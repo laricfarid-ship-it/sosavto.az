@@ -11,7 +11,29 @@
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <style>
-        #picker-map { height: 260px; width: 100%; border-radius: 0.75rem; }
+        #picker-map { height: 280px; width: 100%; border-radius: 0.75rem; position: relative; }
+        /* GPS Konum Düyməsinin Stili */
+        .gps-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            z-index: 1000;
+            background: white;
+            border: 2px solid rgba(0,0,0,0.2);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+            transition: all 0.2s;
+        }
+        .gps-btn:hover {
+            background: #f1f5f9;
+            transform: scale(1.05);
+        }
     </style>
 </head>
 <body class="bg-slate-100 min-h-screen text-slate-800">
@@ -58,7 +80,7 @@
                         </div>
                     </div>
 
-                    <!-- AVTOMOBİL SAHƏLƏRİ (DİNAMİK AÇILAN SİYAHILAR) -->
+                    <!-- AVTOMOBİL SAHƏLƏRİ -->
                     <div id="autoSection" class="hidden space-y-4 p-4 bg-red-50/50 border border-red-200 rounded-xl">
                         <h3 class="text-xs font-bold text-red-600 uppercase tracking-wider">Avtomobil Parametrləri</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -100,7 +122,7 @@
                         </div>
                     </div>
 
-                    <!-- XİDMƏT / OBYEKT SAHƏLƏRİ -->
+                    <!-- XİDMƏT / Obyekt SAHƏLƏRİ -->
                     <div id="serviceSection" class="hidden space-y-4 p-4 bg-blue-50/50 border border-blue-200 rounded-xl">
                         <h3 class="text-xs font-bold text-blue-600 uppercase tracking-wider">Obyekt Məlumatı</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -155,11 +177,17 @@
                         <input type="text" id="address" required placeholder="Məs: Bakı ş., Nərimanov r." class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-sm">
                     </div>
 
-                    <!-- XƏRİTƏ NÖQTƏSİ (YALNIZ OBYEKT VƏ XİDMƏTLƏR ÜÇÜN MƏCBURİDİR) -->
+                    <!-- XƏRİTƏ NÖQTƏSİ (GPS DÜYMƏSİ İLƏ BİRLİKDƏ) -->
                     <div id="mapContainer" class="hidden">
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Xəritədə Obyektinizin Yerinizi Qeyd Edin</label>
-                        <div id="picker-map" class="mb-2 border border-slate-300"></div>
-                        <div class="grid grid-cols-2 gap-2 text-xs text-slate-500">
+                        <div style="position: relative;">
+                            <div id="picker-map" class="border border-slate-300"></div>
+                            <!-- GPS / Yerimi Tap Yumru Düyməsi -->
+                            <button type="button" onclick="locateUser()" class="gps-btn" title="Mənim Olduğum Yerə Get">
+                                <i class="fa-solid fa-location-crosshairs text-red-600 text-lg"></i>
+                            </button>
+                        </div>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-slate-500 mt-2">
                             <input type="text" id="lat" readonly placeholder="Enlem (Lat)" class="bg-slate-50 border px-3 py-2 rounded-lg text-slate-600">
                             <input type="text" id="lng" readonly placeholder="Boylam (Lng)" class="bg-slate-50 border px-3 py-2 rounded-lg text-slate-600">
                         </div>
@@ -177,7 +205,6 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // MARKA VƏ MODELLƏR BAZASI
         const carData = {
             "BMW": ["1-Series", "2-Series", "3-Series", "4-Series", "5-Series", "6-Series", "7-Series", "8-Series", "X1", "X3", "X4", "X5", "X6", "X7", "M3", "M5"],
             "Mercedes-Benz": ["A-Class", "B-Class", "C-Class", "E-Class", "S-Class", "CLA", "CLS", "G-Class", "GLA", "GLC", "GLE", "GLS", "ML-Class", "Vito", "Sprinter"],
@@ -195,12 +222,10 @@
             "Lexus": ["RX", "LX", "GX", "ES", "GS", "IS", "LS"]
         };
 
-        // Səhifə yüklənəndə Markaları və İlləri dərhal açılan siyahıya doldurmaq
         document.addEventListener('DOMContentLoaded', function() {
             const brandSelect = document.getElementById('autoBrand');
             const yearSelect = document.getElementById('autoYear');
 
-            // Markaları əlavə et
             Object.keys(carData).sort().forEach(brand => {
                 let opt = document.createElement('option');
                 opt.value = brand;
@@ -208,7 +233,6 @@
                 brandSelect.appendChild(opt);
             });
 
-            // İlləri əlavə et (1990 - 2026)
             for (let y = 2026; y >= 1990; y--) {
                 let opt = document.createElement('option');
                 opt.value = y;
@@ -217,17 +241,15 @@
             }
         });
 
-        // Marka seçiləndə Modelləri dinamik yeniləmək
         function loadModels() {
             const brandSelect = document.getElementById('autoBrand');
             const modelSelect = document.getElementById('autoModel');
             const selectedBrand = brandSelect.value;
 
-            modelSelect.innerHTML = ''; // Köhnə modelləri sil
+            modelSelect.innerHTML = '';
 
             if (selectedBrand && carData[selectedBrand]) {
-                modelSelect.disabled = false; // Modeli aktiv et
-                
+                modelSelect.disabled = false;
                 let defaultOpt = document.createElement('option');
                 defaultOpt.value = '';
                 defaultOpt.textContent = '-- Model Seçin --';
@@ -240,7 +262,7 @@
                     modelSelect.appendChild(opt);
                 });
             } else {
-                modelSelect.disabled = true; // Marka seçilməyibsə disabled et
+                modelSelect.disabled = true;
                 let defaultOpt = document.createElement('option');
                 defaultOpt.value = '';
                 defaultOpt.textContent = '-- Əvvəlcə Marka Seçin --';
@@ -248,32 +270,56 @@
             }
         }
 
-        // XƏRİTƏ SİSTEMİ
+        // XƏRİTƏ VƏ GPS MƏNTİQİ
         let pickerMap, selectedMarker;
 
         function initMap() {
             if (!pickerMap) {
-                pickerMap = L.map('picker-map').setView([40.409261, 49.867092], 12);
+                pickerMap = L.map('picker-map').setView([40.409261, 49.867092], 13);
                 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
                     maxZoom: 19,
                     attribution: '© OpenStreetMap'
                 }).addTo(pickerMap);
 
                 pickerMap.on('click', function(e) {
-                    const { lat, lng } = e.latlng;
-                    document.getElementById('lat').value = lat.toFixed(6);
-                    document.getElementById('lng').value = lng.toFixed(6);
-
-                    if (selectedMarker) {
-                        selectedMarker.setLatLng(e.latlng);
-                    } else {
-                        selectedMarker = L.marker(e.latlng).addTo(pickerMap);
-                    }
+                    setMarkerPosition(e.latlng.lat, e.latlng.lng);
                 });
             }
         }
 
-        // KATEQORİYA DƏYİŞDİKDƏ
+        // Xəritədə marker qoyan və inputları yeniləyən köməkçi funksiya
+        function setMarkerPosition(lat, lng) {
+            document.getElementById('lat').value = lat.toFixed(6);
+            document.getElementById('lng').value = lng.toFixed(6);
+
+            const latLngObj = L.latLng(lat, lng);
+            if (selectedMarker) {
+                selectedMarker.setLatLng(latLngObj);
+            } else {
+                selectedMarker = L.marker(latLngObj).addTo(pickerMap);
+            }
+            pickerMap.setView(latLngObj, 16);
+        }
+
+        // "Mənim Olduğum Yerə Get" Yumru Düyməsinin Funksiyası
+        function locateUser() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(
+                    function(position) {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        setMarkerPosition(lat, lng);
+                    },
+                    function(error) {
+                        alert('Məkanınızı təyin etmək mümkün olmadı. Zəhmət olmasa brauzerdə məkan icazələrini yoxlayın.');
+                    },
+                    { enableHighAccuracy: true }
+                );
+            } else {
+                alert('Sizin brauzer geolokasiyanı dəstəkləmir.');
+            }
+        }
+
         function handleCategoryChange() {
             const cat = document.getElementById('mainCategory').value;
             const general = document.getElementById('generalFields');
@@ -307,7 +353,6 @@
             }
         }
 
-        // FORM GÖNDƏRİLMƏSİ
         document.getElementById('adForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -325,7 +370,6 @@
                     lat: parseFloat(document.getElementById('lat').value) || null,
                     lng: parseFloat(document.getElementById('lng').value) || null,
                     
-                    // Avto
                     autoBrand: document.getElementById('autoBrand').value,
                     autoModel: document.getElementById('autoModel').value,
                     autoYear: document.getElementById('autoYear').value,
@@ -333,11 +377,9 @@
                     autoTransmission: document.getElementById('autoTransmission').value,
                     autoPrice: document.getElementById('autoPrice').value,
 
-                    // Servis
                     serviceType: document.getElementById('serviceType').value,
                     serviceHours: document.getElementById('serviceHours').value,
 
-                    // Hissə
                     partCondition: document.getElementById('partCondition').value,
                     partFitment: document.getElementById('partFitment').value,
                     partPrice: document.getElementById('partPrice').value
