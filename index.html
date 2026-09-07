@@ -103,6 +103,49 @@
             "Avtoyuma (Moyka)": ["Boya qoruma", "Salonu təmizləmə", "Adi Moyka"]
         };
 
+        function checkAndInitDefaultAds() {
+            let existing = JSON.parse(localStorage.getItem('sosavto_ads')) || [];
+            if (existing.length === 0) {
+                const defaultAds = [
+                    {
+                        title: "Toyota Camry 2021",
+                        category: "auto",
+                        autoBrand: "Toyota",
+                        autoModel: "Camry",
+                        autoYear: "2021",
+                        autoPrice: "28500",
+                        vin: "1HGCR2F33HA000000",
+                        address: "Bakı şəhəri, Nərimanov r.",
+                        description: "İdeal vəziyyətdə, heç bir problemi yoxdur. Rəsmi servisdən alınıb.",
+                        image: "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=600&q=80"
+                    },
+                    {
+                        title: "BMW X5 M Paket",
+                        category: "auto",
+                        autoBrand: "BMW",
+                        autoModel: "X5",
+                        autoYear: "2020",
+                        autoPrice: "54000",
+                        vin: "WBA3B1C08EP000000",
+                        address: "Bakı şəhəri, Yasamal r.",
+                        description: "Full komplektasiya, vuruqsuz, kraska dəyməyib.",
+                        image: "https://images.unsplash.com/photo-1556189250-72ba954cfc2b?auto=format&fit=crop&w=600&q=80"
+                    },
+                    {
+                        title: "Hyundai Elantra Original Porşen",
+                        category: "parts",
+                        partCategory: "Mühərrik",
+                        autoPrice: "150",
+                        vin: "KMHD84AE1HU000000",
+                        address: "Bakı, Babək pr.",
+                        description: "Yeni gətirilib, orijinal Koreya istehsalı.",
+                        image: "https://images.unsplash.com/photo-1486006920555-c77dce18193b?auto=format&fit=crop&w=600&q=80"
+                    }
+                ];
+                localStorage.setItem('sosavto_ads', JSON.stringify(defaultAds));
+            }
+        }
+
         function setCategoryFilter(cat) {
             currentCategoryFilter = cat;
             
@@ -354,6 +397,7 @@
         }
 
         window.onload = () => {
+            checkAndInitDefaultAds();
             loadAds();
         };
     </script>
