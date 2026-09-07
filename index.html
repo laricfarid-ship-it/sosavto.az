@@ -139,7 +139,7 @@
             </div>
 
             <!-- Chat Messages Area -->
-            <div class="flex-grow p-4 overflow-y-auto space-y-3 text-xs sm:text-sm text-gray-300 bg-darkBg/50">
+            <div id="ai-chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3 text-xs sm:text-sm text-gray-300 bg-darkBg/50">
                 <div class="bg-gray-800 p-3 rounded-xl rounded-tl-none max-w-[85%] border border-gray-700">
                     Salam! Mən SosAvto AI köməkçisiyəm. Avtomobilinizdəki hər hansı detalın şəklini atın və ya probleminizi yazın, sizə saytımızdakı ən yaxın ustanı və uyğun ehtiyat hissəsini dərhal tapım! 🚗🔧
                 </div>
@@ -151,8 +151,8 @@
                     <i class="fa-solid fa-camera"></i>
                     <input type="file" class="hidden" accept="image/*">
                 </label>
-                <input type="text" placeholder="Sualınızı yazın və ya şəkil atın..." class="flex-grow bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-accentGold">
-                <button class="bg-accentGold hover:bg-accentHover text-darkBg px-3 py-2 rounded-xl font-bold transition">
+                <input type="text" id="ai-chat-input" placeholder="Sualınızı yazın və ya şəkil atın..." class="flex-grow bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-accentGold">
+                <button onclick="sendUserMessage()" class="bg-accentGold hover:bg-accentHover text-darkBg px-3 py-2 rounded-xl font-bold transition">
                     <i class="fa-solid fa-paper-plane"></i>
                 </button>
             </div>
@@ -220,6 +220,44 @@
             const chatBox = document.getElementById('ai-chat-box');
             chatBox.classList.toggle('hidden');
         }
+
+        function sendUserMessage() {
+            const input = document.getElementById('ai-chat-input');
+            const messageText = input.value.trim();
+            if (!messageText) return;
+
+            const chatMessages = document.getElementById('ai-chat-messages');
+
+            chatMessages.innerHTML += `
+                <div class="flex justify-end">
+                    <div class="bg-accentGold text-darkBg p-3 rounded-xl rounded-tr-none max-w-[85%] font-medium">
+                        ${messageText}
+                    </div>
+                </div>
+            `;
+            input.value = '';
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+
+            setTimeout(() => {
+                chatMessages.innerHTML += `
+                    <div class="bg-gray-800 p-3 rounded-xl rounded-tl-none max-w-[85%] border border-gray-700">
+                        Sualınız qəbul olundu! Bazamızda axtarış edirəm... Zəhmət olmasa detalın tam adını və ya avtomobilin markasını qeyd edin ki, sizə ən yaxın ustanı və ünvanı göstərim. 🔍🛠️
+                    </div>
+                `;
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }, 1000);
+        }
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const inputField = document.getElementById('ai-chat-input');
+            if(inputField) {
+                inputField.addEventListener('keypress', function (e) {
+                    if (e.key === 'Enter') {
+                        sendUserMessage();
+                    }
+                });
+            }
+        });
 
         function initBrands() {
             const brandSelect = document.getElementById('filter-brand');
