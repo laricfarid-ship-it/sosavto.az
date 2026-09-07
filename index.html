@@ -51,20 +51,21 @@
             </button>
         </div>
 
-        <!-- Axtarış Paneli -->
+        <!-- Axtarış Paneli (Dinamik Dəyişir) -->
         <div class="bg-gray-900/90 border border-amber-500/30 p-4 rounded-2xl shadow-2xl backdrop-blur max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-5 gap-3 items-center">
-            <!-- Marka Seçimi -->
-            <select id="filterBrand" onchange="onBrandChange()" class="w-full bg-gray-950 border border-gray-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 cursor-pointer">
+            
+            <!-- 1-ci Seçim (Marka və ya Ehtiyat Hissə / Xidmət növü) -->
+            <select id="filterFirst" onchange="onFirstFilterChange()" class="w-full bg-gray-950 border border-gray-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 cursor-pointer">
                 <option value="">Bütün Markalar</option>
             </select>
             
-            <!-- Model Seçimi -->
-            <select id="filterModel" onchange="filterAds()" disabled class="w-full bg-gray-950 border border-gray-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 cursor-pointer disabled:opacity-50">
+            <!-- 2-ci Seçim (Model və ya Əlavə Alt Kateqoriya) -->
+            <select id="filterSecond" onchange="filterAds()" disabled class="w-full bg-gray-950 border border-gray-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 cursor-pointer disabled:opacity-50">
                 <option value="">Əvvəlcə Marka Seçin</option>
             </select>
 
-            <!-- İl Seçimi -->
-            <select id="filterYear" onchange="filterAds()" class="w-full bg-gray-950 border border-gray-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 cursor-pointer">
+            <!-- 3-cü Seçim (İl və ya Əlavə Filtr) -->
+            <select id="filterThird" onchange="filterAds()" class="w-full bg-gray-950 border border-gray-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
                 <option value="">Bütün İllər</option>
             </select>
             
@@ -142,56 +143,140 @@
             "LADA (VAZ)": ["2106", "2107", "2114", "Niva", "Priora", "Granta", "Vesta", "Kalina", "Largus"]
         };
 
+        const partsData = {
+            "Mühərrik və Detalları": ["Remen və Roliklər", "Mühərrik Yastığı (Paduşka)", "Porşen və Klapanlar", "Kart்டர் və Qapaqlar", "Turbina və Kompressor"],
+            "Filterlər və Yağlar": ["Yağ फिल्टरi", "Hava Filteri", "Salon Filteri", "Yanacaq Filteri", "Mühərrik Yağı", "Sürətlər Qutusu Yağı"],
+            "Əyləc Sistemi": ["Əyləc Bəndi ( Naklatka )", "Əyləc Diski", "Əyləc Silindri", "Əyləc Mayesiyle"],
+            "Asqı və Xodovoy": ["Amortizator", "Ling (R рычаг)", "Stoyka Stalibizator", "Şarnir (Qranat)", "Suprav və Vtulka"],
+            "Kuzov və Optika": ["Fara və İşıqlar", "Bumfer (Bufer)", "Qanad (Krilo)", "Kapot və Baqaj", "Güzgü və Şüşələr"],
+            "Elektrik Avadanlıqları": ["Akkumulyator", "Starter və Dinamo", "Sensor və Datçiklər", "Şamlar (Sveça) və Qatlama"]
+        };
+
+        const serviceData = {
+            "Usta Xidmətləri": ["Mühərrik Ustası", "Xodovoy Ustası", "Elektrik", "Çilingər", "Kuzov Ustası (Malyar)"],
+            "Detayinq və Moyka": ["Avtoyuma (Moyka)", "Ximçistka", "Polirovka", "Keramika və Plyonka"],
+            "Diaqnostika və Texniki Baxış": ["Kompüter Diaqnostikası", "Razval-Balans", "Təkər Dəyişmə və Təmir"]
+        };
+
         let currentCategoryFilter = "";
 
         document.addEventListener('DOMContentLoaded', function() {
-            const brandSelect = document.getElementById('filterBrand');
-            Object.keys(carData).sort().forEach(brand => {
-                let opt = document.createElement('option');
-                opt.value = brand;
-                opt.textContent = brand;
-                brandSelect.appendChild(opt);
-            });
+            setupSearchFilters();
+            loadAds();
+        });
 
-            const yearSelect = document.getElementById('filterYear');
+        function setupSearchFilters() {
+            const firstSelect = document.getElementById('filterFirst');
+            const secondSelect = document.getElementById('filterSecond');
+            const thirdSelect = document.getElementById('filterThird');
+
+            firstSelect.innerHTML = '';
+            secondSelect.innerHTML = '<option value="">Əvvəlcə seçim edin</option>';
+            secondSelect.disabled = true;
+            thirdSelect.disabled = false;
+
+            // İlləri sıfırdan doldur
+            thirdSelect.innerHTML = '<option value="">Bütün İllər</option>';
             const currentYear = new Date().getFullYear();
             for (let y = currentYear; y >= 1990; y--) {
                 let opt = document.createElement('option');
                 opt.value = y;
                 opt.textContent = y;
-                yearSelect.appendChild(opt);
+                thirdSelect.appendChild(opt);
             }
 
-            loadAds();
-        });
+            if (currentCategoryFilter === "" || currentCategoryFilter === "auto") {
+                // Avtomobil rejimi
+                let defOpt = document.createElement('option');
+                defOpt.value = "";
+                defOpt.textContent = "Bütün Markalar";
+                firstSelect.appendChild(defOpt);
 
-        function onBrandChange() {
-            const brandSelect = document.getElementById('filterBrand');
-            const modelSelect = document.getElementById('filterModel');
-            const selectedBrand = brandSelect.value;
-
-            modelSelect.innerHTML = '';
-
-            if (selectedBrand && carData[selectedBrand]) {
-                modelSelect.disabled = false;
-                let defaultOpt = document.createElement('option');
-                defaultOpt.value = '';
-                defaultOpt.textContent = 'Bütün Modellər';
-                modelSelect.appendChild(defaultOpt);
-
-                carData[selectedBrand].forEach(model => {
+                Object.keys(carData).sort().forEach(brand => {
                     let opt = document.createElement('option');
-                    opt.value = model;
-                    opt.textContent = model;
-                    modelSelect.appendChild(opt);
+                    opt.value = brand;
+                    opt.textContent = brand;
+                    firstSelect.appendChild(opt);
                 });
-            } else {
-                modelSelect.disabled = true;
-                let defaultOpt = document.createElement('option');
-                defaultOpt.value = '';
-                defaultOpt.textContent = 'Əvvəlcə Marka Seçin';
-                modelSelect.appendChild(defaultOpt);
+                thirdSelect.disabled = false;
+                thirdSelect.className = "w-full bg-gray-950 border border-gray-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 cursor-pointer";
+
+            } else if (currentCategoryFilter === "parts") {
+                // Ehtiyat hissələri rejimi
+                let defOpt = document.createElement('option');
+                defOpt.value = "";
+                defOpt.textContent = "Bütün Ehtiyat Hissə Növləri";
+                firstSelect.appendChild(defOpt);
+
+                Object.keys(partsData).forEach(cat => {
+                    let opt = document.createElement('option');
+                    opt.value = cat;
+                    opt.textContent = cat;
+                    firstSelect.appendChild(opt);
+                });
+
+                // Ehtiyat hissəsində il vacib deyil -> bozardırıq (disabled)
+                thirdSelect.value = "";
+                thirdSelect.disabled = true;
+                thirdSelect.className = "w-full bg-gray-950/40 border border-gray-800 text-slate-600 text-sm rounded-xl px-4 py-3 cursor-not-allowed opacity-40";
+
+            } else if (currentCategoryFilter === "service") {
+                // Servis / Usta rejimi
+                let defOpt = document.createElement('option');
+                defOpt.value = "";
+                defOpt.textContent = "Bütün Xidmət Sahələri";
+                firstSelect.appendChild(defOpt);
+
+                Object.keys(serviceData).forEach(srv => {
+                    let opt = document.createElement('option');
+                    opt.value = srv;
+                    opt.textContent = srv;
+                    firstSelect.appendChild(opt);
+                });
+
+                // Servisdə də il vacib deyil -> bozardırıq (disabled)
+                thirdSelect.value = "";
+                thirdSelect.disabled = true;
+                thirdSelect.className = "w-full bg-gray-950/40 border border-gray-800 text-slate-600 text-sm rounded-xl px-4 py-3 cursor-not-allowed opacity-40";
             }
+        }
+
+        function onFirstFilterChange() {
+            const firstSelect = document.getElementById('filterFirst');
+            const secondSelect = document.getElementById('filterSecond');
+            const val = firstSelect.value;
+
+            secondSelect.innerHTML = '';
+
+            if (!val) {
+                secondSelect.disabled = true;
+                let defOpt = document.createElement('option');
+                defOpt.value = '';
+                defOpt.textContent = 'Əvvəlcə seçim edin';
+                secondSelect.appendChild(defOpt);
+                filterAds();
+                return;
+            }
+
+            secondSelect.disabled = false;
+            let defOpt = document.createElement('option');
+            defOpt.value = '';
+            defOpt.textContent = 'Hamısı';
+            secondSelect.appendChild(defOpt);
+
+            let sourceMap = carData;
+            if (currentCategoryFilter === 'parts') sourceMap = partsData;
+            if (currentCategoryFilter === 'service') sourceMap = serviceData;
+
+            if (sourceMap[val]) {
+                sourceMap[val].forEach(item => {
+                    let opt = document.createElement('option');
+                    opt.value = item;
+                    opt.textContent = item;
+                    secondSelect.appendChild(opt);
+                });
+            }
+            filterAds();
         }
 
         function setCategoryTab(category) {
@@ -210,6 +295,7 @@
             if(category === "service") titleText = "Servis, Usta və Moykalar";
             document.getElementById('sectionTitle').innerHTML = `<span class="w-2.5 h-6 bg-amber-500 rounded-full inline-block shadow-md shadow-amber-500/50"></span> ${titleText}`;
 
+            setupSearchFilters();
             loadAds();
         }
 
@@ -219,17 +305,30 @@
             
             const allAds = JSON.parse(localStorage.getItem('sosavto_ads')) || [];
             
-            const brandFilter = document.getElementById('filterBrand').value;
-            const modelFilter = document.getElementById('filterModel').value;
-            const yearFilter = document.getElementById('filterYear').value;
+            const firstVal = document.getElementById('filterFirst').value;
+            const secondVal = document.getElementById('filterSecond').value;
+            const thirdVal = document.getElementById('filterThird').value;
 
             const ads = allAds.filter(ad => {
                 const matchCat = currentCategoryFilter === "" || ad.category === currentCategoryFilter;
-                const matchBrand = brandFilter === "" || (ad.autoBrand && ad.autoBrand === brandFilter);
-                const matchModel = modelFilter === "" || (ad.autoModel && ad.autoModel === modelFilter);
-                const matchYear = yearFilter === "" || (ad.autoYear && String(ad.autoYear) === String(yearFilter));
+                
+                let matchFirst = true;
+                let matchSecond = true;
+                let matchThird = true;
 
-                return matchCat && matchBrand && matchModel && matchYear;
+                if (currentCategoryFilter === 'auto' || currentCategoryFilter === "") {
+                    if (firstVal && ad.autoBrand !== firstVal) matchFirst = false;
+                    if (secondVal && ad.autoModel !== secondVal) matchSecond = false;
+                    if (thirdVal && String(ad.autoYear) !== String(thirdVal)) matchThird = false;
+                } else if (currentCategoryFilter === 'parts') {
+                    if (firstVal && ad.partCategory !== firstVal) matchFirst = false;
+                    if (secondVal && ad.partSubCategory !== secondVal) matchSecond = false;
+                } else if (currentCategoryFilter === 'service') {
+                    if (firstVal && ad.serviceCategory !== firstVal) matchFirst = false;
+                    if (secondVal && ad.serviceType !== secondVal) matchSecond = false;
+                }
+
+                return matchCat && matchFirst && matchSecond && matchThird;
             });
             
             counter.textContent = `Cəmi ${ads.length} elan tapıldı`;
@@ -249,7 +348,7 @@
                 let badgeText = '';
                 let badgeClass = '';
                 let priceText = ad.autoPrice ? `${ad.autoPrice} AZN` : (ad.partPrice ? `${ad.partPrice} AZN` : (ad.category === 'service' ? 'Xidmət' : 'Razılaşma ilə'));
-                let subInfo = ad.autoBrand ? `${ad.autoBrand} ${ad.autoModel || ''} (${ad.autoYear || ''})` : (ad.serviceType || ad.partFitment || ad.address);
+                let subInfo = ad.autoBrand ? `${ad.autoBrand} ${ad.autoModel || ''} (${ad.autoYear || ''})` : (ad.partCategory || ad.serviceCategory || ad.address);
 
                 if (ad.category === 'auto') {
                     badgeText = 'Avtomobil';
@@ -295,17 +394,23 @@
             });
         }
 
+        function filterAds() {
+            loadAds();
+        }
+
         function handleSearch() {
             loadAds();
         }
 
         function handleReset() {
-            document.getElementById('filterBrand').value = "";
-            const modelSelect = document.getElementById('filterModel');
-            modelSelect.value = "";
-            modelSelect.disabled = true;
-            modelSelect.innerHTML = '<option value="">Əvvəlcə Marka Seçin</option>';
-            document.getElementById('filterYear').value = "";
+            document.getElementById('filterFirst').value = "";
+            const secondSelect = document.getElementById('filterSecond');
+            secondSelect.value = "";
+            secondSelect.disabled = true;
+            secondSelect.innerHTML = '<option value="">Əvvəlcə seçim edin</option>';
+            if(currentCategoryFilter === 'auto' || currentCategoryFilter === "") {
+                document.getElementById('filterThird').value = "";
+            }
             loadAds();
         }
 
@@ -330,6 +435,7 @@
             } else if (ad.category === 'service') {
                 detailsHtml = `
                     <div class="grid grid-cols-1 gap-2 text-xs bg-gray-950 p-3 rounded-xl border border-gray-800">
+                        <div><span class="text-slate-400">Xidmət Sahəsi:</span> <strong class="text-white">${ad.serviceCategory || '-'}</strong></div>
                         <div><span class="text-slate-400">Xidmət Növü:</span> <strong class="text-white">${ad.serviceType || '-'}</strong></div>
                         <div><span class="text-slate-400">İş Saatları:</span> <strong class="text-white">${ad.serviceHours || '-'}</strong></div>
                     </div>
@@ -337,6 +443,8 @@
             } else if (ad.category === 'parts') {
                 detailsHtml = `
                     <div class="grid grid-cols-2 gap-3 text-xs bg-gray-950 p-3 rounded-xl border border-gray-800">
+                        <div><span class="text-slate-400">Kateqoriya:</span> <strong class="text-white">${ad.partCategory || '-'}</strong></div>
+                        <div><span class="text-slate-400">Detal:</span> <strong class="text-white">${ad.partSubCategory || '-'}</strong></div>
                         <div><span class="text-slate-400">Vəziyyəti:</span> <strong class="text-white">${ad.partCondition || '-'}</strong></div>
                         <div><span class="text-slate-400">Uyğunluğu:</span> <strong class="text-white">${ad.partFitment || '-'}</strong></div>
                     </div>
