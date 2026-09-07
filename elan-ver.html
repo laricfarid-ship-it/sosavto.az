@@ -31,7 +31,7 @@
     <main class="max-w-3xl mx-auto my-8 px-4">
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
             <h1 class="text-2xl font-bold text-slate-900 mb-2">Yeni Elan Yerləşdir</h1>
-            <p class="text-slate-500 text-sm mb-6">Elan tipini seçin, lazımi məlumatları doldurun və xəritədə yerinizi qeyd edin.</p>
+            <p class="text-slate-500 text-sm mb-6">Məlumatları tam və dəqiq doldurun.</p>
 
             <form id="adForm" class="space-y-6">
                 <!-- 1. Kateqoriya Seçimi -->
@@ -45,12 +45,12 @@
                     </select>
                 </div>
 
-                <!-- 2. Əsas Məlumatlar (Hər kəs üçün) -->
+                <!-- 2. Əsas Məlumatlar -->
                 <div id="generalFields" class="space-y-4 hidden">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Elanın Başlığı</label>
-                            <input type="text" id="title" required placeholder="Məs: BMW F30 2015 / Avto Moyka 7/24 / Mobil 1 Yağ Dəyişmə" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-sm">
+                            <input type="text" id="title" required placeholder="Məs: Əla vəziyyətdə / 7/24 Avto Moyka" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-sm">
                         </div>
                         <div>
                             <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Əlaqə Nömrəsi</label>
@@ -61,18 +61,24 @@
                     <!-- AVTOMOBİL SAHƏLƏRİ -->
                     <div id="autoSection" class="hidden space-y-4 p-4 bg-red-50/50 border border-red-200 rounded-xl">
                         <h3 class="text-xs font-bold text-red-600 uppercase tracking-wider">Avtomobil Parametrləri</h3>
-                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Marka</label>
-                                <input type="text" id="autoBrand" placeholder="Məs: Mercedes-Benz" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                                <select id="autoBrand" onchange="loadModels()" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                                    <option value="">-- Marka Seçin --</option>
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Model</label>
-                                <input type="text" id="autoModel" placeholder="Məs: E-Class" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                                <select id="autoModel" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                                    <option value="">-- Əvvəlcə Marka Seçin --</option>
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Buraxılış İli</label>
-                                <input type="number" id="autoYear" placeholder="2018" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                                <select id="autoYear" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                                    <option value="">-- İl Seçin --</option>
+                                </select>
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Yürüş (km)</label>
@@ -83,6 +89,8 @@
                                 <select id="autoTransmission" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
                                     <option value="Avtomat">Avtomat</option>
                                     <option value="Mexanika">Mexanika</option>
+                                    <option value="Variator">Variator (CVT)</option>
+                                    <option value="Robot">Robot</option>
                                 </select>
                             </div>
                             <div>
@@ -94,7 +102,7 @@
 
                     <!-- XİDMƏT / OBYEKT SAHƏLƏRİ -->
                     <div id="serviceSection" class="hidden space-y-4 p-4 bg-blue-50/50 border border-blue-200 rounded-xl">
-                        <h3 class="text-xs font-bold text-blue-600 uppercase tracking-wider">Obyekt və Xidmət Növü</h3>
+                        <h3 class="text-xs font-bold text-blue-600 uppercase tracking-wider">Obyekt Məlumatı</h3>
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Obyekt Tipi</label>
@@ -108,14 +116,14 @@
                             </div>
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">İş Saatları</label>
-                                <input type="text" id="serviceHours" placeholder="Məs: 09:00 - 21:00 və ya 24/7 Təcili" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                                <input type="text" id="serviceHours" placeholder="Məs: 09:00 - 21:00 və ya 24/7" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
                             </div>
                         </div>
                     </div>
 
                     <!-- EHTİYAT HİSSƏSİ SAHƏLƏRİ -->
                     <div id="partsSection" class="hidden space-y-4 p-4 bg-amber-50/50 border border-amber-200 rounded-xl">
-                        <h3 class="text-xs font-bold text-amber-600 uppercase tracking-wider">Ehtiyat Hissəsi Məlumatı</h3>
+                        <h3 class="text-xs font-bold text-amber-600 uppercase tracking-wider">Ehtiyat Hissəsi</h3>
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                             <div>
                                 <label class="block text-[11px] font-semibold text-slate-600 mb-1">Vəziyyəti</label>
@@ -135,25 +143,25 @@
                         </div>
                     </div>
 
-                    <!-- Şəkil Əlavə Etmə -->
+                    <!-- Şəkil Yükləmə -->
                     <div>
                         <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Şəkil Əlavə Et</label>
                         <input type="file" id="imageInput" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 transition">
                     </div>
 
-                    <!-- Ünvan -->
+                    <!-- Ünvan / Şəhər -->
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Ünvan / Yerləşdiyi Məkan</label>
-                        <input type="text" id="address" required placeholder="Məs: Nərimanov r., Təbriz küçəsi 45" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-sm">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Şəhər / Ünvan</label>
+                        <input type="text" id="address" required placeholder="Məs: Bakı ş., Nərimanov r." class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-sm">
                     </div>
 
-                    <!-- Xəritədən Nöqtə Seçimi -->
-                    <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Xəritədə Yerinizi Qeyd Edin (Mütləqdir)</label>
+                    <!-- XƏRİTƏ NÖQTƏSİ (YALNIZ OBYEKT VƏ XİDMƏTLƏR ÜÇÜN MƏCBURİDİR) -->
+                    <div id="mapContainer" class="hidden">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Xəritədə Obyektinizin Yerinizi Qeyd Edin</label>
                         <div id="picker-map" class="mb-2 border border-slate-300"></div>
                         <div class="grid grid-cols-2 gap-2 text-xs text-slate-500">
-                            <input type="text" id="lat" readonly required placeholder="Enlem (Lat)" class="bg-slate-50 border px-3 py-2 rounded-lg text-slate-600">
-                            <input type="text" id="lng" readonly required placeholder="Boylam (Lng)" class="bg-slate-50 border px-3 py-2 rounded-lg text-slate-600">
+                            <input type="text" id="lat" readonly placeholder="Enlem (Lat)" class="bg-slate-50 border px-3 py-2 rounded-lg text-slate-600">
+                            <input type="text" id="lng" readonly placeholder="Boylam (Lng)" class="bg-slate-50 border px-3 py-2 rounded-lg text-slate-600">
                         </div>
                     </div>
 
@@ -169,34 +177,87 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        const pickerMap = L.map('picker-map').setView([40.409261, 49.867092], 12);
+        // BREND VƏ MODELLƏR DATA SİYAHISI
+        const carData = {
+            "BMW": ["1-Series", "3-Series", "5-Series", "7-Series", "X3", "X5", "X6", "M5"],
+            "Mercedes-Benz": ["C-Class", "E-Class", "S-Class", "G-Class", "GLE-Class", "ML-Class", "Vito"],
+            "Toyota": ["Camry", "Corolla", "Land Cruiser", "Prado", "RAV4", "Prius"],
+            "Hyundai": ["Elantra", "Sonata", "Tucson", "Santa Fe", "Accent"],
+            "Kia": ["Optima", "K5", "Sportage", "Sorento", "Rio"],
+            "Nissan": ["Sunny", "X-Trail", "Qashqai", "Patrol", "Altima"],
+            "LADA (VAZ)": ["2106", "2107", "Niva", "Priora", "Granta"],
+            "Chevrolet": ["Cruze", "Malibu", "Aveo", "Cobalt", "Niva"],
+            "Ford": ["Fusion", "Focus", "Mustang", "Transit"],
+            "Honda": ["Civic", "Accord", "CR-V"]
+        };
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '© OpenStreetMap'
-        }).addTo(pickerMap);
-
-        let selectedMarker;
-
-        pickerMap.on('click', function(e) {
-            const { lat, lng } = e.latlng;
-            document.getElementById('lat').value = lat.toFixed(6);
-            document.getElementById('lng').value = lng.toFixed(6);
-
-            if (selectedMarker) {
-                selectedMarker.setLatLng(e.latlng);
-            } else {
-                selectedMarker = L.marker(e.latlng).addTo(pickerMap);
-            }
+        // Brendləri doldurmaq
+        const brandSelect = document.getElementById('autoBrand');
+        Object.keys(carData).forEach(brand => {
+            let opt = document.createElement('option');
+            opt.value = brand;
+            opt.textContent = brand;
+            brandSelect.appendChild(opt);
         });
 
-        // Kateqoriyaya uyğun form xanalarını göstərmək
+        // İlləri doldurmaq (1990 - 2026)
+        const yearSelect = document.getElementById('autoYear');
+        for (let y = 2026; y >= 1990; y--) {
+            let opt = document.createElement('option');
+            opt.value = y;
+            opt.textContent = y;
+            yearSelect.appendChild(opt);
+        }
+
+        // Brend seçiləndə modelləri yükləmək
+        function loadModels() {
+            const selectedBrand = brandSelect.value;
+            const modelSelect = document.getElementById('autoModel');
+            modelSelect.innerHTML = '<option value="">-- Model Seçin --</option>';
+
+            if (selectedBrand && carData[selectedBrand]) {
+                carData[selectedBrand].forEach(model => {
+                    let opt = document.createElement('option');
+                    opt.value = model;
+                    opt.textContent = model;
+                    modelSelect.appendChild(opt);
+                });
+            }
+        }
+
+        // XƏRİTƏ SİSTEMİ
+        let pickerMap, selectedMarker;
+
+        function initMap() {
+            if (!pickerMap) {
+                pickerMap = L.map('picker-map').setView([40.409261, 49.867092], 12);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    maxZoom: 19,
+                    attribution: '© OpenStreetMap'
+                }).addTo(pickerMap);
+
+                pickerMap.on('click', function(e) {
+                    const { lat, lng } = e.latlng;
+                    document.getElementById('lat').value = lat.toFixed(6);
+                    document.getElementById('lng').value = lng.toFixed(6);
+
+                    if (selectedMarker) {
+                        selectedMarker.setLatLng(e.latlng);
+                    } else {
+                        selectedMarker = L.marker(e.latlng).addTo(pickerMap);
+                    }
+                });
+            }
+        }
+
+        // KATEQORİYA DƏYİŞDİKDƏ
         function handleCategoryChange() {
             const cat = document.getElementById('mainCategory').value;
             const general = document.getElementById('generalFields');
             const autoSection = document.getElementById('autoSection');
             const serviceSection = document.getElementById('serviceSection');
             const partsSection = document.getElementById('partsSection');
+            const mapContainer = document.getElementById('mapContainer');
 
             if (!cat) {
                 general.classList.add('hidden');
@@ -207,16 +268,23 @@
             autoSection.classList.add('hidden');
             serviceSection.classList.add('hidden');
             partsSection.classList.add('hidden');
+            mapContainer.classList.add('hidden');
 
-            if (cat === 'auto') autoSection.classList.remove('hidden');
-            if (cat === 'service') serviceSection.classList.remove('hidden');
-            if (cat === 'parts') partsSection.classList.remove('hidden');
-            
-            // Xəritənin ölçüsünü yeniləmək
-            setTimeout(() => pickerMap.invalidateSize(), 200);
+            if (cat === 'auto') {
+                autoSection.classList.remove('hidden');
+            } else if (cat === 'service') {
+                serviceSection.classList.remove('hidden');
+                mapContainer.classList.remove('hidden'); // Yalnız Obyektlər üçün Xəritə açılır!
+                setTimeout(() => {
+                    initMap();
+                    pickerMap.invalidateSize();
+                }, 200);
+            } else if (cat === 'parts') {
+                partsSection.classList.remove('hidden');
+            }
         }
 
-        // Form Göndərildikdə Məlumatı Saxlamaq
+        // FORM GÖNDƏRİLMƏSİ
         document.getElementById('adForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
@@ -231,10 +299,10 @@
                     phone: document.getElementById('phone').value,
                     address: document.getElementById('address').value,
                     image: imageData,
-                    lat: parseFloat(document.getElementById('lat').value),
-                    lng: parseFloat(document.getElementById('lng').value),
+                    lat: parseFloat(document.getElementById('lat').value) || null,
+                    lng: parseFloat(document.getElementById('lng').value) || null,
                     
-                    // Avto Məlumatları
+                    // Avto
                     autoBrand: document.getElementById('autoBrand').value,
                     autoModel: document.getElementById('autoModel').value,
                     autoYear: document.getElementById('autoYear').value,
@@ -242,11 +310,11 @@
                     autoTransmission: document.getElementById('autoTransmission').value,
                     autoPrice: document.getElementById('autoPrice').value,
 
-                    // Servis Məlumatları
+                    // Servis
                     serviceType: document.getElementById('serviceType').value,
                     serviceHours: document.getElementById('serviceHours').value,
 
-                    // Hissə Məlumatları
+                    // Hissə
                     partCondition: document.getElementById('partCondition').value,
                     partFitment: document.getElementById('partFitment').value,
                     partPrice: document.getElementById('partPrice').value
@@ -256,8 +324,8 @@
                 existingAds.push(newAd);
                 localStorage.setItem('sosavto_ads', JSON.stringify(existingAds));
 
-                alert('Elanınız uğurla yerləşdirildi!');
-                window.location.href = 'xarita.html';
+                alert('Elanınız uğurla dərc olundu!');
+                window.location.href = 'index.html';
             };
 
             if (imageFile) {
