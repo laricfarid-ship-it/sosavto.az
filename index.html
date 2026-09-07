@@ -1,75 +1,262 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="az">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SosAvto.az — Ehtiyat Hissələri Və Servis Mərkəzi</title>
+    <title>SosAvto.az — Avtomobilinizin bütün ehtiyacı</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: { brandDark: '#0f172a', brandOrange: '#f59e0b', brandGray: '#94a3b8' }
-                }
-            }
-        }
-    </script>
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-950 text-white font-sans min-h-screen flex flex-col justify-between">
+<body class="bg-slate-900 min-h-screen text-slate-100 font-sans">
 
-    <header class="bg-brandDark border-b border-slate-800">
-        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="index.html" class="flex items-center space-x-2">
-                <div class="bg-brandOrange text-brandDark p-2 rounded-lg font-black text-xl"><i class="fa-solid fa-truck-medical"></i> SOS</div>
-                <span class="text-xl font-bold tracking-tight">Sos<span class="text-brandOrange">Avto</span>.az</span>
-            </a>
-            <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-brandGray">
-                <a href="index.html" class="text-white hover:text-brandOrange">Ehtiyat Hissələri</a>
-                <a href="xarita.html" class="hover:text-brandOrange">Servis Xəritəsi</a>
-                <a href="admin.html" class="hover:text-brandOrange">Admin Panel</a>
-            </nav>
-            <div class="flex items-center space-x-3">
-                <a href="elan-ver.html" class="text-xs bg-brandOrange hover:bg-amber-600 text-brandDark font-bold px-3.5 py-2 rounded-lg transition">
-                    <i class="fa-solid fa-plus mr-1"></i> Elan Ver
-                </a>
-            </div>
-        </div>
+    <!-- Header -->
+    <header class="border-b border-slate-800 h-20 flex items-center justify-between px-4 md:px-12 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
+        <a href="index.html" class="flex items-center gap-2 text-amber-500 font-bold text-2xl tracking-wider">
+            <i class="fa-solid fa-truck-monster"></i>
+            <span>SosAvto<span class="text-white">.az</span></span>
+        </a>
+        <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-300">
+            <a href="index.html" class="hover:text-amber-500 transition">Ana Səhifə</a>
+            <a href="xarita.html" class="hover:text-amber-500 transition">Servis Xəritəsi</a>
+        </nav>
+        <a href="elan-ver.html" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-5 py-2.5 rounded-xl transition shadow-lg shadow-amber-500/20 text-sm flex items-center gap-2">
+            <i class="fa-solid fa-plus"></i> Elan Ver
+        </a>
     </header>
 
-    <section class="bg-gradient-to-b from-brandDark to-slate-900 py-12 px-4 text-center">
-        <h1 class="text-3xl sm:text-5xl font-black mb-4">Avtomobilinizin bütün ehtiyacı — <span class="text-brandOrange">bir ünvanda</span></h1>
-        <p class="text-brandGray text-sm mb-8">Ehtiyat hissələri, GPS servis xəritəsi, 24/7 təcili yardım və usta kataloqu</p>
-        
-        <div class="max-w-3xl mx-auto bg-slate-800/90 border border-slate-700 p-4 rounded-2xl shadow-2xl grid grid-cols-1 sm:grid-cols-4 gap-3">
-            <select class="bg-slate-900 border border-slate-700 text-white text-sm rounded-xl p-3"><option>Kateqoriyalar</option></select>
-            <select class="bg-slate-900 border border-slate-700 text-white text-sm rounded-xl p-3"><option>Marka Seçin</option></select>
-            <input type="text" placeholder="Hissə adı..." class="bg-slate-900 border border-slate-700 text-white text-sm rounded-xl p-3">
-            <button class="bg-brandOrange text-brandDark font-bold rounded-xl p-3">Axtar</button>
+    <!-- Hero Section -->
+    <section class="py-12 px-4 text-center max-w-5xl mx-auto">
+        <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-4">
+            Avtomobilinizin bütün ehtiyacı — <span class="text-amber-500">bir ünvanda</span>
+        </h1>
+        <p class="text-slate-400 text-sm md:text-base mb-8">
+            Ehtiyat hissələri, GPS servis xəritəsi, 24/7 təcili yardım və usta kataloqu
+        </p>
+
+        <!-- Kateqoriya Seçim Düymələri (Sürətli Filtrləmə) -->
+        <div class="flex flex-wrap justify-center gap-3 mb-6">
+            <button onclick="setCategoryTab('')" id="tab-all" class="category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-border-all mr-1.5"></i> Bütün Elanlar
+            </button>
+            <button onclick="setCategoryTab('auto')" id="tab-auto" class="category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">
+                <i class="fa-solid fa-car mr-1.5"></i> Avtomobil Satışı
+            </button>
+            <button onclick="setCategoryTab('parts')" id="tab-parts" class="category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">
+                <i class="fa-solid fa-gears mr-1.5"></i> Ehtiyat Hissələri
+            </button>
+            <button onclick="setCategoryTab('service')" id="tab-service" class="category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">
+                <i class="fa-solid fa-wrench mr-1.5"></i> Servis və Usta (Moyka)
+            </button>
+        </div>
+
+        <!-- Axtarış Sətri -->
+        <div class="bg-slate-800/90 border border-slate-700/80 p-3 rounded-2xl shadow-xl backdrop-blur max-w-2xl mx-auto flex gap-2">
+            <input type="text" id="searchInput" oninput="filterAds()" placeholder="Açar söz, marka və ya ünvan ilə axtar..." class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500">
         </div>
     </section>
 
-    <section class="container mx-auto px-4 py-8">
-        <h2 class="text-xl font-bold mb-6 flex items-center space-x-2"><span class="w-2 h-5 bg-brandOrange rounded-full"></span><span>Son Elanlar</span></h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
-                <div class="h-32 bg-slate-800 rounded-lg mb-3 flex items-center justify-center text-slate-600"><i class="fa-solid fa-image text-3xl"></i></div>
-                <div class="text-brandOrange font-bold text-lg">120 AZN</div>
-                <h3 class="font-semibold text-sm mb-2">BMW F30 Ön Amortizator</h3>
-                <div class="text-xs text-brandGray">Bakı, Yasamal</div>
-            </div>
-            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
-                <div class="h-32 bg-slate-800 rounded-lg mb-3 flex items-center justify-center text-slate-600"><i class="fa-solid fa-image text-3xl"></i></div>
-                <div class="text-brandOrange font-bold text-lg">45 AZN</div>
-                <h3 class="font-semibold text-sm mb-2">Hyundai Elantra Əyləc Bəndi</h3>
-                <div class="text-xs text-brandGray">Bakı, Nərimanov</div>
+    <!-- Elanlar Bölməsi -->
+    <main class="max-w-7xl mx-auto px-4 md:px-8 pb-20">
+        <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
+            <h2 id="sectionTitle" class="text-xl font-bold text-white flex items-center gap-2">
+                <span class="w-2.5 h-6 bg-amber-500 rounded-full inline-block"></span> Bütün Elanlar
+            </h2>
+            <span id="adCounter" class="text-xs text-slate-400 font-semibold"></span>
+        </div>
+
+        <!-- Elanlar Grid Konteyneri -->
+        <div id="adsGrid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- Dinamik dolacaq -->
+        </div>
+    </main>
+
+    <!-- Detal Modalı (Səhifə dəyişmədən açılan pəncərə) -->
+    <div id="detailModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-slate-800 border border-slate-700 w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]">
+            <button onclick="closeModal()" class="absolute top-4 right-4 bg-slate-900/80 text-slate-300 hover:text-white w-9 h-9 rounded-full flex items-center justify-center transition z-10">
+                <i class="fa-solid fa-xmark text-lg"></i>
+            </button>
+            <div id="modalContent" class="overflow-y-auto p-6 space-y-4">
+                <!-- Elanın ətraflı məlumatları buraya gələcək -->
             </div>
         </div>
-    </section>
+    </div>
 
-    <footer class="bg-slate-900 border-t border-slate-800 py-6 text-center text-xs text-brandGray">
-        © 2026 SosAvto.az — Bütün hüquqlar qorunur.
-    </footer>
+    <script>
+        let currentCategoryFilter = "";
 
+        document.addEventListener('DOMContentLoaded', function() {
+            loadAds();
+        });
+
+        function setCategoryTab(category) {
+            currentCategoryFilter = category;
+            
+            // Düymələrin aktivlik dizaynını yeniləyirik
+            document.querySelectorAll('.category-tab').forEach(tab => {
+                tab.className = "category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700";
+            });
+
+            let activeTabId = category === "" ? "tab-all" : `tab-${category}`;
+            document.getElementById(activeTabId).className = "category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20";
+
+            // Başlığı dəyişirik
+            let titleText = "Bütün Elanlar";
+            if(category === "auto") titleText = "Avtomobil Elanları";
+            if(category === "parts") titleText = "Ehtiyat Hissələri";
+            if(category === "service") titleText = "Servis, Usta və Moykalar";
+            document.getElementById('sectionTitle').innerHTML = `<span class="w-2.5 h-6 bg-amber-500 rounded-full inline-block"></span> ${titleText}`;
+
+            filterAds();
+        }
+
+        function loadAds(filteredList = null) {
+            const grid = document.getElementById('adsGrid');
+            const counter = document.getElementById('adCounter');
+            
+            const allAds = JSON.parse(localStorage.getItem('sosavto_ads')) || [];
+            
+            // Kateqoriya və axtarışa görə filtrləmə
+            const searchKeyword = document.getElementById('searchInput').value.toLowerCase().trim();
+
+            const ads = allAds.filter(ad => {
+                const matchCat = currentCategoryFilter === "" || ad.category === currentCategoryFilter;
+                const matchSearch = searchKeyword === "" || 
+                    (ad.title && ad.title.toLowerCase().includes(searchKeyword)) || 
+                    (ad.address && ad.address.toLowerCase().includes(searchKeyword)) ||
+                    (ad.autoBrand && ad.autoBrand.toLowerCase().includes(searchKeyword)) ||
+                    (ad.serviceType && ad.serviceType.toLowerCase().includes(searchKeyword));
+
+                return matchCat && matchSearch;
+            });
+            
+            counter.textContent = `Cəmi ${ads.length} elan tapıldı`;
+            grid.innerHTML = '';
+
+            if (ads.length === 0) {
+                grid.innerHTML = `
+                    <div class="col-span-full text-center py-16 text-slate-500">
+                        <i class="fa-solid fa-box-open text-4xl mb-3"></i>
+                        <p class="text-sm">Bu kateqoriyada hələ ki elan yoxdur.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            ads.reverse().forEach(ad => {
+                let badgeText = '';
+                let badgeClass = '';
+                let priceText = ad.autoPrice ? `${ad.autoPrice} AZN` : (ad.partPrice ? `${ad.partPrice} AZN` : (ad.category === 'service' ? 'Xidmət' : 'Razılaşma ilə'));
+                let subInfo = ad.autoBrand ? `${ad.autoBrand} ${ad.autoModel || ''} (${ad.autoYear || ''})` : (ad.serviceType || ad.partFitment || ad.address);
+
+                if (ad.category === 'auto') {
+                    badgeText = 'Avtomobil';
+                    badgeClass = 'bg-red-500/20 text-red-400 border-red-500/30';
+                } else if (ad.category === 'service') {
+                    badgeText = 'Obyekt / Xidmət';
+                    badgeClass = 'bg-blue-500/20 text-blue-400 border-blue-500/30';
+                } else {
+                    badgeText = 'Ehtiyat Hissəsi';
+                    badgeClass = 'bg-amber-500/20 text-amber-400 border-amber-500/30';
+                }
+
+                const imageHtml = ad.image 
+                    ? `<img src="${ad.image}" alt="${ad.title}" class="w-full h-44 object-cover group-hover:scale-105 transition duration-300">`
+                    : `<div class="w-full h-44 bg-slate-800 flex items-center justify-center text-slate-600"><i class="fa-solid fa-image text-3xl"></i></div>`;
+
+                const card = document.createElement('div');
+                card.className = 'bg-slate-800 border border-slate-700/80 rounded-2xl overflow-hidden shadow-md hover:border-amber-500/50 transition flex flex-col justify-between cursor-pointer group';
+                card.onclick = () => openModal(ad);
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="relative overflow-hidden">
+                            ${imageHtml}
+                            <span class="absolute top-3 left-3 text-[10px] font-bold px-2.5 py-1 rounded-full border backdrop-blur-md ${badgeClass}">
+                                ${badgeText}
+                            </span>
+                        </div>
+                        <div class="p-4">
+                            <div class="text-lg font-extrabold text-amber-500 mb-1">${priceText}</div>
+                            <h3 class="text-sm font-bold text-slate-100 line-clamp-1 mb-1">${ad.title}</h3>
+                            <p class="text-xs text-slate-400 mb-3 line-clamp-1"><i class="fa-solid fa-location-dot text-slate-500 mr-1"></i>${ad.address || 'Göstərilməyib'}</p>
+                            <p class="text-[11px] text-slate-300 bg-slate-900/60 px-2.5 py-1.5 rounded-lg border border-slate-700/50 inline-block">${subInfo}</p>
+                        </div>
+                    </div>
+                    <div class="p-4 pt-0">
+                        <span class="w-full bg-slate-700/50 hover:bg-amber-500 hover:text-slate-950 text-slate-300 text-xs font-bold py-2.5 rounded-xl transition text-center block">
+                            Ətraflı Bax
+                        </span>
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function filterAds() {
+            loadAds();
+        }
+
+        function openModal(ad) {
+            const modal = document.getElementById('detailModal');
+            const content = document.getElementById('modalContent');
+            
+            let priceText = ad.autoPrice ? `${ad.autoPrice} AZN` : (ad.partPrice ? `${ad.partPrice} AZN` : 'Razılaşma ilə');
+            let imageSection = ad.image ? `<img src="${ad.image}" class="w-full h-64 object-cover rounded-xl mb-4">` : '';
+
+            let detailsHtml = '';
+            if (ad.category === 'auto') {
+                detailsHtml = `
+                    <div class="grid grid-cols-2 gap-3 text-xs bg-slate-900/60 p-3 rounded-xl border border-slate-700">
+                        <div><span class="text-slate-400">Marka:</span> <strong class="text-white">${ad.autoBrand || '-'}</strong></div>
+                        <div><span class="text-slate-400">Model:</span> <strong class="text-white">${ad.autoModel || '-'}</strong></div>
+                        <div><span class="text-slate-400">İl:</span> <strong class="text-white">${ad.autoYear || '-'}</strong></div>
+                        <div><span class="text-slate-400">Yürüş:</span> <strong class="text-white">${ad.autoMileage ? ad.autoMileage + ' km' : '-'}</strong></div>
+                        <div><span class="text-slate-400">Ötürücü / Korobka:</span> <strong class="text-white">${ad.autoTransmission || '-'}</strong></div>
+                    </div>
+                `;
+            } else if (ad.category === 'service') {
+                detailsHtml = `
+                    <div class="grid grid-cols-1 gap-2 text-xs bg-slate-900/60 p-3 rounded-xl border border-slate-700">
+                        <div><span class="text-slate-400">Xidmət Növü:</span> <strong class="text-white">${ad.serviceType || '-'}</strong></div>
+                        <div><span class="text-slate-400">İş Saatları:</span> <strong class="text-white">${ad.serviceHours || '-'}</strong></div>
+                    </div>
+                `;
+            } else if (ad.category === 'parts') {
+                detailsHtml = `
+                    <div class="grid grid-cols-2 gap-3 text-xs bg-slate-900/60 p-3 rounded-xl border border-slate-700">
+                        <div><span class="text-slate-400">Vəziyyəti:</span> <strong class="text-white">${ad.partCondition || '-'}</strong></div>
+                        <div><span class="text-slate-400">Uyğunluğu:</span> <strong class="text-white">${ad.partFitment || '-'}</strong></div>
+                    </div>
+                `;
+            }
+
+            content.innerHTML = `
+                ${imageSection}
+                <div class="flex items-center justify-between">
+                    <span class="text-2xl font-extrabold text-amber-500">${priceText}</span>
+                    <span class="text-xs bg-slate-900 px-3 py-1 rounded-full text-slate-300 border border-slate-700">${ad.category.toUpperCase()}</span>
+                </div>
+                <h2 class="text-lg font-bold text-white">${ad.title}</h2>
+                <p class="text-xs text-slate-400"><i class="fa-solid fa-location-dot text-amber-500 mr-1"></i> ${ad.address || 'Ünvan qeyd olunmayıb'}</p>
+                
+                ${detailsHtml}
+
+                <div class="pt-4 flex gap-3">
+                    <a href="tel:${ad.phone}" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-xl transition text-center flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 text-sm">
+                        <i class="fa-solid fa-phone"></i> Zəng Et (${ad.phone})
+                    </a>
+                </div>
+            `;
+
+            modal.classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('detailModal').classList.add('hidden');
+        }
+    </script>
 </body>
 </html>
