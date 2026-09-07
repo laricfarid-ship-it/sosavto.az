@@ -42,6 +42,11 @@
                     <i class="fa-solid fa-plus"></i>
                     <span>Elan Ver</span>
                 </a>
+                <!-- User Auth Area -->
+                <div id="auth-nav-area" class="flex items-center space-x-2 border-l border-gray-700 pl-3">
+                    <a href="giris.html" class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition">Daxil ol</a>
+                    <a href="qeydiyyat.html" class="bg-gray-700 hover:bg-gray-600 text-accentGold px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition">Qeydiyyat</a>
+                </div>
             </div>
         </div>
     </header>
@@ -119,15 +124,12 @@
 
     <!-- FLOATING AI ASSISTANT BUTTON & CHAT WINDOW -->
     <div class="fixed bottom-6 right-6 z-50">
-        <!-- Toggle Button -->
         <button onclick="toggleAIChat()" id="ai-toggle-btn" class="bg-gradient-to-r from-accentGold to-amber-600 hover:from-amber-500 hover:to-amber-700 text-darkBg w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-2xl font-bold transition transform hover:scale-105 border-2 border-white/20 relative">
             <i class="fa-solid fa-robot"></i>
             <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse">AI</span>
         </button>
 
-        <!-- Chat Box Modal (Hidden by default) -->
         <div id="ai-chat-box" class="hidden absolute bottom-20 right-0 w-80 sm:w-96 bg-cardBg border border-gray-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[450px]">
-            <!-- Chat Header -->
             <div class="bg-gray-900 px-4 py-3 border-b border-gray-800 flex justify-between items-center">
                 <div class="flex items-center space-x-2">
                     <div class="w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
@@ -138,14 +140,12 @@
                 </button>
             </div>
 
-            <!-- Chat Messages Area -->
             <div id="ai-chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3 text-xs sm:text-sm text-gray-300 bg-darkBg/50">
                 <div class="bg-gray-800 p-3 rounded-xl rounded-tl-none max-w-[85%] border border-gray-700">
                     Salam! Mən SosAvto AI köməkçisiyəm. Avtomobilinizdəki hər hansı detalın şəklini atın və ya probleminizi yazın, sizə saytımızdakı ən yaxın ustanı və uyğun ehtiyat hissəsini dərhal tapım! 🚗🔧
                 </div>
             </div>
 
-            <!-- Chat Input & Upload Area -->
             <div class="p-3 bg-cardBg border-t border-gray-800 flex items-center space-x-2">
                 <label class="cursor-pointer bg-gray-800 hover:bg-gray-700 text-accentGold p-2.5 rounded-xl transition">
                     <i class="fa-solid fa-camera"></i>
@@ -179,100 +179,69 @@
             "Porsche": ["Cayenne", "Macan", "Panamera", "911", "Taycan"],
             "Hyundai": ["Accent", "Elantra", "Sonata", "Tucson", "Santa Fe", "Palisade", "Kona", "Ioniq 5", "Ioniq 6"],
             "Kia": ["Rio", "Cerato", "K5", "Optima", "Stinger", "Sportage", "Sorento", "Telluride", "Carnival", "EV6", "EV9"],
-            "BYD": ["Song Plus", "Han", "Tang", "Seal", "Qin Plus", "Destroyer 05", "Yuan Plus", "Atto 3", "Seagull"],
-            "Chery": ["Tiggo 2 Pro", "Tiggo 4 Pro", "Tiggo 7 Pro", "Tiggo 8 Pro", "Arrizo 6", "Arrizo 8"],
-            "Changan": ["CS35 Plus", "CS55 Plus", "CS75 Plus", "UNI-K", "UNI-T", "UNI-V", "Lumin", "Deepal SL03"],
-            "Geely": ["Monjaro", "Coolray", "Emgrand", "Preface", "Galaxy L7", "Geometry C"],
-            "Haval": ["H6", "Jolion", "Dargo", "H9", "F7"],
-            "LiXiang": ["L6", "L7", "L8", "L9"],
-            "Zeekr": ["001", "X", "009", "7X"],
-            "Nio": ["ET5", "ET7", "ES6", "ES8"],
-            "Xpeng": ["P7", "G6", "G9", "X9"],
-            "Lexus": ["IS", "ES", "GS", "LS", "NX", "RX", "GX", "LX", "UX"],
-            "Nissan": ["Sunny", "Sentra", "Altima", "Maxima", "Qashqai", "X-Trail", "Patrol", "Murano", "Leaf"],
-            "Honda": ["Civic", "Accord", "CR-V", "HR-V", "Pilot", "Odyssey"],
-            "Land Rover": ["Range Rover", "Range Rover Sport", "Range Rover Velar", "Evoque", "Defender", "Discovery"],
-            "Volvo": ["XC40", "XC60", "XC90", "S60", "S90", "EX30", "EX90"],
-            "Tesla": ["Model 3", "Model Y", "Model S", "Model X", "Cybertruck"],
-            "Cadillac": ["Escalade", "XT4", "XT5", "XT6", "CT5"],
-            "Chevrolet": ["Cruze", "Malibu", "Impala", "Equinox", "Tahoe", "Suburban", "Camaro", "Corvette"],
-            "Ford": ["Focus", "Fusion", "Mustang", "Explorer", "Expedition", "F-150", "Ranger"],
-            "Mazda": ["Mazda 3", "Mazda 6", "CX-30", "CX-5", "CX-60", "CX-90"],
-            "Subaru": ["Impreza", "Legacy", "Forester", "Outback", "Crosstrek"]
+            "BYD": ["Song Plus", "Han", "Tang", "Seal", "Qin Plus", "Destroyer 05", "Yuan Plus", "Atto 3", "Seagull"]
         };
 
         const defaultListings = [
             { id: 1, category: 'cars', title: 'Hyundai Elantra Original Porşen', brand: 'Hyundai', model: 'Elantra', year: 2022, price: 150, image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=600&q=80', vin: 'KMHD84AE1HU000000', status: 'approved' },
             { id: 2, category: 'cars', title: 'BMW X5 M Paket', brand: 'BMW', model: 'X5', year: 2023, price: 54000, image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=600&q=80', vin: 'WBA3B1C08EP000000', status: 'approved' },
-            { id: 3, category: 'cars', title: 'Toyota Camry 2021', brand: 'Toyota', model: 'Camry', year: 2021, price: 28500, image: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=600&q=80', vin: '1HGCR2F33HA000000', status: 'approved' },
-            { id: 4, category: 'cars', title: 'BYD Song Plus EV', brand: 'BYD', model: 'Song Plus', year: 2024, price: 34000, image: 'https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=600&q=80', vin: 'BYD123456789ABCDE', status: 'approved' }
+            { id: 3, category: 'cars', title: 'Toyota Camry 2021', brand: 'Toyota', model: 'Camry', year: 2021, price: 28500, image: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=600&q=80', vin: '1HGCR2F33HA000000', status: 'approved' }
         ];
 
         let currentCategory = 'all';
 
         window.onload = () => {
+            checkAuthNavbar();
             initBrands();
             initYears();
             filterListings();
         };
 
+        function checkAuthNavbar() {
+            const loggedUser = localStorage.getItem('sosavto_logged_user');
+            const authArea = document.getElementById('auth-nav-area');
+            if (loggedUser) {
+                authArea.innerHTML = `
+                    <div class="flex items-center space-x-2">
+                        <a href="profil.html" class="bg-gray-800 hover:bg-gray-700 text-accentGold px-3 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-1">
+                            <i class="fa-solid fa-user"></i>
+                            <span class="max-w-[100px] truncate">${loggedUser}</span>
+                        </a>
+                        <button onclick="logoutUser()" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 p-2 rounded-xl text-xs transition" title="Çıxış">
+                            <i class="fa-solid fa-right-from-bracket"></i>
+                        </button>
+                    </div>
+                `;
+            }
+        }
+
+        function logoutUser() {
+            localStorage.removeItem('sosavto_logged_user');
+            window.location.reload();
+        }
+
         function toggleAIChat() {
-            const chatBox = document.getElementById('ai-chat-box');
-            chatBox.classList.toggle('hidden');
+            document.getElementById('ai-chat-box').classList.toggle('hidden');
         }
 
         function sendUserMessage() {
             const input = document.getElementById('ai-chat-input');
             const text = input.value.trim();
             if (!text) return;
-
             const chatMessages = document.getElementById('ai-chat-messages');
-
-            // İstifadəçinin mesajı
-            chatMessages.innerHTML += `
-                <div class="flex justify-end">
-                    <div class="bg-accentGold text-darkBg p-3 rounded-xl rounded-tr-none max-w-[85%] font-medium">
-                        ${text}
-                    </div>
-                </div>
-            `;
+            chatMessages.innerHTML += `<div class="flex justify-end"><div class="bg-accentGold text-darkBg p-3 rounded-xl rounded-tr-none max-w-[85%] font-medium">${text}</div></div>`;
             input.value = '';
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
-            // Qarşılıqlı ağıllı cavab məntiqi
             setTimeout(() => {
-                let reply = "Sualını başa düşdüm. Zəhmət olmasa tam olaraq hansı hissəni və ya avtomobili axtardığını qeyd et ki, dərhal baxım.";
+                let reply = "Sualını başa düşdüm. Zəhmət olmasa tam olaraq hansı hissəni və ya avtomobili axtardığını qeyd et.";
                 const lower = text.toLowerCase();
-
-                if (lower.includes('salam') || lower.includes('sabahınız xeyir') || lower.includes('hi') || lower.includes('necəsən')) {
-                    reply = "Aleykum salam! Mən SosAvto AI köməkçisiyəm. Hər şey əladır, siz necəsiniz? Buyur, hansı avtomobil, usta və ya ehtiyat hissəsi lazımdır?";
-                } else if (lower.includes('optima') || lower.includes('kia') || lower.includes('toyota') || lower.includes('bmw') || lower.includes('hyundai')) {
-                    reply = `Bəli, ${text} üzrə bazamızda uyğun elanlar və xidmətlər mövcuddur. Yuxarıdakı filterdən və ya elanlardan ətraflı baxa bilərsən! 🚗🔧`;
-                } else if (lower.includes('qiymət') || lower.includes('neçəyə')) {
-                    reply = "Qiymətlər elanın növündən və vəziyyətindən asılı olaraq dəyişir. Konkret model yazsan, dəqiq məlumat verərəm.";
-                } else if (lower.includes('sağol') || lower.includes('tesekkur') || lower.includes('təşəkkür')) {
-                    reply = "Dəyməz! Həmişə kömək etməyə hazıram. Başqa sualın olsa yazarsan! 🤝";
-                }
-
-                chatMessages.innerHTML += `
-                    <div class="bg-gray-800 p-3 rounded-xl rounded-tl-none max-w-[85%] border border-gray-700">
-                        ${reply}
-                    </div>
-                `;
+                if (lower.includes('salam') || lower.includes('hi')) reply = "Aleykum salam! Mən SosAvto AI köməkçisiyəm. Buyur, necə kömək edə bilərəm?";
+                else if (lower.includes('qiymət')) reply = "Qiymətlər elanın növündən asılıdır. Konkret model yazsan, dəqiq məlumat verərəm.";
+                chatMessages.innerHTML += `<div class="bg-gray-800 p-3 rounded-xl rounded-tl-none max-w-[85%] border border-gray-700">${reply}</div>`;
                 chatMessages.scrollTop = chatMessages.scrollHeight;
             }, 800);
         }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const inputField = document.getElementById('ai-chat-input');
-            if(inputField) {
-                inputField.addEventListener('keypress', function (e) {
-                    if (e.key === 'Enter') {
-                        sendUserMessage();
-                    }
-                });
-            }
-        });
 
         function initBrands() {
             const brandSelect = document.getElementById('filter-brand');
@@ -294,7 +263,6 @@
         function onBrandChange() {
             const brand = document.getElementById('filter-brand').value;
             const modelSelect = document.getElementById('filter-model');
-            
             modelSelect.innerHTML = '<option value="">Bütün Modellər</option>';
             if (brand && carDatabase[brand]) {
                 carDatabase[brand].forEach(model => {
@@ -332,7 +300,6 @@
         function filterListings() {
             const listings = getListings();
             const approvedListings = listings.filter(item => item.status === 'approved');
-
             const brand = document.getElementById('filter-brand').value;
             const model = document.getElementById('filter-model').value;
             const year = document.getElementById('filter-year').value;
@@ -346,25 +313,16 @@
                 if (vinQuery && (!item.vin || !item.vin.toLowerCase().includes(vinQuery))) return false;
                 return true;
             });
-
             renderListings(filtered);
         }
 
         function renderListings(items) {
             const container = document.getElementById('listings-container');
-            const countLabel = document.getElementById('result-count');
-            countLabel.textContent = `${items.length} nəticə tapıldı`;
-
+            document.getElementById('result-count').textContent = `${items.length} nəticə tapıldı`;
             if (items.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full text-center py-12 text-gray-500">
-                        <i class="fa-solid fa-box-open text-4xl mb-3"></i>
-                        <p class="text-lg">Heç bir aktiv elan tapılmadı.</p>
-                    </div>
-                `;
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500"><i class="fa-solid fa-box-open text-4xl mb-3"></i><p class="text-lg">Heç bir aktiv elan tapılmadı.</p></div>`;
                 return;
             }
-
             container.innerHTML = items.map(item => `
                 <div class="bg-cardBg border border-gray-800 rounded-2xl overflow-hidden shadow-lg hover:border-gray-700 transition flex flex-col">
                     <div class="h-48 overflow-hidden relative">
@@ -378,11 +336,10 @@
                             <div class="text-xs text-gray-400 space-y-1">
                                 <div><i class="fa-solid fa-car mr-1"></i> ${item.brand || ''} ${item.model || ''} (${item.year || 'N/A'})</div>
                                 ${item.vin ? `<div><i class="fa-solid fa-barcode mr-1"></i> VIN: ${item.vin}</div>` : ''}
+                                <div class="text-gray-500 pt-1"><i class="fa-solid fa-user-tag mr-1"></i> Satıcı: ${item.owner || 'Admin'}</div>
                             </div>
                         </div>
-                        <button class="mt-4 w-full bg-gray-800 hover:bg-gray-700 text-gray-200 py-2 rounded-xl text-sm font-semibold transition">
-                            Ətraflı Bax
-                        </button>
+                        <button class="mt-4 w-full bg-gray-800 hover:bg-gray-700 text-gray-200 py-2 rounded-xl text-sm font-semibold transition">Ətraflı Bax</button>
                     </div>
                 </div>
             `).join('');
