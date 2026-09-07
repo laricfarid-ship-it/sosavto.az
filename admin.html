@@ -1,61 +1,176 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="az">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SosAvto.az — Admin Panel</title>
+    <title>Admin Panel - SosAvto.az</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
             theme: {
-                extend: { colors: { brandDark: '#0f172a', brandOrange: '#f59e0b', brandGray: '#94a3b8' } }
+                extend: {
+                    colors: {
+                        darkBg: '#0b0f19',
+                        cardBg: '#131c2e',
+                        accentGold: '#f59e0b',
+                        accentHover: '#d97706'
+                    }
+                }
             }
         }
     </script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-950 text-white font-sans min-h-screen flex">
+<body class="bg-darkBg text-gray-100 min-h-screen flex flex-col font-sans">
 
-    <aside class="w-64 bg-slate-900 border-r border-slate-800 p-5 hidden md:block">
-        <div class="text-xl font-bold mb-8">Sos<span class="text-brandOrange">Avto</span> Admin</div>
-        <nav class="space-y-2 text-sm text-brandGray">
-            <a href="#" class="flex items-center space-x-3 bg-brandOrange/10 text-brandOrange p-3 rounded-xl font-semibold">
-                <i class="fa-solid fa-chart-line"></i>
-                <span>İdarə Paneli</span>
-            </a>
-            <a href="index.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
-                <i class="fa-solid fa-house"></i>
-                <span>Sayta Qayıt</span>
-            </a>
-        </nav>
-    </aside>
-
-    <main class="flex-1 p-6">
-        <h1 class="text-2xl font-bold mb-6">Təsdiq Gözləyən Elanlar</h1>
-        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
-            <table class="w-full text-left text-xs text-brandGray">
-                <thead class="bg-slate-950 text-white border-b border-slate-800 uppercase">
-                    <tr>
-                        <th class="p-4">Başlıq</th>
-                        <th class="p-4">Satıcı</th>
-                        <th class="p-4">Qiymət</th>
-                        <th class="p-4 text-right">Əməliyyat</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-slate-800">
-                    <tr>
-                        <td class="p-4 font-semibold text-white">BMW F30 Ön Amortizator</td>
-                        <td class="p-4">AvtoParts MMC</td>
-                        <td class="p-4 text-brandOrange font-bold">120 AZN</td>
-                        <td class="p-4 text-right space-x-2">
-                            <button class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg font-bold">Təsdiqlə</button>
-                            <button class="bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg font-bold">İmtina</button>
-                        </td>
-                    </tr>
-                </tbody>
-            </table>
+    <!-- Login Modal / Screen -->
+    <div id="login-screen" class="fixed inset-0 bg-darkBg z-50 flex items-center justify-center p-4">
+        <div class="bg-cardBg border border-gray-800 p-8 rounded-2xl max-w-md w-full shadow-2xl text-center">
+            <div class="bg-accentGold text-darkBg w-14 h-14 rounded-2xl mx-auto flex items-center justify-center text-2xl font-black mb-4 shadow">
+                <i class="fa-solid fa-lock"></i>
+            </div>
+            <h2 class="text-2xl font-black mb-2">Admin Girişi</h2>
+            <p class="text-gray-400 text-sm mb-6">Elanları idarə etmək üçün şifrəni daxil edin</p>
+            <input type="password" id="admin-pass" placeholder="Şifrə (admin123)" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-200 focus:outline-none focus:border-accentGold mb-4">
+            <button onclick="checkLogin()" class="w-full bg-accentGold hover:bg-accentHover text-darkBg font-bold py-3 rounded-xl transition shadow">
+                Daxil Ol
+            </button>
+            <a href="index.html" class="block mt-4 text-xs text-gray-500 hover:text-gray-300">← Sayta qayıt</a>
         </div>
-    </main>
+    </div>
 
+    <!-- Admin Dashboard -->
+    <div id="admin-dashboard" class="hidden flex-grow flex flex-col">
+        <header class="bg-cardBg border-b border-gray-800 py-4 px-6 flex justify-between items-center">
+            <div class="flex items-center space-x-3">
+                <span class="bg-accentGold text-darkBg font-bold px-3 py-1 rounded-lg text-sm">ADMIN PANEL</span>
+                <h1 class="text-lg font-bold">SosAvto.az İdarəetmə</h1>
+            </div>
+            <div class="flex items-center space-x-4">
+                <a href="index.html" target="_blank" class="text-sm text-gray-400 hover:text-white flex items-center space-x-1">
+                    <i class="fa-solid fa-globe"></i>
+                    <span>Sayta Bax</span>
+                </a>
+                <button onclick="logout()" class="bg-red-500/10 hover:bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-xl text-sm font-semibold transition">
+                    Çıxış
+                </button>
+            </div>
+        </header>
+
+        <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-xl font-bold flex items-center space-x-2">
+                    <i class="fa-solid fa-clock-rotate-left text-accentGold"></i>
+                    <span>Gözləmədə olan elanlar (Moderasiya)</span>
+                </h2>
+            </div>
+
+            <div id="pending-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Pending listings load here -->
+            </div>
+        </main>
+    </div>
+
+    <script>
+        const ADMIN_PASSWORD = "admin123"; // İstədiyin şifrəni burdan dəyişə bilərsən
+
+        function checkLogin() {
+            const pass = document.getElementById('admin-pass').value;
+            if (pass === ADMIN_PASSWORD) {
+                sessionStorage.setItem('sosavto_logged', 'true');
+                showDashboard();
+            } else {
+                alert("Şifrə yanlışdır!");
+            }
+        }
+
+        function showDashboard() {
+            document.getElementById('login-screen').classList.add('hidden');
+            document.getElementById('admin-dashboard').classList.remove('hidden');
+            loadPendingListings();
+        }
+
+        function logout() {
+            sessionStorage.removeItem('sosavto_logged');
+            location.reload();
+        }
+
+        window.onload = () => {
+            if (sessionStorage.getItem('sosavto_logged') === 'true') {
+                showDashboard();
+            }
+        };
+
+        function loadPendingListings() {
+            const stored = JSON.parse(localStorage.getItem('sosavto_listings')) || [];
+            // Statusu 'pending' olanlar və ya ümumiyyətcə statusu olmayanlar (köhnələr)
+            const pending = stored.filter(item => item.status === 'pending' || !item.status);
+
+            const container = document.getElementById('pending-container');
+
+            if (pending.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center py-12 text-gray-500 bg-cardBg border border-gray-800 rounded-2xl">
+                        <i class="fa-solid fa-circle-check text-4xl text-green-500 mb-3"></i>
+                        <p class="text-lg">Təsdiq gözləyən yeni elan yoxdur.</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = pending.map(item => `
+                <div class="bg-cardBg border border-gray-800 rounded-2xl overflow-hidden shadow-lg flex flex-col justify-between">
+                    <div>
+                        <div class="h-40 overflow-hidden relative">
+                            <img src="${item.image || 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=600&q=80'}" class="w-full h-full object-cover">
+                            <span class="absolute top-3 left-3 bg-yellow-500/90 text-darkBg text-xs font-bold px-3 py-1 rounded-full uppercase">Təsdiq Gözləyir</span>
+                        </div>
+                        <div class="p-4">
+                            <h3 class="font-bold text-base mb-1 text-white">${item.title}</h3>
+                            <div class="text-accentGold font-black text-lg mb-2">${item.price} AZN</div>
+                            <div class="text-xs text-gray-400 space-y-1">
+                                <div>Kateqoriya: ${item.category}</div>
+                                <div>Marka / Model: ${item.brand || '-'} ${item.model || '-'} (${item.year || '-'})</div>
+                                ${item.vin ? `<div>VIN: ${item.vin}</div>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="p-4 bg-gray-900/50 border-t border-gray-800 flex gap-2">
+                        <button onclick="approveListing(${item.id})" class="flex-1 bg-green-600 hover:bg-green-500 text-white font-bold py-2 rounded-xl text-sm transition flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-check"></i>
+                            <span>Təsdiq Et</span>
+                        </button>
+                        <button onclick="deleteListing(${item.id})" class="flex-1 bg-red-600/20 hover:bg-red-600 text-red-400 hover:text-white border border-red-500/30 font-bold py-2 rounded-xl text-sm transition flex items-center justify-center space-x-1">
+                            <i class="fa-solid fa-trash"></i>
+                            <span>Sil</span>
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function approve(id) {
+            approveListing(id);
+        }
+
+        function approveListing(id) {
+            let stored = JSON.parse(localStorage.getItem('sosavto_listings')) || [];
+            stored = stored.map(item => {
+                if (item.id === id) item.status = 'approved';
+                return item;
+            });
+            localStorage.setItem('sosavto_listings', JSON.stringify(stored));
+            loadPendingListings();
+            alert("Elan uğurla təsdiqləndi və sayta əlavə olundu!");
+        }
+
+        function deleteListing(id) {
+            if (!confirm("Bu elanı silmək istədiyinizə əminsiniz?")) return;
+            let stored = JSON.parse(localStorage.getItem('sosavto_listings')) || [];
+            stored = stored.filter(item => item.id !== id);
+            localStorage.setItem('sosavto_listings', JSON.stringify(stored));
+            loadPendingListings();
+        }
+    </script>
 </body>
 </html>
