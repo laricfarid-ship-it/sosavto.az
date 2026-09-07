@@ -115,42 +115,44 @@
                 <span>Kateqoriyalar</span>
             </h2>
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                <a href="#" class="bg-cardBg border border-gray-800 hover:border-accentGold p-4 rounded-2xl text-center transition flex flex-col items-center space-y-2 group shadow-md">
+                <!-- 1ci hissə: BÜTÜN -->
+                <div onclick="alert('Bütün elanlar göstərilir')" class="bg-cardBg border border-gray-800 hover:border-accentGold p-4 rounded-2xl text-center transition flex flex-col items-center space-y-2 group shadow-md cursor-pointer">
+                    <div class="bg-gray-900 text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3 rounded-xl transition">
+                        <i class="fa-solid fa-globe text-xl"></i>
+                    </div>
+                    <span class="text-xs font-bold text-gray-200">Bütün Elanlar</span>
+                </div>
+                <!-- 2ci hissədən etibarən avtomobilə aid siyahı -->
+                <div onclick="alert('Minik Avtomobilləri seçildi')" class="bg-cardBg border border-gray-800 hover:border-accentGold p-4 rounded-2xl text-center transition flex flex-col items-center space-y-2 group shadow-md cursor-pointer">
                     <div class="bg-gray-900 text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3 rounded-xl transition">
                         <i class="fa-solid fa-car text-xl"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-200">Minik Avtomobilləri</span>
-                </a>
-                <a href="#" class="bg-cardBg border border-gray-800 hover:border-accentGold p-4 rounded-2xl text-center transition flex flex-col items-center space-y-2 group shadow-md">
+                </div>
+                <div onclick="alert('Ehtiyat Hissələri seçildi')" class="bg-cardBg border border-gray-800 hover:border-accentGold p-4 rounded-2xl text-center transition flex flex-col items-center space-y-2 group shadow-md cursor-pointer">
                     <div class="bg-gray-900 text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3 rounded-xl transition">
                         <i class="fa-solid fa-gears text-xl"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-200">Ehtiyat Hissələri</span>
-                </a>
-                <a href="#" class="bg-cardBg border border-gray-800 hover:border-accentGold p-4 rounded-2xl text-center transition flex flex-col items-center space-y-2 group shadow-md">
+                </div>
+                <div onclick="alert('Ustalar və Servislər seçildi')" class="bg-cardBg border border-gray-800 hover:border-accentGold p-4 rounded-2xl text-center transition flex flex-col items-center space-y-2 group shadow-md cursor-pointer">
                     <div class="bg-gray-900 text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3 rounded-xl transition">
                         <i class="fa-solid fa-wrench text-xl"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-200">Ustalar və Servislər</span>
-                </a>
-                <a href="#" class="bg-cardBg border border-gray-800 hover:border-accentGold p-4 rounded-2xl text-center transition flex flex-col items-center space-y-2 group shadow-md">
+                </div>
+                <div onclick="alert('Avtoyuma seçildi')" class="bg-cardBg border border-gray-800 hover:border-accentGold p-4 rounded-2xl text-center transition flex flex-col items-center space-y-2 group shadow-md cursor-pointer">
                     <div class="bg-gray-900 text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3 rounded-xl transition">
                         <i class="fa-solid fa-soap text-xl"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-200">Avtoyuma</span>
-                </a>
-                <a href="#" class="bg-cardBg border border-gray-800 hover:border-accentGold p-4 rounded-2xl text-center transition flex flex-col items-center space-y-2 group shadow-md">
+                </div>
+                <div onclick="alert('Detailing seçildi')" class="bg-cardBg border border-gray-800 hover:border-accentGold p-4 rounded-2xl text-center transition flex flex-col items-center space-y-2 group shadow-md cursor-pointer">
                     <div class="bg-gray-900 text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3 rounded-xl transition">
                         <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-200">Detailing</span>
-                </a>
-                <a href="#" class="bg-cardBg border border-gray-800 hover:border-accentGold p-4 rounded-2xl text-center transition flex flex-col items-center space-y-2 group shadow-md">
-                    <div class="bg-gray-900 text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3 rounded-xl transition">
-                        <i class="fa-solid fa-shield-halved text-xl"></i>
-                    </div>
-                    <span class="text-xs font-bold text-gray-200">Avto Sığorta</span>
-                </a>
+                </div>
             </div>
         </div>
 
@@ -259,11 +261,9 @@
                     let fuel = result.FuelTypePrimary || "Göstərilməyib";
                     let plant = result.PlantCountry || "Göstərilməyib";
 
-                    // Həqiqi auksion/qəza simulyasiyası və ya ABŞ arxiv bazası şəkli
-                    // Sınaq üçün daxil edilən VIN kod (KMHDH4AE8DU123456) və ya digər qəzalı maşın simulyasiyası
                     let accidentStatus = "Yüngül zədəli / İdeal vəziyyətdə gəlib";
                     let auctionHouse = "Copart / ABŞ Arxivi";
-                    let accidentImg = "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=600&q=80"; // Qəzalı/hasarlı maşın görünüşü
+                    let accidentImg = "https://images.unsplash.com/photo-1541899481282-d53bffe3c35d?auto=format&fit=crop&w=600&q=80"; 
 
                     if(vin === "KMHDH4AE8DU123456" || model.toLowerCase().includes("elantra")) {
                         accidentStatus = "Arxa hissədən və təkərdən zədəli (Auksion qəza qeydi var)";
