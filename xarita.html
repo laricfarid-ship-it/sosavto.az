@@ -3,111 +3,190 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SosAvto.az — GPS Servis Xəritəsi</title>
+    <title>GPS Servis və Evakuator Xəritəsi - SosAvto.az</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        darkBg: '#0b0f19',
+                        cardBg: '#131c2e',
+                        accentGold: '#f59e0b',
+                        accentHover: '#d97706'
+                    }
+                }
+            }
+        }
+    </script>
     <style>
-        #map { height: calc(100vh - 80px); width: 100%; z-index: 1; }
+        #map { height: calc(100vh - 80px); width: 100%; z-index: 10; }
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+            background-color: #131c2e !important;
+            color: #fff !important;
+            border: 1px solid #374151;
+            border-radius: 12px;
+        }
     </style>
 </head>
-<body class="bg-slate-50 flex flex-col h-screen">
+<body class="bg-darkBg text-gray-100 min-h-screen flex flex-col font-sans overflow-hidden">
 
     <!-- Header -->
-    <header class="bg-white border-b border-slate-200 h-20 flex items-center justify-between px-4 md:px-8 z-10 shadow-sm">
-        <a href="index.html" class="flex items-center gap-2 text-red-600 font-bold text-2xl tracking-wider">
-            <i class="fa-solid fa-truck-monster"></i>
-            <span>SosAvto<span class="text-slate-800">.az</span></span>
+    <header class="bg-cardBg border-b border-gray-800 h-20 flex items-center justify-between px-4 sm:px-6 relative z-20">
+        <a href="index.html" class="flex items-center space-x-2">
+            <div class="bg-accentGold text-darkBg p-2 rounded-xl font-black text-xl flex items-center justify-center shadow-md">
+                <i class="fa-solid fa-car-side"></i>
+            </div>
+            <span class="text-xl sm:text-2xl font-black tracking-wider text-white">Sos<span class="text-accentGold">Avto</span>.az</span>
         </a>
 
-        <!-- Filtrlər -->
-        <div class="flex gap-2 overflow-x-auto py-1">
-            <button onclick="filterMarkers('all')" class="px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded-lg hover:bg-slate-700 transition">Bütün Nöqtələr</button>
-            <button onclick="filterMarkers('evakuator')" class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition"><i class="fa-solid fa-truck-pickup mr-1"></i> Evakuator</button>
-            <button onclick="filterMarkers('servis')" class="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition"><i class="fa-solid fa-wrench mr-1"></i> Servis</button>
+        <!-- Filter Buttons -->
+        <div class="flex items-center space-x-1 sm:space-x-2 bg-gray-900/80 p-1.5 rounded-2xl border border-gray-800">
+            <button onclick="filterMap('all')" id="btn-all" class="map-filter px-3 sm:px-4 py-1.5 rounded-xl font-bold text-xs sm:text-sm transition bg-accentGold text-darkBg shadow">Bütün Nöqtələr</button>
+            <button onclick="filterMap('tow')" id="btn-tow" class="map-filter px-3 sm:px-4 py-1.5 rounded-xl font-bold text-xs sm:text-sm transition text-gray-400 hover:text-white">Evakuator</button>
+            <button onclick="filterMap('service')" id="btn-service" class="map-filter px-3 sm:px-4 py-1.5 rounded-xl font-bold text-xs sm:text-sm transition text-gray-400 hover:text-white">Servis</button>
         </div>
 
-        <a href="elan-ver.html" class="hidden md:inline-flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white text-sm font-semibold px-4 py-2.5 rounded-xl transition">
-            <i class="fa-solid fa-plus"></i> Elan Yerləşdir
-        </a>
+        <div class="flex items-center space-x-2">
+            <!-- Məni Tap düyməsi -->
+            <button onclick="locateUser()" title="Məni Tap" class="bg-blue-600 hover:bg-blue-500 text-white px-3 sm:px-4 py-2 rounded-xl font-bold text-xs sm:text-sm shadow transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-crosshairs"></i>
+                <span class="hidden sm:inline">Məni Tap</span>
+            </button>
+            <a href="elan-ver.html" class="hidden md:flex items-center space-x-2 bg-accentGold hover:bg-accentHover text-darkBg px-4 py-2 rounded-xl font-bold text-xs sm:text-sm shadow transition">
+                <i class="fa-solid fa-plus"></i>
+                <span>Elan Yerləşdir</span>
+            </a>
+        </div>
     </header>
 
-    <!-- Xəritə -->
-    <div class="relative flex-1">
-        <div id="map"></div>
-    </div>
+    <!-- Map Container -->
+    <div id="map" class="w-full flex-grow"></div>
 
     <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
     <script>
-        const map = L.map('map').setView([40.409261, 49.867092], 12);
+        // Bakı mərkəzli xəritə
+        const map = L.map('map').setView([40.4093, 49.8671], 12);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
-            attribution: '© OpenStreetMap'
+            attribution: '&copy; OpenStreetMap contributors'
         }).addTo(map);
 
-        // Nümunə Sabit Nöqtələr
-        const defaultLocations = [
-            { id: 1, title: "7/24 Təcili Evakuator", category: "evakuator", lat: 40.409261, lng: 49.867092, phone: "+994 50 123 45 67", address: "28 May küç." },
-            { id: 2, title: "Avto Elektrik və Diaqnostika", category: "servis", lat: 40.380000, lng: 49.820000, phone: "+994 55 987 65 43", address: "Yasamal r., Şərifzadə küç." }
+        // Nöqtələr bazası (Evakuator və Servislər)
+        const locations = [
+            { id: 1, type: 'tow', title: 'Bakı Evakuator Xidməti 24/7', lat: 40.4034, lng: 49.8456, phone: '+994 50 123 45 67', desc: 'Şəhərdaxili və rayonlara təcili evakuasiya.' },
+            { id: 2, type: 'service', title: 'Motors Master - BMW & Mercedes Servis', lat: 40.4312, lng: 49.8723, phone: '+994 55 987 65 43', desc: 'Kompüter diaqnostikası, mühərrik təmiri.' },
+            { id: 3, type: 'tow', title: 'Təcili Evakuator Nəsimi', lat: 40.3951, lng: 49.8221, phone: '+994 70 555 44 33', desc: '10 dəqiqəyə ünvana çatdırılma.' },
+            { id: 4, type: 'service', title: 'Çin Avtomobilləri Servisi (BYD, Changan)', lat: 40.4201, lng: 49.9012, phone: '+994 51 333 22 11', desc: 'Elektromobil və Plug-in hybrid təmiri.' },
+            { id: 5, type: 'service', title: 'Usta Elşən - Otomat Korobka', lat: 40.3785, lng: 49.8920, phone: '+994 50 777 88 99', desc: 'Sürətlər qutusunun təmiri və yağı.' }
         ];
 
-        // LocalStorage-dən yeni əlavə edilmiş elanları çəkmək
-        const userAds = JSON.parse(localStorage.getItem('sosavto_ads')) || [];
-        const allLocations = [...defaultLocations, ...userAds];
+        let markersLayer = L.layerGroup().addTo(map);
+        let userMarker = null;
+        let userAccuracyCircle = null;
 
-        let markerList = [];
+        function renderMarkers(filterType) {
+            markersLayer.clearLayers();
 
-        function renderMarkers(data) {
-            markerList.forEach(m => map.removeLayer(m));
-            markerList = [];
+            locations.forEach(loc => {
+                if (filterType === 'all' || loc.type === filterType) {
+                    // İkon təyini
+                    let iconColor = loc.type === 'tow' ? '#ef4444' : '#f59e0b';
+                    let iconClass = loc.type === 'tow' ? 'fa-truck-pickup' : 'fa-wrench';
 
-            data.forEach(item => {
-                const marker = L.marker([item.lat, item.lng]).addTo(map);
-                
-                const gmapsUrl = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
-                const wazeUrl = `https://waze.com/ul?ll=${item.lat},${item.lng}&navigate=yes`;
+                    let customIcon = L.divIcon({
+                        className: 'custom-div-icon',
+                        html: `<div style="background-color: ${iconColor}; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #0b0f19; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 2px solid #fff;"><i class="fa-solid ${iconClass}"></i></div>`,
+                        iconSize: [36, 36],
+                        iconAnchor: [18, 18]
+                    });
 
-                const popupContent = `
-                    <div class="p-1 min-w-[200px]">
-                        <span class="text-xs font-bold uppercase tracking-wider ${item.category === 'evakuator' ? 'text-red-600' : 'text-blue-600'}">${item.category}</span>
-                        <h3 class="font-bold text-slate-800 text-base mt-0.5">${item.title}</h3>
-                        <p class="text-slate-500 text-xs mt-1 mb-2"><i class="fa-solid fa-location-dot"></i> ${item.address}</p>
-                        
-                        <div class="grid grid-cols-2 gap-1.5 my-2">
-                            <a href="${gmapsUrl}" target="_blank" class="flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold py-1.5 px-2 rounded-lg border border-slate-200 transition text-decoration-none">
-                                <i class="fa-brands fa-google text-blue-600"></i> Google Maps
-                            </a>
-                            <a href="${wazeUrl}" target="_blank" class="flex items-center justify-center gap-1.5 bg-sky-50 hover:bg-sky-100 text-sky-700 text-[11px] font-semibold py-1.5 px-2 rounded-lg border border-sky-200 transition text-decoration-none">
-                                <i class="fa-brands fa-waze text-sky-500"></i> Waze
-                            </a>
+                    let marker = L.marker([loc.lat, loc.lng], { icon: customIcon });
+
+                    marker.bindPopup(`
+                        <div style="padding: 4px;">
+                            <h3 style="font-weight: bold; font-size: 15px; margin-bottom: 4px; color: #f59e0b;">${loc.title}</h3>
+                            <p style="font-size: 13px; color: #9ca3af; margin-bottom: 8px;">${loc.desc}</p>
+                            <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;"><i class="fa-solid fa-phone mr-1"></i> ${loc.phone}</div>
+                            <a href="tel:${loc.phone}" style="display: block; text-align: center; background-color: #f59e0b; color: #0b0f19; padding: 6px 12px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 13px;">Zəng Et</a>
                         </div>
+                    `);
 
-                        <a href="tel:${item.phone}" class="flex items-center justify-center w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs py-2 px-3 rounded-lg gap-2 transition text-decoration-none">
-                            <i class="fa-solid fa-phone"></i> ${item.phone}
-                        </a>
-                    </div>
-                `;
-                
-                marker.bindPopup(popupContent);
-                markerList.push(marker);
+                    markersLayer.addLayer(marker);
+                }
             });
         }
 
-        renderMarkers(allLocations);
+        function filterMap(type) {
+            document.querySelectorAll('.map-filter').forEach(btn => {
+                btn.classList.remove('bg-accentGold', 'text-darkBg', 'shadow');
+                btn.classList.add('text-gray-400', 'hover:text-white');
+            });
 
-        function filterMarkers(category) {
-            if (category === 'all') {
-                renderMarkers(allLocations);
-            } else {
-                const filtered = allLocations.filter(loc => loc.category === category);
-                renderMarkers(filtered);
+            let activeBtn = document.getElementById(`btn-${type}`);
+            if (activeBtn) {
+                activeBtn.classList.add('bg-accentGold', 'text-darkBg', 'shadow');
+                activeBtn.classList.remove('text-gray-400', 'hover:text-white');
             }
+
+            renderMarkers(type);
         }
+
+        // Məni Tap (Geolocation) funksiyası
+        function locateUser() {
+            if (!navigator.geolocation) {
+                alert("Sizin brauzer GPS geolokasiyanı dəstəkləmir.");
+                return;
+            }
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    const accuracy = position.coords.accuracy;
+
+                    // Əgər əvvəlki istifadəçi markerləri varsa, silirik
+                    if (userMarker) map.removeLayer(userMarker);
+                    if (userAccuracyCircle) map.removeLayer(userAccuracyCircle);
+
+                    // İstifadəçinin yerində göy rəngli nöqtə və radius dairəsi yaradırıq
+                    userIcon = L.divIcon({
+                        className: 'user-location-icon',
+                        html: `<div style="background-color: #3b82f6; width: 22px; height: 22px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 10px rgba(59,130,246,0.8);"></div>`,
+                        iconSize: [22, 22],
+                        iconAnchor: [11, 11]
+                    });
+
+                    userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map);
+                    userMarker.bindPopup("<b>Siz buradasınız</b>").openPopup();
+
+                    userAccuracyCircle = L.circle([lat, lng], {
+                        radius: accuracy / 2,
+                        color: '#3b82f6',
+                        fillColor: '#3b82f6',
+                        fillOpacity: 0.15,
+                        weight: 1
+                    }).addTo(map);
+
+                    // Xəritəni həmin koordinata yaxınlaşdırırıq
+                    map.setView([lat, lng], 15);
+                },
+                (error) => {
+                    alert("Məkan məlumatı alınmadı. Zəhmət olmasa GPS/Məkan icazələrini yoxlayın.");
+                    console.error(error);
+                },
+                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+            );
+        }
+
+        // İlkin yüklənmə
+        renderMarkers('all');
     </script>
 </body>
 </html>
