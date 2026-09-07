@@ -50,7 +50,7 @@
     <section class="relative py-12 px-4 text-center bg-gradient-to-b from-cardBg to-darkBg border-b border-gray-800">
         <div class="max-w-5xl mx-auto">
             <h1 class="text-3xl sm:text-5xl font-black mb-4 tracking-tight">Avtomobiliniz üçün hər şey bir arada</h1>
-            <p class="text-gray-400 text-base sm:text-lg mb-8">Çin, Avropa və yerli bazarın ən geniş avtomobil və ehtiyat hissələri kataloqu</p>
+            <p class="text-gray-400 text-base sm:text-lg mb-8">Çin, Avropa və dünya bazarının ən geniş avtomobil və ehtiyat hissələri kataloqu</p>
 
             <!-- Main Category Tabs -->
             <div class="flex flex-wrap justify-center gap-2 bg-gray-900/80 p-2 rounded-2xl border border-gray-800 max-w-2xl mx-auto mb-6">
@@ -130,21 +130,34 @@
     <!-- JavaScript Logic -->
     <script>
         const carDatabase = {
-            "Toyota": ["Camry", "Corolla", "RAV4", "Prado", "Land Cruiser", "Prius", "Avalon", "Highlander"],
-            "BMW": ["3 Series", "5 Series", "7 Series", "X3", "X5", "X6", "M4", "i4"],
-            "Mercedes-Benz": ["C-Class", "E-Class", "S-Class", "GLE", "GLS", "G-Class", "CLA"],
-            "Hyundai": ["Elantra", "Sonata", "Tucson", "Santa Fe", "Accent", "Kona"],
-            "Kia": ["Optima", "K5", "Sorento", "Sportage", "Cerato", "Rio"],
-            "BYD": ["Song Plus", "Han", "Tang", "Seal", "Qin Plus", "Destroyer 05"],
-            "Chery": ["Tiggo 7 Pro", "Tiggo 8 Pro", "Arrizo 8", "Tiggo 4 Pro"],
-            "Changan": ["CS35 Plus", "CS75 Plus", "UNI-K", "UNI-T", "Lumin"],
-            "Geely": ["Monjaro", "Coolray", "Emgrand", "Preface"],
-            "Haval": ["H6", "Jolion", "Dargo"],
-            "LiXiang": ["L7", "L8", "L9"],
-            "Zeekr": ["001", "X", "009"],
-            "Volkswagen": ["Passat", "Jetta", "Golf", "Tiguan", "Touareg"],
-            "Audi": ["A4", "A6", "Q5", "Q7", "e-tron"],
-            "Porsche": ["Cayenne", "Macan", "Panamera"]
+            "Toyota": ["Camry", "Corolla", "RAV4", "Prado", "Land Cruiser", "Prius", "Avalon", "Highlander", "Yaris", "C-HR", "Hilux", "Fortuner", "Alphard"],
+            "BMW": ["1 Series", "2 Series", "3 Series", "4 Series", "5 Series", "6 Series", "7 Series", "8 Series", "X1", "X3", "X4", "X5", "X6", "X7", "M2", "M3", "M4", "M5", "i4", "iX3", "iX"],
+            "Mercedes-Benz": ["A-Class", "B-Class", "C-Class", "E-Class", "S-Class", "CLA", "CLS", "GLA", "GLB", "GLC", "GLE", "GLS", "G-Class", "EQE", "EQS", "AMG GT"],
+            "Audi": ["A1", "A3", "A4", "A5", "A6", "A7", "A8", "Q2", "Q3", "Q5", "Q7", "Q8", "e-tron", "RS6", "RS7"],
+            "Volkswagen": ["Polo", "Golf", "Jetta", "Passat", "Arteon", "Tiguan", "Touareg", "Atlas", "ID.4", "ID.6"],
+            "Porsche": ["Cayenne", "Macan", "Panamera", "911", "Taycan"],
+            "Hyundai": ["Accent", "Elantra", "Sonata", "Tucson", "Santa Fe", "Palisade", "Kona", "Ioniq 5", "Ioniq 6"],
+            "Kia": ["Rio", "Cerato", "K5", "Optima", "Stinger", "Sportage", "Sorento", "Telluride", "Carnival", "EV6", "EV9"],
+            "BYD": ["Song Plus", "Han", "Tang", "Seal", "Qin Plus", "Destroyer 05", "Yuan Plus", "Atto 3", "Seagull"],
+            "Chery": ["Tiggo 2 Pro", "Tiggo 4 Pro", "Tiggo 7 Pro", "Tiggo 8 Pro", "Arrizo 6", "Arrizo 8"],
+            "Changan": ["CS35 Plus", "CS55 Plus", "CS75 Plus", "UNI-K", "UNI-T", "UNI-V", "Lumin", "Deepal SL03"],
+            "Geely": ["Monjaro", "Coolray", "Emgrand", "Preface", "Galaxy L7", "Geometry C"],
+            "Haval": ["H6", "Jolion", "Dargo", "H9", "F7"],
+            "LiXiang": ["L6", "L7", "L8", "L9"],
+            "Zeekr": ["001", "X", "009", "7X"],
+            "Nio": ["ET5", "ET7", "ES6", "ES8"],
+            "Xpeng": ["P7", "G6", "G9", "X9"],
+            "Lexus": ["IS", "ES", "GS", "LS", "NX", "RX", "GX", "LX", "UX"],
+            "Nissan": ["Sunny", "Sentra", "Altima", "Maxima", "Qashqai", "X-Trail", "Patrol", "Murano", "Leaf"],
+            "Honda": ["Civic", "Accord", "CR-V", "HR-V", "Pilot", "Odyssey"],
+            "Land Rover": ["Range Rover", "Range Rover Sport", "Range Rover Velar", "Evoque", "Defender", "Discovery"],
+            "Volvo": ["XC40", "XC60", "XC90", "S60", "S90", "EX30", "EX90"],
+            "Tesla": ["Model 3", "Model Y", "Model S", "Model X", "Cybertruck"],
+            "Cadillac": ["Escalade", "XT4", "XT5", "XT6", "CT5"],
+            "Chevrolet": ["Cruze", "Malibu", "Impala", "Equinox", "Tahoe", "Suburban", "Camaro", "Corvette"],
+            "Ford": ["Focus", "Fusion", "Mustang", "Explorer", "Expedition", "F-150", "Ranger"],
+            "Mazda": ["Mazda 3", "Mazda 6", "CX-30", "CX-5", "CX-60", "CX-90"],
+            "Subaru": ["Impreza", "Legacy", "Forester", "Outback", "Crosstrek"]
         };
 
         const defaultListings = [
@@ -219,7 +232,6 @@
 
         function filterListings() {
             const listings = getListings();
-            // Yalnız təsdiqlənmiş (approved) elanlar ana səhifədə görünür!
             const approvedListings = listings.filter(item => item.status === 'approved');
 
             const brand = document.getElementById('filter-brand').value;
