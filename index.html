@@ -55,7 +55,7 @@
 
         <!-- Search Filter Box -->
         <div class="bg-cardBg border border-gray-800 p-6 rounded-3xl shadow-2xl max-w-4xl mx-auto space-y-4">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Marka</label>
                     <select class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accentGold">
@@ -69,19 +69,30 @@
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Buraxılış İti</label>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Buraxılış İli</label>
                     <select class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accentGold">
                         <option value="">Bütün illər</option>
                     </select>
                 </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">VIN Kodu</label>
+                    <input type="text" placeholder="17 simvol VIN" maxlength="17" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white uppercase focus:outline-none focus:border-accentGold">
+                </div>
             </div>
-            <button class="w-full bg-accentGold hover:bg-accentHover text-darkBg font-black py-3.5 rounded-xl transition text-sm flex items-center justify-center space-x-2 shadow-lg shadow-accentGold/20">
-                <i class="fa-solid fa-magnifying-glass"></i>
-                <span>Axtar</span>
-            </button>
+            
+            <div class="flex gap-4 pt-2">
+                <button class="flex-1 bg-accentGold hover:bg-accentHover text-darkBg font-black py-3.5 rounded-xl transition text-sm flex items-center justify-center space-x-2 shadow-lg shadow-accentGold/20">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>Axtar</span>
+                </button>
+                <button onclick="alert('Davam edilir...')" class="bg-gray-800 hover:bg-gray-700 text-accentGold font-bold px-6 py-3.5 rounded-xl transition text-sm border border-accentGold/30 flex items-center space-x-2">
+                    <span>Davam et</span>
+                    <i class="fa-solid fa-arrow-right"></i>
+                </button>
+            </div>
         </div>
 
-        <!-- Kateqoriyalar Bölməsi -->
+        <!-- Kateqoriyalar -->
         <div class="space-y-4">
             <h2 class="text-xl font-black text-white flex items-center space-x-2">
                 <i class="fa-solid fa-layer-group text-accentGold"></i>
@@ -108,15 +119,15 @@
                 </a>
                 <a href="#" class="bg-cardBg border border-gray-800 hover:border-accentGold p-4 rounded-2xl text-center transition flex flex-col items-center space-y-2 group shadow-md">
                     <div class="bg-gray-900 text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3 rounded-xl transition">
-                        <i class="fa-solid fa-spray-can text-xl"></i>
+                        <i class="fa-solid fa-soap text-xl"></i>
                     </div>
-                    <span class="text-xs font-bold text-gray-200">Kosmetika və Yağlar</span>
+                    <span class="text-xs font-bold text-gray-200">Avtoyuma</span>
                 </a>
                 <a href="#" class="bg-cardBg border border-gray-800 hover:border-accentGold p-4 rounded-2xl text-center transition flex flex-col items-center space-y-2 group shadow-md">
                     <div class="bg-gray-900 text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3 rounded-xl transition">
-                        <i class="fa-solid fa-truck-monster text-xl"></i>
+                        <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
                     </div>
-                    <span class="text-xs font-bold text-gray-200">Yük Maşınları</span>
+                    <span class="text-xs font-bold text-gray-200">Detailing</span>
                 </a>
                 <a href="#" class="bg-cardBg border border-gray-800 hover:border-accentGold p-4 rounded-2xl text-center transition flex flex-col items-center space-y-2 group shadow-md">
                     <div class="bg-gray-900 text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3 rounded-xl transition">
@@ -156,13 +167,39 @@
             `;
         }
 
-        // Marka və Model məlumatları
+        // Azərbaycan bazarında olan geniş Avropa, Yaponiya, Koreya, Amerika və Çin avtomobilləri bazası
         const carData = {
-            "Mercedes": ["C 180", "C 200", "E 200", "E 220", "S 500", "GLC 300", "G 63"],
-            "BMW": ["320", "330", "520", "530", "740", "X5", "X6"],
-            "Toyota": ["Camry", "Corolla", "RAV4", "Prado", "Land Cruiser"],
-            "Hyundai": ["Elantra", "Sonata", "Tucson", "Santa Fe"],
-            "Kia": ["Optima", "Sorento", "Sportage", "Cerato"]
+            "Mercedes-Benz": ["C-Class", "E-Class", "S-Class", "GLC", "GLE", "GLS", "G-Class", "A-Class", "B-Class", "CLA", "CLS", "ML-Class", "GL-Class", "V-Class", "190", "200", "Vito", "Sprinter"],
+            "BMW": ["3 Series", "5 Series", "7 Series", "X1", "X3", "X4", "X5", "X6", "X7", "1 Series", "4 Series", "6 Series", "8 Series", "Z4", "i3", "i4", "iX"],
+            "Toyota": ["Camry", "Corolla", "RAV4", "Land Cruiser", "Prado", "Avalon", "Yaris", "Prius", "Highlander", "C-HR", "Hilux", "Fortuner", "FJ Cruiser"],
+            "Hyundai": ["Elantra", "Sonata", "Tucson", "Santa Fe", "Accent", "Kona", "Palisade", "Azera", "Creta", "Ioniq", "Starex", "Grandeur"],
+            "Kia": ["Optima", "K5", "Sorento", "Sportage", "Cerato", "Rio", "Carnival", "Stinger", "Telluride", "Picanto", "Seltos", "Soul"],
+            "Lexus": ["RX", "NX", "LX", "ES", "LS", "IS", "GX", "UX", "GS"],
+            "Chevrolet": ["Cruze", "Malibu", "Aveo", "Captiva", "Traverse", "Tahoe", "Suburban", "Camaro", "Corvette", "Equinox", "Niva"],
+            "Ford": ["Fusion", "Focus", "Mustang", "Explorer", "Escape", "Edge", "F-150", "Transit", "Mondeo", "Fiesta"],
+            "Volkswagen": ["Passat", "Jetta", "Golf", "Tiguan", "Touareg", "Polo", "Arteon", "Transporter", "Beetle"],
+            "Audi": ["A4", "A6", "A8", "Q3", "Q5", "Q7", "Q8", "A3", "A5", "A7", "TT"],
+            "Nissan": ["X-Trail", "Qashqai", "Sunny", "Patrol", "Teana", "Sentra", "Murano", "Juke", "Pathfinder", "Navara"],
+            "Honda": ["Civic", "Accord", "CR-V", "HR-V", "Pilot", "Fit", "Insight"],
+            "Mitsubishi": ["Pajero", "Outlander", "ASX", "Lancer", "L200", "Galant"],
+            "Land Rover / Range Rover": ["Range Rover", "Range Rover Sport", "Range Rover Velar", "Evoque", "Discovery", "Defender"],
+            "Porsche": ["Cayenne", "Macan", "Panamera", "911", "Taycan"],
+            "Tesla": ["Model S", "Model 3", "Model X", "Model Y", "Cybertruck"],
+            // Çin Avtomobilləri (Azərbaycan bazarında məşhur olanlar)
+            "BYD": ["Song Plus", "Han", "Qin Plus", "Yuan Plus", "Tang", "Destroyer 05", "Seagull"],
+            "Changan": ["CS35 Plus", "CS75 Plus", "Uni-K", "Uni-T", "Uni-V", "Alsvin"],
+            "Chery": ["Tiggo 2", "Tiggo 4 Pro", "Tiggo 7 Pro", "Tiggo 8 Pro", "Arrizo 8"],
+            "Geely": ["Coolray", "Monjaro", "Tugella", "Emgrand", "Azkarra"],
+            "Haval": ["H6", "Jolion", "Dargo", "H9"],
+            "LiXiang (Lixiang)": ["L7", "L8", "L9", "One"],
+            "Zeekr": ["001", "X", "009"],
+            "Exeed": ["LX", "TXL", "RX", "VX"],
+            "Tank": ["300", "500", "700"],
+            "Nio": ["ET5", "ET7", "ES6", "ES8"],
+            "Jetour": ["T2", "X70 Plus", "Dashing"],
+            "Baic": ["U5 Plus", "X3", "BJ40", "BJ60"],
+            "GAC": ["Emkoo", "Empow", "GS8", "Aion Y"],
+            "Daewoo": ["Nexia", "Matiz", "Gentra", "Lacetti"]
         };
 
         const brandSelect = document.querySelector('select:nth-of-type(1)');
@@ -171,7 +208,7 @@
 
         // Markaları doldur
         brandSelect.innerHTML = '<option value="">Bütün Markalar</option>' + 
-            Object.keys(carData).map(brand => `<option value="${brand}">${brand}</option>`).join('');
+            Object.keys(carData).sort().map(brand => `<option value="${brand}">${brand}</option>`).join('');
 
         brandSelect.addEventListener('change', function() {
             let selectedBrand = this.value;
@@ -181,9 +218,9 @@
             }
         });
 
-        // İlləri doldur (2026-dan 1990-a qədər)
+        // İlləri doldur (2026-dan 1980-ci ilə qədər)
         let yearsHtml = '<option value="">Bütün illər</option>';
-        for(let y = 2026; y >= 1990; y--) {
+        for(let y = 2026; y >= 1980; y--) {
             yearsHtml += `<option value="${y}">${y}</option>`;
         }
         yearSelect.innerHTML = yearsHtml;
