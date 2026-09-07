@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Şəxsi Kabinet - SosAvto.az</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { darkBg: '#0b0f19', cardBg: '#131c2e', accentGold: '#f59e0b', accentHover: '#d97706' } } }
+        }
+    </script>
+</head>
+<body class="bg-darkBg text-gray-100 min-h-screen flex flex-col justify-between font-sans">
+    <!-- Navbar -->
+    <header class="bg-cardBg border-b border-gray-800 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-2">
+                <div class="bg-accentGold text-darkBg p-2 rounded-xl font-black text-xl flex items-center justify-center">
+                    <i class="fa-solid fa-car-side"></i>
+                </div>
+                <span class="text-2xl font-black tracking-wider text-white">Sos<span class="text-accentGold">Avto</span>.az</span>
+            </a>
+            <div class="flex items-center space-x-3">
+                <a href="elan-ver.html" class="bg-accentGold hover:bg-accentHover text-darkBg px-4 py-2 rounded-xl text-sm font-bold transition flex items-center space-x-1.5">
+                    <i class="fa-solid fa-plus"></i>
+                    <span>Elan Ver</span>
+                </a>
+                <button onclick="logout()" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 p-2 rounded-xl text-sm transition" title="Çıxış">
+                    <i class="fa-solid fa-right-from-bracket"></i>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-800 mb-6 space-x-6 overflow-x-auto text-sm font-semibold">
+            <button onclick="switchTab('stats')" id="btn-stats" class="pb-3 border-b-2 border-accentGold text-accentGold flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-chart-pie"></i><span>Ümumi Statistika</span>
+            </button>
+            <button onclick="switchTab('my-ads')" id="btn-my-ads" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-car"></i><span>Mənim Elanlarım</span>
+            </button>
+            <button onclick="switchTab('settings')" id="btn-settings" class="pb-3 border-b-2 border-transparent text-gray-400 hover:text-white flex items-center space-x-2 whitespace-nowrap">
+                <i class="fa-solid fa-gear"></i><span>Tənzimləmələr</span>
+            </button>
+        </div>
+
+        <!-- Tab 1: Stats -->
+        <div id="tab-stats" class="space-y-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="bg-cardBg border border-gray-800 p-6 rounded-2xl shadow-xl">
+                    <p class="text-gray-400 text-xs uppercase tracking-wider mb-2 font-semibold">Şəxsi Hesab Balansı</p>
+                    <div class="text-3xl font-black text-white mb-4">0.00 AZN</div>
+                    <button class="bg-gray-800 hover:bg-gray-700 text-accentGold text-xs font-bold px-4 py-2 rounded-xl transition">Balansı Artır</button>
+                </div>
+                <div class="bg-cardBg border border-gray-800 p-6 rounded-2xl shadow-xl">
+                    <p class="text-gray-400 text-xs uppercase tracking-wider mb-2 font-semibold">Ödənişli Elan Balansı</p>
+                    <div class="text-3xl font-black text-white mb-4">0 elan</div>
+                    <a href="elan-ver.html" class="inline-block bg-accentGold text-darkBg text-xs font-bold px-4 py-2 rounded-xl transition hover:bg-accentHover">Elan Yerləşdir</a>
+                </div>
+                <div class="bg-cardBg border border-gray-800 p-6 rounded-2xl shadow-xl">
+                    <p class="text-gray-400 text-xs uppercase tracking-wider mb-2 font-semibold">Elanların Statistikası</p>
+                    <div class="grid grid-cols-3 text-center pt-2">
+                        <div>
+                            <div id="stat-active" class="text-xl font-bold text-emerald-400">0</div>
+                            <div class="text-[10px] text-gray-400 mt-1">Saytda</div>
+                        </div>
+                        <div>
+                            <div id="stat-pending" class="text-xl font-bold text-amber-400">0</div>
+                            <div class="text-[10px] text-gray-400 mt-1">Gözləmədə</div>
+                        </div>
+                        <div>
+                            <div id="stat-rejected" class="text-xl font-bold text-red-400">0</div>
+                            <div class="text-[10px] text-gray-400 mt-1">İmtina</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tab 2: My Ads -->
+        <div id="tab-my-ads" class="hidden space-y-4">
+            <h2 class="text-xl font-black mb-4">Sizin Elanlarınız</h2>
+            <div id="user-ads-list" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Dinamik yüklənəcək -->
+            </div>
+        </div>
+
+        <!-- Tab 3: Settings (Dil və Şifrə) -->
+        <div id="tab-settings" class="hidden max-w-xl bg-cardBg border border-gray-800 p-6 rounded-2xl shadow-xl space-y-6">
+            <h2 class="text-xl font-black">Hesab Tənzimləmələri</h2>
+            
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase">İnterfeys Dili</label>
+                    <select id="lang-select" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accentGold">
+                        <option value="az">Azərbaycan</option>
+                        <option value="ru">Русский</option>
+                        <option value="en">English</option>
+                        <option value="tr">Türkçe</option>
+                    </select>
+                </div>
+
+                <hr class="border-gray-800">
+
+                <h3 class="text-sm font-bold text-white">Şifrəni Yenilə</h3>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase">Yeni Şifrə</label>
+                    <input type="password" id="new-password" placeholder="••••••••" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accentGold">
+                </div>
+                <button onclick="updateSettings()" class="bg-accentGold hover:bg-accentHover text-darkBg font-bold px-6 py-3 rounded-xl transition text-sm">Yadda Saxla</button>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-cardBg border-t border-gray-800 py-4 text-center text-xs text-gray-500">
+        &copy; 2026 SosAvto.az - Bütün hüquqlar qorunur.
+    </footer>
+
+    <script>
+        const loggedUser = localStorage.getItem('sosavto_logged_user');
+        if (!loggedUser) {
+            window.location.href = 'giris.html';
+        }
+
+        function switchTab(tab) {
+            ['stats', 'my-ads', 'settings'].forEach(t => {
+                document.getElementById(`tab-${t}`).classList.add('hidden');
+                document.getElementById(`btn-${t}`).classList.remove('border-accentGold', 'text-accentGold');
+                document.getElementById(`btn-${t}`).classList.add('border-transparent', 'text-gray-400');
+            });
+            document.getElementById(`tab-${tab}`).classList.remove('hidden');
+            document.getElementById(`btn-${tab}`).classList.add('border-accentGold', 'text-accentGold');
+            document.getElementById(`btn-${tab}`).classList.remove('border-transparent', 'text-gray-400');
+
+            if(tab === 'my-ads') loadUserAds();
+        }
+
+        function loadUserAds() {
+            let listings = JSON.parse(localStorage.getItem('sosavto_listings') || '[]');
+            let userAds = listings.filter(ad => ad.owner === loggedUser);
+            
+            let activeCount = userAds.filter(ad => ad.status === 'active').length;
+            let pendingCount = userAds.filter(ad => ad.status === 'pending').length;
+            let rejectedCount = userAds.filter(ad => ad.status === 'rejected').length;
+
+            document.getElementById('stat-active').textContent = activeCount;
+            document.getElementById('stat-pending').textContent = pendingCount;
+            document.getElementById('stat-rejected').textContent = rejectedCount;
+
+            let container = document.getElementById('user-ads-list');
+            if (userAds.length === 0) {
+                container.innerHTML = `<p class="text-gray-400 text-sm col-span-3">Hələ heç bir elan yerləşdirməmisiniz.</p>`;
+                return;
+            }
+
+            container.innerHTML = userAds.map(ad => `
+                <div class="bg-gray-900 border border-gray-800 rounded-xl overflow-hidden shadow-lg p-4 flex flex-col justify-between">
+                    <div>
+                        <img src="${ad.image}" class="w-full h-36 object-cover rounded-lg mb-3">
+                        <h3 class="font-bold text-white text-sm">${ad.title}</h3>
+                        <p class="text-accentGold font-black mt-1">${ad.price} AZN</p>
+                    </div>
+                    <div class="mt-4 flex justify-between items-center text-xs">
+                        <span class="px-2.5 py-1 rounded-full font-semibold ${ad.status === 'active' ? 'bg-emerald-500/20 text-emerald-400' : ad.status === 'pending' ? 'bg-amber-500/20 text-amber-400' : 'bg-red-500/20 text-red-400'}">
+                            ${ad.status === 'active' ? 'Saytda' : ad.status === 'pending' ? 'Gözləmədə' : 'İmtina olundu'}
+                        </span>
+                        <button onclick="deleteAd(${ad.id})" class="text-red-400 hover:text-red-300 font-semibold"><i class="fa-solid fa-trash"></i> Sil</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function deleteAd(id) {
+            if(!confirm("Bu elanı silmək istədiyinizə əminsiniz?")) return;
+            let listings = JSON.parse(localStorage.getItem('sosavto_listings') || '[]');
+            listings = listings.filter(ad => ad.id !== id);
+            localStorage.setItem('sosavto_listings', JSON.stringify(listings));
+            loadUserAds();
+        }
+
+        function updateSettings() {
+            let newPass = document.getElementById('new-password').value.trim();
+            if(!newPass) { alert("Yeni şifrə daxil edin!"); return; }
+
+            let users = JSON.parse(localStorage.getItem('sosavto_users') || '[]');
+            let user = users.find(u => u.username === loggedUser);
+            if(user) {
+                user.password = newPass;
+                localStorage.setItem('sosavto_users', JSON.stringify(users));
+                alert("Şifrəniz uğurla yeniləndi!");
+                document.getElementById('new-password').value = '';
+            }
+        }
+
+        function logout() {
+            localStorage.removeItem('sosavto_logged_user');
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
