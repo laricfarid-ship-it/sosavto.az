@@ -223,29 +223,44 @@
 
         function sendUserMessage() {
             const input = document.getElementById('ai-chat-input');
-            const messageText = input.value.trim();
-            if (!messageText) return;
+            const text = input.value.trim();
+            if (!text) return;
 
             const chatMessages = document.getElementById('ai-chat-messages');
 
+            // İstifadəçinin mesajı
             chatMessages.innerHTML += `
                 <div class="flex justify-end">
                     <div class="bg-accentGold text-darkBg p-3 rounded-xl rounded-tr-none max-w-[85%] font-medium">
-                        ${messageText}
+                        ${text}
                     </div>
                 </div>
             `;
             input.value = '';
             chatMessages.scrollTop = chatMessages.scrollHeight;
 
+            // Qarşılıqlı ağıllı cavab məntiqi
             setTimeout(() => {
+                let reply = "Sualını başa düşdüm. Zəhmət olmasa tam olaraq hansı hissəni və ya avtomobili axtardığını qeyd et ki, dərhal baxım.";
+                const lower = text.toLowerCase();
+
+                if (lower.includes('salam') || lower.includes('sabahınız xeyir') || lower.includes('hi') || lower.includes('necəsən')) {
+                    reply = "Aleykum salam! Mən SosAvto AI köməkçisiyəm. Hər şey əladır, siz necəsiniz? Buyur, hansı avtomobil, usta və ya ehtiyat hissəsi lazımdır?";
+                } else if (lower.includes('optima') || lower.includes('kia') || lower.includes('toyota') || lower.includes('bmw') || lower.includes('hyundai')) {
+                    reply = `Bəli, ${text} üzrə bazamızda uyğun elanlar və xidmətlər mövcuddur. Yuxarıdakı filterdən və ya elanlardan ətraflı baxa bilərsən! 🚗🔧`;
+                } else if (lower.includes('qiymət') || lower.includes('neçəyə')) {
+                    reply = "Qiymətlər elanın növündən və vəziyyətindən asılı olaraq dəyişir. Konkret model yazsan, dəqiq məlumat verərəm.";
+                } else if (lower.includes('sağol') || lower.includes('tesekkur') || lower.includes('təşəkkür')) {
+                    reply = "Dəyməz! Həmişə kömək etməyə hazıram. Başqa sualın olsa yazarsan! 🤝";
+                }
+
                 chatMessages.innerHTML += `
                     <div class="bg-gray-800 p-3 rounded-xl rounded-tl-none max-w-[85%] border border-gray-700">
-                        Sualınız qəbul olundu! Bazamızda axtarış edirəm... Zəhmət olmasa detalın tam adını və ya avtomobilin markasını qeyd edin ki, sizə ən yaxın ustanı və ünvanı göstərim. 🔍🛠️
+                        ${reply}
                     </div>
                 `;
                 chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 1000);
+            }, 800);
         }
 
         document.addEventListener('DOMContentLoaded', () => {
