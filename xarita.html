@@ -6,7 +6,7 @@
     <title>SosAvto.az — GPS Servis Xəritəsi</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Fontlar -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
@@ -16,14 +16,14 @@
 </head>
 <body class="bg-slate-50 flex flex-col h-screen">
 
-    <!-- Naviqasiya Paneli -->
+    <!-- Header -->
     <header class="bg-white border-b border-slate-200 h-20 flex items-center justify-between px-4 md:px-8 z-10 shadow-sm">
         <a href="index.html" class="flex items-center gap-2 text-red-600 font-bold text-2xl tracking-wider">
             <i class="fa-solid fa-truck-monster"></i>
             <span>SosAvto<span class="text-slate-800">.az</span></span>
         </a>
 
-        <!-- Xəritə Filtrləri -->
+        <!-- Filtrlər -->
         <div class="flex gap-2 overflow-x-auto py-1">
             <button onclick="filterMarkers('all')" class="px-4 py-2 bg-slate-800 text-white text-sm font-medium rounded-lg hover:bg-slate-700 transition">Bütün Nöqtələr</button>
             <button onclick="filterMarkers('evakuator')" class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 transition"><i class="fa-solid fa-truck-pickup mr-1"></i> Evakuator</button>
@@ -35,7 +35,7 @@
         </a>
     </header>
 
-    <!-- Xəritə Konteyneri -->
+    <!-- Xəritə -->
     <div class="relative flex-1">
         <div id="map"></div>
     </div>
@@ -43,26 +43,25 @@
     <!-- Leaflet JS -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Xəritəni Bakı koordinatları ilə başlatmaq
         const map = L.map('map').setView([40.409261, 49.867092], 12);
 
-        // OpenStreetMap qatını əlavə etmək
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 19,
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
-        // Nümunə Məlumatlar
-        const locations = [
+        // Nümunə Sabit Nöqtələr
+        const defaultLocations = [
             { id: 1, title: "7/24 Təcili Evakuator", category: "evakuator", lat: 40.409261, lng: 49.867092, phone: "+994 50 123 45 67", address: "28 May küç." },
-            { id: 2, title: "Avto Elektrik və Diaqnostika", category: "servis", lat: 40.380000, lng: 49.820000, phone: "+994 55 987 65 43", address: "Yasamal r., Şərifzadə küç." },
-            { id: 3, title: "Ekspres Evakuator Xidməti", category: "evakuator", lat: 40.420000, lng: 49.910000, phone: "+994 70 555 44 33", address: "Nərimanov r." },
-            { id: 4, title: "Mühərrik və Şassi Servisi", category: "servis", lat: 40.360000, lng: 49.840000, phone: "+994 50 333 22 11", address: "Səbail r., Badamdar" }
+            { id: 2, title: "Avto Elektrik və Diaqnostika", category: "servis", lat: 40.380000, lng: 49.820000, phone: "+994 55 987 65 43", address: "Yasamal r., Şərifzadə küç." }
         ];
+
+        // LocalStorage-dən yeni əlavə edilmiş elanları çəkmək
+        const userAds = JSON.parse(localStorage.getItem('sosavto_ads')) || [];
+        const allLocations = [...defaultLocations, ...userAds];
 
         let markerList = [];
 
-        // Markerləri Xəritəyə Əlavə Edən Funksiya
         function renderMarkers(data) {
             markerList.forEach(m => map.removeLayer(m));
             markerList = [];
@@ -70,7 +69,6 @@
             data.forEach(item => {
                 const marker = L.marker([item.lat, item.lng]).addTo(map);
                 
-                // Google Maps & Waze Linkləri
                 const gmapsUrl = `https://www.google.com/maps/search/?api=1&query=${item.lat},${item.lng}`;
                 const wazeUrl = `https://waze.com/ul?ll=${item.lat},${item.lng}&navigate=yes`;
 
@@ -80,7 +78,6 @@
                         <h3 class="font-bold text-slate-800 text-base mt-0.5">${item.title}</h3>
                         <p class="text-slate-500 text-xs mt-1 mb-2"><i class="fa-solid fa-location-dot"></i> ${item.address}</p>
                         
-                        <!-- Naviqasiya Düymələri -->
                         <div class="grid grid-cols-2 gap-1.5 my-2">
                             <a href="${gmapsUrl}" target="_blank" class="flex items-center justify-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-semibold py-1.5 px-2 rounded-lg border border-slate-200 transition text-decoration-none">
                                 <i class="fa-brands fa-google text-blue-600"></i> Google Maps
@@ -90,7 +87,6 @@
                             </a>
                         </div>
 
-                        <!-- Zəng Et Düyməsi -->
                         <a href="tel:${item.phone}" class="flex items-center justify-center w-full bg-emerald-600 hover:bg-emerald-700 text-white font-medium text-xs py-2 px-3 rounded-lg gap-2 transition text-decoration-none">
                             <i class="fa-solid fa-phone"></i> ${item.phone}
                         </a>
@@ -102,13 +98,13 @@
             });
         }
 
-        renderMarkers(locations);
+        renderMarkers(allLocations);
 
         function filterMarkers(category) {
             if (category === 'all') {
-                renderMarkers(locations);
+                renderMarkers(allLocations);
             } else {
-                const filtered = locations.filter(loc => loc.category === category);
+                const filtered = allLocations.filter(loc => loc.category === category);
                 renderMarkers(filtered);
             }
         }
