@@ -9,72 +9,72 @@
     <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body class="bg-slate-900 min-h-screen text-slate-100 font-sans">
+<body class="bg-gradient-to-br from-gray-900 via-zinc-900 to-amber-950 min-h-screen text-slate-100 font-sans">
 
     <!-- Header -->
-    <header class="border-b border-slate-800 h-20 flex items-center justify-between px-4 md:px-12 bg-slate-900/80 backdrop-blur sticky top-0 z-50">
-        <a href="index.html" class="flex items-center gap-2 text-amber-500 font-bold text-2xl tracking-wider">
+    <header class="border-b border-amber-500/20 h-20 flex items-center justify-between px-4 md:px-12 bg-gray-950/70 backdrop-blur sticky top-0 z-50">
+        <a href="index.html" class="flex items-center gap-2 text-amber-400 font-bold text-2xl tracking-wider">
             <i class="fa-solid fa-truck-monster"></i>
             <span>SosAvto<span class="text-white">.az</span></span>
         </a>
         <nav class="hidden md:flex items-center gap-6 text-sm font-semibold text-slate-300">
-            <a href="index.html" class="hover:text-amber-500 transition">Ana Səhifə</a>
-            <a href="xarita.html" class="hover:text-amber-500 transition">Servis Xəritəsi</a>
+            <a href="index.html" class="hover:text-amber-400 transition">Ana Səhifə</a>
+            <a href="xarita.html" class="hover:text-amber-400 transition">Servis Xəritəsi</a>
         </nav>
-        <a href="elan-ver.html" class="bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold px-5 py-2.5 rounded-xl transition shadow-lg shadow-amber-500/20 text-sm flex items-center gap-2">
+        <a href="elan-ver.html" class="bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-bold px-5 py-2.5 rounded-xl transition shadow-lg shadow-amber-500/20 text-sm flex items-center gap-2">
             <i class="fa-solid fa-plus"></i> Elan Ver
         </a>
     </header>
 
     <!-- Hero Section -->
-    <section class="py-10 px-4 text-center max-w-5xl mx-auto">
+    <section class="py-12 px-4 text-center max-w-5xl mx-auto">
         <h1 class="text-3xl md:text-5xl font-extrabold tracking-tight text-white mb-4">
-            Avtomobilinizin bütün ehtiyacı — <span class="text-amber-500">bir ünvanda</span>
+            Avtomobilinizin bütün ehtiyacı — <span class="text-amber-400 drop-shadow-md">bir ünvanda</span>
         </h1>
-        <p class="text-slate-400 text-sm md:text-base mb-8">
+        <p class="text-slate-300 text-sm md:text-base mb-8 font-medium">
             Ehtiyat hissələri, GPS servis xəritəsi, Çin və digər avtomobillər üçün elanlar
         </p>
 
         <!-- Kateqoriya Seçim Düymələri -->
         <div class="flex flex-wrap justify-center gap-3 mb-6">
-            <button onclick="setCategoryTab('')" id="tab-all" class="category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20">
+            <button onclick="setCategoryTab('')" id="tab-all" class="category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30">
                 <i class="fa-solid fa-border-all mr-1.5"></i> Bütün Elanlar
             </button>
-            <button onclick="setCategoryTab('auto')" id="tab-auto" class="category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">
+            <button onclick="setCategoryTab('auto')" id="tab-auto" class="category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-gray-800/80 text-slate-300 hover:bg-gray-700 border border-gray-700">
                 <i class="fa-solid fa-car mr-1.5"></i> Avtomobil Satışı
             </button>
-            <button onclick="setCategoryTab('parts')" id="tab-parts" class="category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">
+            <button onclick="setCategoryTab('parts')" id="tab-parts" class="category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-gray-800/80 text-slate-300 hover:bg-gray-700 border border-gray-700">
                 <i class="fa-solid fa-gears mr-1.5"></i> Ehtiyat Hissələri
             </button>
-            <button onclick="setCategoryTab('service')" id="tab-service" class="category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700">
+            <button onclick="setCategoryTab('service')" id="tab-service" class="category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-gray-800/80 text-slate-300 hover:bg-gray-700 border border-gray-700">
                 <i class="fa-solid fa-wrench mr-1.5"></i> Servis və Usta (Moyka)
             </button>
         </div>
 
-        <!-- Səliqəli Axtarış Paneli (Marka, Model, İl, Davam Et və Sıfırla) -->
-        <div class="bg-slate-800/90 border border-slate-700/80 p-4 rounded-2xl shadow-xl backdrop-blur max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-5 gap-3 items-center">
+        <!-- Axtarış Paneli -->
+        <div class="bg-gray-900/90 border border-amber-500/30 p-4 rounded-2xl shadow-2xl backdrop-blur max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-5 gap-3 items-center">
             <!-- Marka Seçimi -->
-            <select id="filterBrand" onchange="onBrandChange()" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 cursor-pointer">
+            <select id="filterBrand" onchange="onBrandChange()" class="w-full bg-gray-950 border border-gray-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 cursor-pointer">
                 <option value="">Bütün Markalar</option>
             </select>
             
             <!-- Model Seçimi -->
-            <select id="filterModel" onchange="filterAds()" disabled class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 cursor-pointer disabled:opacity-50">
+            <select id="filterModel" onchange="filterAds()" disabled class="w-full bg-gray-950 border border-gray-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 cursor-pointer disabled:opacity-50">
                 <option value="">Əvvəlcə Marka Seçin</option>
             </select>
 
             <!-- İl Seçimi -->
-            <select id="filterYear" onchange="filterAds()" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 cursor-pointer">
+            <select id="filterYear" onchange="filterAds()" class="w-full bg-gray-950 border border-gray-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 cursor-pointer">
                 <option value="">Bütün İllər</option>
             </select>
             
             <!-- Davam Et Düyməsi -->
-            <button onclick="handleSearch()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold py-3.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/20">
+            <button onclick="handleSearch()" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold py-3.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/30">
                 <i class="fa-solid fa-arrow-right"></i> Davam Et
             </button>
 
             <!-- Sıfırla Düyməsi -->
-            <button onclick="handleReset()" class="w-full bg-slate-900 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-1.5">
+            <button onclick="handleReset()" class="w-full bg-gray-800 hover:bg-gray-700 border border-gray-700 text-slate-300 text-xs font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-1.5">
                 <i class="fa-solid fa-rotate-right"></i> Sıfırla
             </button>
         </div>
@@ -82,9 +82,9 @@
 
     <!-- Elanlar Bölməsi -->
     <main class="max-w-7xl mx-auto px-4 md:px-8 pb-20">
-        <div class="flex items-center justify-between mb-6 border-b border-slate-800 pb-4">
+        <div class="flex items-center justify-between mb-6 border-b border-gray-800 pb-4">
             <h2 id="sectionTitle" class="text-xl font-bold text-white flex items-center gap-2">
-                <span class="w-2.5 h-6 bg-amber-500 rounded-full inline-block"></span> Bütün Elanlar
+                <span class="w-2.5 h-6 bg-amber-500 rounded-full inline-block shadow-md shadow-amber-500/50"></span> Bütün Elanlar
             </h2>
             <span id="adCounter" class="text-xs text-slate-400 font-semibold"></span>
         </div>
@@ -97,8 +97,8 @@
 
     <!-- Detal Modalı -->
     <div id="detailModal" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="bg-slate-800 border border-slate-700 w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]">
-            <button onclick="closeModal()" class="absolute top-4 right-4 bg-slate-900/80 text-slate-300 hover:text-white w-9 h-9 rounded-full flex items-center justify-center transition z-10">
+        <div class="bg-gray-900 border border-amber-500/30 w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl relative flex flex-col max-h-[90vh]">
+            <button onclick="closeModal()" class="absolute top-4 right-4 bg-gray-950 text-slate-300 hover:text-white w-9 h-9 rounded-full flex items-center justify-center transition z-10 border border-gray-800">
                 <i class="fa-solid fa-xmark text-lg"></i>
             </button>
             <div id="modalContent" class="overflow-y-auto p-6 space-y-4">
@@ -108,7 +108,6 @@
     </div>
 
     <script>
-        // Azərbaycan bazarındakı bütün populyar markalar və modellər bazası
         const carData = {
             "BYD": ["Song Plus", "Qin Plus", "Han", "Tang", "Destroyer 05", "Yuan Plus", "Seagull", "Chazor"],
             "Changan": ["CS35 Plus", "CS75 Plus", "Uni-K", "Uni-T", "Uni-V", "E-Star", "Alsvin"],
@@ -146,7 +145,6 @@
         let currentCategoryFilter = "";
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Markaları əlavə edirik
             const brandSelect = document.getElementById('filterBrand');
             Object.keys(carData).sort().forEach(brand => {
                 let opt = document.createElement('option');
@@ -155,7 +153,6 @@
                 brandSelect.appendChild(opt);
             });
 
-            // İlləri əlavə edirik (Cari ildən 1990-cı ilə qədər)
             const yearSelect = document.getElementById('filterYear');
             const currentYear = new Date().getFullYear();
             for (let y = currentYear; y >= 1990; y--) {
@@ -201,17 +198,17 @@
             currentCategoryFilter = category;
             
             document.querySelectorAll('.category-tab').forEach(tab => {
-                tab.className = "category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-slate-800 text-slate-300 hover:bg-slate-700 border border-slate-700";
+                tab.className = "category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-gray-800/80 text-slate-300 hover:bg-gray-700 border border-gray-700";
             });
 
             let activeTabId = category === "" ? "tab-all" : `tab-${category}`;
-            document.getElementById(activeTabId).className = "category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/20";
+            document.getElementById(activeTabId).className = "category-tab px-5 py-2.5 rounded-xl text-sm font-bold transition bg-amber-500 text-slate-950 shadow-lg shadow-amber-500/30";
 
             let titleText = "Bütün Elanlar";
             if(category === "auto") titleText = "Avtomobil Elanları";
             if(category === "parts") titleText = "Ehtiyat Hissələri";
             if(category === "service") titleText = "Servis, Usta və Moykalar";
-            document.getElementById('sectionTitle').innerHTML = `<span class="w-2.5 h-6 bg-amber-500 rounded-full inline-block"></span> ${titleText}`;
+            document.getElementById('sectionTitle').innerHTML = `<span class="w-2.5 h-6 bg-amber-500 rounded-full inline-block shadow-md shadow-amber-500/50"></span> ${titleText}`;
 
             loadAds();
         }
@@ -241,7 +238,7 @@
             if (ads.length === 0) {
                 grid.innerHTML = `
                     <div class="col-span-full text-center py-16 text-slate-500">
-                        <i class="fa-solid fa-box-open text-4xl mb-3"></i>
+                        <i class="fa-solid fa-box-open text-4xl mb-3 text-amber-500/50"></i>
                         <p class="text-sm">Axtarışınıza uyğun elan tapılmadı.</p>
                     </div>
                 `;
@@ -267,10 +264,10 @@
 
                 const imageHtml = ad.image 
                     ? `<img src="${ad.image}" alt="${ad.title}" class="w-full h-44 object-cover group-hover:scale-105 transition duration-300">`
-                    : `<div class="w-full h-44 bg-slate-800 flex items-center justify-center text-slate-600"><i class="fa-solid fa-image text-3xl"></i></div>`;
+                    : `<div class="w-full h-44 bg-gray-950 flex items-center justify-center text-gray-700"><i class="fa-solid fa-image text-3xl"></i></div>`;
 
                 const card = document.createElement('div');
-                card.className = 'bg-slate-800 border border-slate-700/80 rounded-2xl overflow-hidden shadow-md hover:border-amber-500/50 transition flex flex-col justify-between cursor-pointer group';
+                card.className = 'bg-gray-900/90 border border-gray-800 rounded-2xl overflow-hidden shadow-lg hover:border-amber-500/50 transition flex flex-col justify-between cursor-pointer group';
                 card.onclick = () => openModal(ad);
                 
                 card.innerHTML = `
@@ -282,14 +279,14 @@
                             </span>
                         </div>
                         <div class="p-4">
-                            <div class="text-lg font-extrabold text-amber-500 mb-1">${priceText}</div>
+                            <div class="text-lg font-extrabold text-amber-400 mb-1">${priceText}</div>
                             <h3 class="text-sm font-bold text-slate-100 line-clamp-1 mb-1">${ad.title}</h3>
-                            <p class="text-xs text-slate-400 mb-3 line-clamp-1"><i class="fa-solid fa-location-dot text-slate-500 mr-1"></i>${ad.address || 'Göstərilməyib'}</p>
-                            <p class="text-[11px] text-slate-300 bg-slate-900/60 px-2.5 py-1.5 rounded-lg border border-slate-700/50 inline-block">${subInfo}</p>
+                            <p class="text-xs text-slate-400 mb-3 line-clamp-1"><i class="fa-solid fa-location-dot text-amber-500/80 mr-1"></i>${ad.address || 'Göstərilməyib'}</p>
+                            <p class="text-[11px] text-slate-300 bg-gray-950/70 px-2.5 py-1.5 rounded-lg border border-gray-800 inline-block">${subInfo}</p>
                         </div>
                     </div>
                     <div class="p-4 pt-0">
-                        <span class="w-full bg-slate-700/50 hover:bg-amber-500 hover:text-slate-950 text-slate-300 text-xs font-bold py-2.5 rounded-xl transition text-center block">
+                        <span class="w-full bg-gray-800 hover:bg-amber-500 hover:text-slate-950 text-slate-300 text-xs font-bold py-2.5 rounded-xl transition text-center block">
                             Ətraflı Bax
                         </span>
                     </div>
@@ -298,12 +295,10 @@
             });
         }
 
-        // Avtomatik deyil, yalnız "Davam Et" düyməsinə basanda axtarışı işə salır
         function handleSearch() {
             loadAds();
         }
 
-        // Bütün filtrləri sıfırlayır
         function handleReset() {
             document.getElementById('filterBrand').value = "";
             const modelSelect = document.getElementById('filterModel');
@@ -314,21 +309,17 @@
             loadAds();
         }
 
-        function filterAds() {
-            // Seçim dəyişəndə dərhal sıfırlanmır, sadəcə "Davam Et" gözlənilir
-        }
-
         function openModal(ad) {
             const modal = document.getElementById('detailModal');
             const content = document.getElementById('modalContent');
             
             let priceText = ad.autoPrice ? `${ad.autoPrice} AZN` : (ad.partPrice ? `${ad.partPrice} AZN` : 'Razılaşma ilə');
-            let imageSection = ad.image ? `<img src="${ad.image}" class="w-full h-64 object-cover rounded-xl mb-4">` : '';
+            let imageSection = ad.image ? `<img src="${ad.image}" class="w-full h-64 object-cover rounded-xl mb-4 border border-gray-800">` : '';
 
             let detailsHtml = '';
             if (ad.category === 'auto') {
                 detailsHtml = `
-                    <div class="grid grid-cols-2 gap-3 text-xs bg-slate-900/60 p-3 rounded-xl border border-slate-700">
+                    <div class="grid grid-cols-2 gap-3 text-xs bg-gray-950 p-3 rounded-xl border border-gray-800">
                         <div><span class="text-slate-400">Marka:</span> <strong class="text-white">${ad.autoBrand || '-'}</strong></div>
                         <div><span class="text-slate-400">Model:</span> <strong class="text-white">${ad.autoModel || '-'}</strong></div>
                         <div><span class="text-slate-400">İl:</span> <strong class="text-white">${ad.autoYear || '-'}</strong></div>
@@ -338,14 +329,14 @@
                 `;
             } else if (ad.category === 'service') {
                 detailsHtml = `
-                    <div class="grid grid-cols-1 gap-2 text-xs bg-slate-900/60 p-3 rounded-xl border border-slate-700">
+                    <div class="grid grid-cols-1 gap-2 text-xs bg-gray-950 p-3 rounded-xl border border-gray-800">
                         <div><span class="text-slate-400">Xidmət Növü:</span> <strong class="text-white">${ad.serviceType || '-'}</strong></div>
                         <div><span class="text-slate-400">İş Saatları:</span> <strong class="text-white">${ad.serviceHours || '-'}</strong></div>
                     </div>
                 `;
             } else if (ad.category === 'parts') {
                 detailsHtml = `
-                    <div class="grid grid-cols-2 gap-3 text-xs bg-slate-900/60 p-3 rounded-xl border border-slate-700">
+                    <div class="grid grid-cols-2 gap-3 text-xs bg-gray-950 p-3 rounded-xl border border-gray-800">
                         <div><span class="text-slate-400">Vəziyyəti:</span> <strong class="text-white">${ad.partCondition || '-'}</strong></div>
                         <div><span class="text-slate-400">Uyğunluğu:</span> <strong class="text-white">${ad.partFitment || '-'}</strong></div>
                     </div>
@@ -355,8 +346,8 @@
             content.innerHTML = `
                 ${imageSection}
                 <div class="flex items-center justify-between">
-                    <span class="text-2xl font-extrabold text-amber-500">${priceText}</span>
-                    <span class="text-xs bg-slate-900 px-3 py-1 rounded-full text-slate-300 border border-slate-700">${ad.category.toUpperCase()}</span>
+                    <span class="text-2xl font-extrabold text-amber-400">${priceText}</span>
+                    <span class="text-xs bg-gray-950 px-3 py-1 rounded-full text-slate-300 border border-gray-800">${ad.category.toUpperCase()}</span>
                 </div>
                 <h2 class="text-lg font-bold text-white">${ad.title}</h2>
                 <p class="text-xs text-slate-400"><i class="fa-solid fa-location-dot text-amber-500 mr-1"></i> ${ad.address || 'Ünvan qeyd olunmayıb'}</p>
@@ -364,7 +355,7 @@
                 ${detailsHtml}
 
                 <div class="pt-4 flex gap-3">
-                    <a href="tel:${ad.phone}" class="flex-1 bg-amber-500 hover:bg-amber-600 text-slate-950 font-bold py-3 rounded-xl transition text-center flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20 text-sm">
+                    <a href="tel:${ad.phone}" class="flex-1 bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold py-3 rounded-xl transition text-center flex items-center justify-center gap-2 shadow-lg shadow-amber-500/25 text-sm">
                         <i class="fa-solid fa-phone"></i> Zəng Et (${ad.phone})
                     </a>
                 </div>
