@@ -52,15 +52,19 @@
         <!-- Tab 1: Stats -->
         <div id="tab-stats" class="space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="bg-cardBg border border-gray-800 p-6 rounded-2xl shadow-xl">
-                    <p class="text-gray-400 text-xs uppercase tracking-wider mb-2 font-semibold">Şəxsi Hesab Balansı</p>
-                    <div class="text-3xl font-black text-white mb-4">0.00 AZN</div>
-                    <button class="bg-gray-800 hover:bg-gray-700 text-accentGold text-xs font-bold px-4 py-2 rounded-xl transition">Balansı Artır</button>
+                <div class="bg-cardBg border border-gray-800 p-6 rounded-2xl shadow-xl flex flex-col justify-between">
+                    <div>
+                        <p class="text-gray-400 text-xs uppercase tracking-wider mb-2 font-semibold">Şəxsi Hesab Balansı</p>
+                        <div id="user-balance" class="text-3xl font-black text-white mb-4">0.00 AZN</div>
+                    </div>
+                    <button onclick="openDepositModal()" class="bg-gray-800 hover:bg-gray-700 text-accentGold text-xs font-bold px-4 py-2.5 rounded-xl transition w-full">Balansı Artır</button>
                 </div>
-                <div class="bg-cardBg border border-gray-800 p-6 rounded-2xl shadow-xl">
-                    <p class="text-gray-400 text-xs uppercase tracking-wider mb-2 font-semibold">Ödənişli Elan Balansı</p>
-                    <div class="text-3xl font-black text-white mb-4">0 elan</div>
-                    <a href="elan-ver.html" class="inline-block bg-accentGold text-darkBg text-xs font-bold px-4 py-2 rounded-xl transition hover:bg-accentHover">Elan Yerləşdir</a>
+                <div class="bg-cardBg border border-gray-800 p-6 rounded-2xl shadow-xl flex flex-col justify-between">
+                    <div>
+                        <p class="text-gray-400 text-xs uppercase tracking-wider mb-2 font-semibold">Ödənişli Elan Balansı</p>
+                        <div class="text-3xl font-black text-white mb-4">0 elan</div>
+                    </div>
+                    <a href="elan-ver.html" class="inline-block bg-accentGold text-darkBg text-xs font-bold px-4 py-2.5 rounded-xl text-center transition hover:bg-accentHover">Elan Yerləşdir</a>
                 </div>
                 <div class="bg-cardBg border border-gray-800 p-6 rounded-2xl shadow-xl">
                     <p class="text-gray-400 text-xs uppercase tracking-wider mb-2 font-semibold">Elanların Statistikası</p>
@@ -90,10 +94,9 @@
             </div>
         </div>
 
-        <!-- Tab 3: Settings (Dil və Şifrə) -->
+        <!-- Tab 3: Settings -->
         <div id="tab-settings" class="hidden max-w-xl bg-cardBg border border-gray-800 p-6 rounded-2xl shadow-xl space-y-6">
             <h2 class="text-xl font-black">Hesab Tənzimləmələri</h2>
-            
             <div class="space-y-4">
                 <div>
                     <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase">İnterfeys Dili</label>
@@ -104,9 +107,7 @@
                         <option value="tr">Türkçe</option>
                     </select>
                 </div>
-
                 <hr class="border-gray-800">
-
                 <h3 class="text-sm font-bold text-white">Şifrəni Yenilə</h3>
                 <div>
                     <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase">Yeni Şifrə</label>
@@ -117,6 +118,42 @@
         </div>
     </main>
 
+    <!-- Balans Artırma Modalı (Pəncərəsi) -->
+    <div id="deposit-modal" class="fixed inset-0 bg-black/70 backdrop-blur-sm hidden items-center justify-center z-50 px-4">
+        <div class="bg-cardBg border border-gray-800 w-full max-w-md p-6 rounded-3xl shadow-2xl relative space-y-4">
+            <button onclick="closeDepositModal()" class="absolute top-4 right-4 text-gray-400 hover:text-white text-lg"><i class="fa-solid fa-xmark"></i></button>
+            <h3 class="text-xl font-black text-white flex items-center space-x-2">
+                <i class="fa-solid fa-credit-card text-accentGold"></i>
+                <span>Balansı Artırmaq</span>
+            </h3>
+            
+            <div class="space-y-3">
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase">Məbləğ (AZN)</label>
+                    <input type="number" id="deposit-amount" value="10" min="1" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accentGold font-bold">
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase">Kart Nömrəsi</label>
+                    <input type="text" placeholder="4169 •••• •••• ••••" maxlength="19" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accentGold">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase">Bitmə Tarixi</label>
+                        <input type="text" placeholder="MM/YY" maxlength="5" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accentGold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase">CVV / CVC</label>
+                        <input type="password" placeholder="•••" maxlength="3" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accentGold">
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="processPayment()" class="w-full bg-accentGold hover:bg-accentHover text-darkBg font-black py-3 rounded-xl transition text-sm shadow-lg shadow-accentGold/20 mt-2">
+                Ödənişi Təsdiq Et
+            </button>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="bg-cardBg border-t border-gray-800 py-4 text-center text-xs text-gray-500">
         &copy; 2026 SosAvto.az - Bütün hüquqlar qorunur.
@@ -126,6 +163,40 @@
         const loggedUser = localStorage.getItem('sosavto_logged_user');
         if (!loggedUser) {
             window.location.href = 'giris.html';
+        }
+
+        // Balansı yüklə
+        function loadBalance() {
+            let balances = JSON.parse(localStorage.getItem('sosavto_balances') || '{}');
+            let userBalance = balances[loggedUser] || 0.00;
+            document.getElementById('user-balance').textContent = userBalance.toFixed(2) + ' AZN';
+        }
+        loadBalance();
+
+        function openDepositModal() {
+            document.getElementById('deposit-modal').classList.remove('hidden');
+            document.getElementById('deposit-modal').classList.add('flex');
+        }
+
+        function closeDepositModal() {
+            document.getElementById('deposit-modal').classList.add('hidden');
+            document.getElementById('deposit-modal').classList.remove('flex');
+        }
+
+        function processPayment() {
+            let amount = parseFloat(document.getElementById('deposit-amount').value);
+            if(isNaN(amount) || amount <=0) {
+                alert("Zəhmət olmasa düzgün məbləğ daxil edin!");
+                return;
+            }
+
+            let balances = JSON.parse(localStorage.getItem('sosavto_balances') || '{}');
+            balances[loggedUser] = (balances[loggedUser] || 0) + amount;
+            localStorage.setItem('sosavto_balances', JSON.stringify(balances));
+
+            loadBalance();
+            closeDepositModal();
+            alert(`Uğurlu ödəniş! Balansınıza ${amount.toFixed(2)} AZN əlavə edildi.`);
         }
 
         function switchTab(tab) {
@@ -145,13 +216,9 @@
             let listings = JSON.parse(localStorage.getItem('sosavto_listings') || '[]');
             let userAds = listings.filter(ad => ad.owner === loggedUser);
             
-            let activeCount = userAds.filter(ad => ad.status === 'active').length;
-            let pendingCount = userAds.filter(ad => ad.status === 'pending').length;
-            let rejectedCount = userAds.filter(ad => ad.status === 'rejected').length;
-
-            document.getElementById('stat-active').textContent = activeCount;
-            document.getElementById('stat-pending').textContent = pendingCount;
-            document.getElementById('stat-rejected').textContent = rejectedCount;
+            document.getElementById('stat-active').textContent = userAds.filter(ad => ad.status === 'active').length;
+            document.getElementById('stat-pending').textContent = userAds.filter(ad => ad.status === 'pending').length;
+            document.getElementById('stat-rejected').textContent = userAds.filter(ad => ad.status === 'rejected').length;
 
             let container = document.getElementById('user-ads-list');
             if (userAds.length === 0) {
