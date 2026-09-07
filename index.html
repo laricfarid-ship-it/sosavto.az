@@ -51,24 +51,26 @@
             </button>
         </div>
 
-        <!-- Tam Detallı Axtarış və Filtr Paneli -->
-        <div class="bg-slate-800/90 border border-slate-700/80 p-4 rounded-2xl shadow-xl backdrop-blur max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-4 gap-3 transition-all">
+        <!-- Səliqəli 4-lü Axtarış Paneli (Marka, Model, İl, Davam Et) -->
+        <div class="bg-slate-800/90 border border-slate-700/80 p-4 rounded-2xl shadow-xl backdrop-blur max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-4 gap-3 items-center">
             <!-- Marka Seçimi -->
-            <select id="filterBrand" onchange="onBrandChange()" class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 cursor-pointer">
+            <select id="filterBrand" onchange="onBrandChange()" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 cursor-pointer">
                 <option value="">Bütün Markalar</option>
             </select>
             
             <!-- Model Seçimi -->
-            <select id="filterModel" onchange="filterAds()" disabled class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 cursor-pointer disabled:opacity-50">
+            <select id="filterModel" onchange="filterAds()" disabled class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 cursor-pointer disabled:opacity-50">
                 <option value="">Əvvəlcə Marka Seçin</option>
             </select>
 
-            <!-- Açar söz / Hissə adı -->
-            <input type="text" id="searchInput" oninput="filterAds()" placeholder="Açar söz və ya ünvan..." class="bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500">
+            <!-- İl Seçimi -->
+            <select id="filterYear" onchange="filterAds()" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 cursor-pointer">
+                <option value="">Bütün İllər</option>
+            </select>
             
-            <!-- Sıfırlama Düyməsi -->
-            <button onclick="resetFilters()" class="bg-slate-700 hover:bg-slate-600 text-slate-200 text-xs font-bold py-3 rounded-xl transition flex items-center justify-center gap-2">
-                <i class="fa-solid fa-rotate-left"></i> Sıfırla
+            <!-- Davam Et / Sıfırla Düyməsi -->
+            <button onclick="handleSearchAction()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i> Davam Et / Sıfırla
             </button>
         </div>
     </section>
@@ -101,9 +103,8 @@
     </div>
 
     <script>
-        // Azərbaycan bazarındakı bütün populyar markalar (Çin brendləri daxil olmaqla) və modelləri
+        // Azərbaycan bazarındakı bütün populyar markalar və modellər bazası
         const carData = {
-            // --- ÇİN (KITAY) BRENDLƏRİ ---
             "BYD": ["Song Plus", "Qin Plus", "Han", "Tang", "Destroyer 05", "Yuan Plus", "Seagull", "Chazor"],
             "Changan": ["CS35 Plus", "CS75 Plus", "Uni-K", "Uni-T", "Uni-V", "E-Star", "Alsvin"],
             "Chery": ["Tiggo 2", "Tiggo 4 Pro", "Tiggo 7 Pro", "Tiggo 8 Pro", "Arrizo 5", "Arrizo 8"],
@@ -118,28 +119,20 @@
             "Nio": ["ET5", "ET7", "ES6", "EL7"],
             "Ora": ["Good Cat"],
             "Tank": ["300", "500"],
-
-            // --- ALMANİYA ---
             "Mercedes-Benz": ["A-Class", "B-Class", "C-Class", "E-Class", "S-Class", "CLA", "CLS", "G-Class", "GLA", "GLC", "GLE", "GLS", "ML-Class", "Vito", "Sprinter"],
             "BMW": ["1-Series", "2-Series", "3-Series", "4-Series", "5-Series", "6-Series", "7-Series", "8-Series", "X1", "X3", "X4", "X5", "X6", "X7", "M3", "M5"],
             "Audi": ["A3", "A4", "A5", "A6", "A7", "A8", "Q3", "Q5", "Q7", "Q8"],
             "Volkswagen": ["Passat", "Golf", "Jetta", "Tiguan", "Touareg", "Polo", "CC", "Arteon"],
             "Porsche": ["Cayenne", "Panamera", "Macan", "911", "Boxster"],
             "Opel": ["Astra", "Vectra", "Zafira", "Insignia", "Corsa"],
-
-            // --- YAPONİYA ---
             "Toyota": ["Camry", "Corolla", "Land Cruiser", "Prado", "RAV4", "Prius", "Highlander", "Avalon", "Hilux", "Yaris"],
             "Nissan": ["Sunny", "X-Trail", "Qashqai", "Patrol", "Altima", "Teana", "Juke", "Murano", "Navara"],
             "Honda": ["Civic", "Accord", "CR-V", "HR-V", "Fit", "Insight"],
             "Lexus": ["RX", "LX", "GX", "ES", "GS", "IS", "LS"],
             "Mitsubishi": ["Pajero", "Lancer", "Outlander", "ASX"],
             "Subaru": ["Forester", "Outback", "Impreza", "XV"],
-
-            // --- KOREYA ---
             "Hyundai": ["Elantra", "Sonata", "Tucson", "Santa Fe", "Accent", "Creta", "Genesis", "Grandeur", "i30", "Palisade"],
             "Kia": ["Optima", "K5", "Sportage", "Sorento", "Rio", "Cerato", "Ceed", "Stinger", "Carnival"],
-
-            // --- ABŞ VƏ DİGƏR ---
             "Chevrolet": ["Cruze", "Malibu", "Aveo", "Cobalt", "Niva", "Tracker", "Captiva", "Orlando", "Lacetti"],
             "Ford": ["Fusion", "Focus", "Fiesta", "Mondeo", "Mustang", "Escape", "Explorer", "Transit"],
             "LADA (VAZ)": ["2106", "2107", "2114", "Niva", "Priora", "Granta", "Vesta", "Kalina", "Largus"]
@@ -148,7 +141,7 @@
         let currentCategoryFilter = "";
 
         document.addEventListener('DOMContentLoaded', function() {
-            // Markaları select elementinə əlavə edirik (alfabetik sırada)
+            // Markaları əlavə edirik
             const brandSelect = document.getElementById('filterBrand');
             Object.keys(carData).sort().forEach(brand => {
                 let opt = document.createElement('option');
@@ -156,6 +149,16 @@
                 opt.textContent = brand;
                 brandSelect.appendChild(opt);
             });
+
+            // İlləri əlavə edirik (Cari ildən 1990-cı ilə qədər)
+            const yearSelect = document.getElementById('filterYear');
+            const currentYear = new Date().getFullYear();
+            for (let y = currentYear; y >= 1990; y--) {
+                let opt = document.createElement('option');
+                opt.value = y;
+                opt.textContent = y;
+                yearSelect.appendChild(opt);
+            }
 
             loadAds();
         });
@@ -218,21 +221,15 @@
             
             const brandFilter = document.getElementById('filterBrand').value;
             const modelFilter = document.getElementById('filterModel').value;
-            const searchKeyword = document.getElementById('searchInput').value.toLowerCase().trim();
+            const yearFilter = document.getElementById('filterYear').value;
 
             const ads = allAds.filter(ad => {
                 const matchCat = currentCategoryFilter === "" || ad.category === currentCategoryFilter;
                 const matchBrand = brandFilter === "" || (ad.autoBrand && ad.autoBrand === brandFilter);
                 const matchModel = modelFilter === "" || (ad.autoModel && ad.autoModel === modelFilter);
-                
-                const matchSearch = searchKeyword === "" || 
-                    (ad.title && ad.title.toLowerCase().includes(searchKeyword)) || 
-                    (ad.address && ad.address.toLowerCase().includes(searchKeyword)) ||
-                    (ad.autoBrand && ad.autoBrand.toLowerCase().includes(searchKeyword)) ||
-                    (ad.autoModel && ad.autoModel.toLowerCase().includes(searchKeyword)) ||
-                    (ad.serviceType && ad.serviceType.toLowerCase().includes(searchKeyword));
+                const matchYear = yearFilter === "" || (ad.autoYear && String(ad.autoYear) === String(yearFilter));
 
-                return matchCat && matchBrand && matchModel && matchSearch;
+                return matchCat && matchBrand && matchModel && matchYear;
             });
             
             counter.textContent = `Cəmi ${ads.length} elan tapıldı`;
@@ -302,13 +299,14 @@
             loadAds();
         }
 
-        function resetFilters() {
+        // Davam Et / Sıfırlama funksiyası (Bütün filtrləri təmizləyir)
+        function handleSearchAction() {
             document.getElementById('filterBrand').value = "";
             const modelSelect = document.getElementById('filterModel');
             modelSelect.value = "";
             modelSelect.disabled = true;
             modelSelect.innerHTML = '<option value="">Əvvəlcə Marka Seçin</option>';
-            document.getElementById('searchInput').value = "";
+            document.getElementById('filterYear').value = "";
             loadAds();
         }
 
