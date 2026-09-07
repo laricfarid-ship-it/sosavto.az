@@ -51,8 +51,8 @@
             </button>
         </div>
 
-        <!-- Səliqəli 4-lü Axtarış Paneli (Marka, Model, İl, Davam Et) -->
-        <div class="bg-slate-800/90 border border-slate-700/80 p-4 rounded-2xl shadow-xl backdrop-blur max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-4 gap-3 items-center">
+        <!-- Səliqəli Axtarış Paneli (Marka, Model, İl, Davam Et və Sıfırla) -->
+        <div class="bg-slate-800/90 border border-slate-700/80 p-4 rounded-2xl shadow-xl backdrop-blur max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-5 gap-3 items-center">
             <!-- Marka Seçimi -->
             <select id="filterBrand" onchange="onBrandChange()" class="w-full bg-slate-900 border border-slate-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-500 cursor-pointer">
                 <option value="">Bütün Markalar</option>
@@ -68,9 +68,14 @@
                 <option value="">Bütün İllər</option>
             </select>
             
-            <!-- Davam Et / Sıfırla Düyməsi -->
-            <button onclick="handleSearchAction()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold py-3.5 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-amber-500/20">
-                <i class="fa-solid fa-arrow-right-to-bracket"></i> Davam Et / Sıfırla
+            <!-- Davam Et Düyməsi -->
+            <button onclick="handleSearch()" class="w-full bg-amber-500 hover:bg-amber-600 text-slate-950 text-xs font-extrabold py-3.5 rounded-xl transition flex items-center justify-center gap-1.5 shadow-lg shadow-amber-500/20">
+                <i class="fa-solid fa-arrow-right"></i> Davam Et
+            </button>
+
+            <!-- Sıfırla Düyməsi -->
+            <button onclick="handleReset()" class="w-full bg-slate-900 hover:bg-slate-700 border border-slate-700 text-slate-300 text-xs font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-1.5">
+                <i class="fa-solid fa-rotate-right"></i> Sıfırla
             </button>
         </div>
     </section>
@@ -190,8 +195,6 @@
                 defaultOpt.textContent = 'Əvvəlcə Marka Seçin';
                 modelSelect.appendChild(defaultOpt);
             }
-
-            filterAds();
         }
 
         function setCategoryTab(category) {
@@ -210,7 +213,7 @@
             if(category === "service") titleText = "Servis, Usta və Moykalar";
             document.getElementById('sectionTitle').innerHTML = `<span class="w-2.5 h-6 bg-amber-500 rounded-full inline-block"></span> ${titleText}`;
 
-            filterAds();
+            loadAds();
         }
 
         function loadAds() {
@@ -295,12 +298,13 @@
             });
         }
 
-        function filterAds() {
+        // Avtomatik deyil, yalnız "Davam Et" düyməsinə basanda axtarışı işə salır
+        function handleSearch() {
             loadAds();
         }
 
-        // Davam Et / Sıfırlama funksiyası (Bütün filtrləri təmizləyir)
-        function handleSearchAction() {
+        // Bütün filtrləri sıfırlayır
+        function handleReset() {
             document.getElementById('filterBrand').value = "";
             const modelSelect = document.getElementById('filterModel');
             modelSelect.value = "";
@@ -308,6 +312,10 @@
             modelSelect.innerHTML = '<option value="">Əvvəlcə Marka Seçin</option>';
             document.getElementById('filterYear').value = "";
             loadAds();
+        }
+
+        function filterAds() {
+            // Seçim dəyişəndə dərhal sıfırlanmır, sadəcə "Davam Et" gözlənilir
         }
 
         function openModal(ad) {
