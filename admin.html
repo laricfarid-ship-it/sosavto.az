@@ -31,7 +31,7 @@
             </div>
             <h2 class="text-2xl font-black mb-2">Admin Girişi</h2>
             <p class="text-gray-400 text-sm mb-6">Elanları idarə etmək üçün şifrəni daxil edin</p>
-            <input type="password" id="admin-pass" placeholder="Şifrə (admin123)" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-200 focus:outline-none focus:border-accentGold mb-4">
+            <input type="password" id="admin-pass" placeholder="Şifrənizi daxil edin" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-gray-200 focus:outline-none focus:border-accentGold mb-4">
             <button onclick="checkLogin()" class="w-full bg-accentGold hover:bg-accentHover text-darkBg font-bold py-3 rounded-xl transition shadow">
                 Daxil Ol
             </button>
@@ -72,7 +72,7 @@
     </div>
 
     <script>
-        const ADMIN_PASSWORD = "admin123"; // İstədiyin şifrəni burdan dəyişə bilərsən
+        const ADMIN_PASSWORD = "admin123"; // Şifrə yenə "admin123" olaraq qalır, sadəcə ekranda sətrin içi boşdur
 
         function checkLogin() {
             const pass = document.getElementById('admin-pass').value;
@@ -103,7 +103,6 @@
 
         function loadPendingListings() {
             const stored = JSON.parse(localStorage.getItem('sosavto_listings')) || [];
-            // Statusu 'pending' olanlar və ya ümumiyyətcə statusu olmayanlar (köhnələr)
             const pending = stored.filter(item => item.status === 'pending' || !item.status);
 
             const container = document.getElementById('pending-container');
@@ -147,10 +146,6 @@
                     </div>
                 </div>
             `).join('');
-        }
-
-        function approve(id) {
-            approveListing(id);
         }
 
         function approveListing(id) {
