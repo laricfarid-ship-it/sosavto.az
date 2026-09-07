@@ -1,0 +1,61 @@
+﻿<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SosAvto.az — Admin Panel</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { colors: { brandDark: '#0f172a', brandOrange: '#f59e0b', brandGray: '#94a3b8' } }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-white font-sans min-h-screen flex">
+
+    <aside class="w-64 bg-slate-900 border-r border-slate-800 p-5 hidden md:block">
+        <div class="text-xl font-bold mb-8">Sos<span class="text-brandOrange">Avto</span> Admin</div>
+        <nav class="space-y-2 text-sm text-brandGray">
+            <a href="#" class="flex items-center space-x-3 bg-brandOrange/10 text-brandOrange p-3 rounded-xl font-semibold">
+                <i class="fa-solid fa-chart-line"></i>
+                <span>İdarə Paneli</span>
+            </a>
+            <a href="index.html" class="flex items-center space-x-3 hover:bg-slate-800 p-3 rounded-xl transition">
+                <i class="fa-solid fa-house"></i>
+                <span>Sayta Qayıt</span>
+            </a>
+        </nav>
+    </aside>
+
+    <main class="flex-1 p-6">
+        <h1 class="text-2xl font-bold mb-6">Təsdiq Gözləyən Elanlar</h1>
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+            <table class="w-full text-left text-xs text-brandGray">
+                <thead class="bg-slate-950 text-white border-b border-slate-800 uppercase">
+                    <tr>
+                        <th class="p-4">Başlıq</th>
+                        <th class="p-4">Satıcı</th>
+                        <th class="p-4">Qiymət</th>
+                        <th class="p-4 text-right">Əməliyyat</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800">
+                    <tr>
+                        <td class="p-4 font-semibold text-white">BMW F30 Ön Amortizator</td>
+                        <td class="p-4">AvtoParts MMC</td>
+                        <td class="p-4 text-brandOrange font-bold">120 AZN</td>
+                        <td class="p-4 text-right space-x-2">
+                            <button class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 px-3 py-1.5 rounded-lg font-bold">Təsdiqlə</button>
+                            <button class="bg-red-500/20 text-red-400 border border-red-500/30 px-3 py-1.5 rounded-lg font-bold">İmtina</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </main>
+
+</body>
+</html>

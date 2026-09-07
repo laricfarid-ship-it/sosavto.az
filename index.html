@@ -1,0 +1,75 @@
+﻿<!DOCTYPE html>
+<html lang="az">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SosAvto.az — Ehtiyat Hissələri Və Servis Mərkəzi</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: { brandDark: '#0f172a', brandOrange: '#f59e0b', brandGray: '#94a3b8' }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body class="bg-slate-950 text-white font-sans min-h-screen flex flex-col justify-between">
+
+    <header class="bg-brandDark border-b border-slate-800">
+        <div class="container mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-2">
+                <div class="bg-brandOrange text-brandDark p-2 rounded-lg font-black text-xl"><i class="fa-solid fa-truck-medical"></i> SOS</div>
+                <span class="text-xl font-bold tracking-tight">Sos<span class="text-brandOrange">Avto</span>.az</span>
+            </a>
+            <nav class="hidden md:flex items-center space-x-6 text-sm font-medium text-brandGray">
+                <a href="index.html" class="text-white hover:text-brandOrange">Ehtiyat Hissələri</a>
+                <a href="xarita.html" class="hover:text-brandOrange">Servis Xəritəsi</a>
+                <a href="admin.html" class="hover:text-brandOrange">Admin Panel</a>
+            </nav>
+            <div class="flex items-center space-x-3">
+                <a href="elan-ver.html" class="text-xs bg-brandOrange hover:bg-amber-600 text-brandDark font-bold px-3.5 py-2 rounded-lg transition">
+                    <i class="fa-solid fa-plus mr-1"></i> Elan Ver
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <section class="bg-gradient-to-b from-brandDark to-slate-900 py-12 px-4 text-center">
+        <h1 class="text-3xl sm:text-5xl font-black mb-4">Avtomobilinizin bütün ehtiyacı — <span class="text-brandOrange">bir ünvanda</span></h1>
+        <p class="text-brandGray text-sm mb-8">Ehtiyat hissələri, GPS servis xəritəsi, 24/7 təcili yardım və usta kataloqu</p>
+        
+        <div class="max-w-3xl mx-auto bg-slate-800/90 border border-slate-700 p-4 rounded-2xl shadow-2xl grid grid-cols-1 sm:grid-cols-4 gap-3">
+            <select class="bg-slate-900 border border-slate-700 text-white text-sm rounded-xl p-3"><option>Kateqoriyalar</option></select>
+            <select class="bg-slate-900 border border-slate-700 text-white text-sm rounded-xl p-3"><option>Marka Seçin</option></select>
+            <input type="text" placeholder="Hissə adı..." class="bg-slate-900 border border-slate-700 text-white text-sm rounded-xl p-3">
+            <button class="bg-brandOrange text-brandDark font-bold rounded-xl p-3">Axtar</button>
+        </div>
+    </section>
+
+    <section class="container mx-auto px-4 py-8">
+        <h2 class="text-xl font-bold mb-6 flex items-center space-x-2"><span class="w-2 h-5 bg-brandOrange rounded-full"></span><span>Son Elanlar</span></h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-5">
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                <div class="h-32 bg-slate-800 rounded-lg mb-3 flex items-center justify-center text-slate-600"><i class="fa-solid fa-image text-3xl"></i></div>
+                <div class="text-brandOrange font-bold text-lg">120 AZN</div>
+                <h3 class="font-semibold text-sm mb-2">BMW F30 Ön Amortizator</h3>
+                <div class="text-xs text-brandGray">Bakı, Yasamal</div>
+            </div>
+            <div class="bg-slate-900 border border-slate-800 rounded-xl p-4">
+                <div class="h-32 bg-slate-800 rounded-lg mb-3 flex items-center justify-center text-slate-600"><i class="fa-solid fa-image text-3xl"></i></div>
+                <div class="text-brandOrange font-bold text-lg">45 AZN</div>
+                <h3 class="font-semibold text-sm mb-2">Hyundai Elantra Əyləc Bəndi</h3>
+                <div class="text-xs text-brandGray">Bakı, Nərimanov</div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="bg-slate-900 border-t border-slate-800 py-6 text-center text-xs text-brandGray">
+        © 2026 SosAvto.az — Bütün hüquqlar qorunur.
+    </footer>
+
+</body>
+</html>
