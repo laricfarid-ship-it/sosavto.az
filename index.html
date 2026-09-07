@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SosAvto.az - Süni İntellekt Avtomobil Ekosistemi</title>
-    <!-- Tailwind CSS CDN -->
+    <title>SosAvto.az - Azərbaycanın İlk AI Avtomobil Köməkçisi</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
@@ -22,84 +21,76 @@
         }
     </script>
 </head>
-<body class="bg-darkBg text-gray-100 min-h-screen flex flex-col font-sans relative">
-
-    <!-- Header / Navbar -->
-    <header class="bg-cardBg border-b border-gray-800 sticky top-0 z-50 shadow-lg">
+<body class="bg-darkBg text-gray-100 min-h-screen flex flex-col justify-between font-sans">
+    
+    <!-- Navbar -->
+    <header class="bg-cardBg border-b border-gray-800 shadow-lg sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
             <a href="index.html" class="flex items-center space-x-2">
-                <div class="bg-accentGold text-darkBg p-2 rounded-xl font-black text-xl flex items-center justify-center shadow-md">
+                <div class="bg-accentGold text-darkBg p-2.5 rounded-xl font-black text-xl flex items-center justify-center shadow-lg shadow-accentGold/20">
                     <i class="fa-solid fa-car-side"></i>
                 </div>
                 <span class="text-2xl font-black tracking-wider text-white">Sos<span class="text-accentGold">Avto</span>.az</span>
             </a>
+            
             <div class="flex items-center space-x-3">
-                <a href="xarita.html" class="hidden sm:flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded-xl text-sm font-semibold transition">
+                <a href="xarita.html" class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center space-x-2">
                     <i class="fa-solid fa-map-location-dot text-accentGold"></i>
-                    <span>Servis Xəritəsi</span>
+                    <span class="hidden md:inline">Servis Xəritəsi</span>
                 </a>
-                <a href="elan-ver.html" class="flex items-center space-x-2 bg-accentGold hover:bg-accentHover text-darkBg px-5 py-2.5 rounded-xl font-bold text-sm shadow-lg transition transform hover:-translate-y-0.5">
+                <a href="elan-ver.html" class="bg-accentGold hover:bg-accentHover text-darkBg px-4 py-2.5 rounded-xl text-sm font-bold transition flex items-center space-x-1.5 shadow-lg shadow-accentGold/20">
                     <i class="fa-solid fa-plus"></i>
                     <span>Elan Ver</span>
                 </a>
-                <!-- User Auth Area -->
-                <div id="auth-nav-area" class="flex items-center space-x-2 border-l border-gray-700 pl-3">
-                    <a href="giris.html" class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition">Daxil ol</a>
-                    <a href="qeydiyyat.html" class="bg-gray-700 hover:bg-gray-600 text-accentGold px-3 py-2 rounded-xl text-xs sm:text-sm font-semibold transition">Qeydiyyat</a>
+
+                <!-- Dinamik İstifadəçi və ya Giriş -->
+                <div id="auth-container">
+                    <a href="giris.html" class="bg-gray-800 hover:bg-gray-700 text-gray-200 px-4 py-2 rounded-xl text-sm font-semibold transition flex items-center space-x-2">
+                        <i class="fa-solid fa-user"></i>
+                        <span>Giriş</span>
+                    </a>
                 </div>
             </div>
         </div>
     </header>
 
     <!-- Hero Section -->
-    <section class="relative py-12 px-4 text-center bg-gradient-to-b from-cardBg to-darkBg border-b border-gray-800">
-        <div class="max-w-5xl mx-auto">
-            <div class="inline-flex items-center space-x-2 bg-accentGold/10 border border-accentGold/30 px-4 py-1.5 rounded-full text-accentGold text-xs font-bold mb-4">
+    <section class="py-12 px-4 text-center relative overflow-hidden">
+        <div class="max-w-4xl mx-auto space-y-6">
+            <div class="inline-flex items-center space-x-2 bg-accentGold/10 border border-accentGold/30 text-accentGold px-4 py-1.5 rounded-full text-xs font-bold tracking-wide">
                 <i class="fa-solid fa-wand-magic-sparkles"></i>
                 <span>Azərbaycanda İlk: AI Avtomobil Köməkçisi</span>
             </div>
-            <h1 class="text-3xl sm:text-5xl font-black mb-4 tracking-tight">Avtomobiliniz üçün hər şey bir arada</h1>
-            <p class="text-gray-400 text-base sm:text-lg mb-8">Detail şəklini at, AI sənə dərhal uyğun ustanı, ehtiyat hissəsini və xəritə ünvanını tapsın.</p>
+            <h1 class="text-4xl md:text-6xl font-black tracking-tight text-white">
+                Avtomobiliniz üçün <span class="text-accentGold">hər şey</span> bir arada
+            </h1>
+            <p class="text-gray-400 text-sm md:text-base max-w-xl mx-auto">
+                Detail şəklini at, AI sənə dərhal uyğun ustanı, ehtiyat hissəsini və xəritə ünvanını tapsın.
+            </p>
 
-            <!-- Main Category Tabs -->
-            <div class="flex flex-wrap justify-center gap-2 bg-gray-900/80 p-2 rounded-2xl border border-gray-800 max-w-2xl mx-auto mb-6">
-                <button onclick="switchCategory('all')" id="tab-all" class="cat-tab flex-1 min-w-[120px] py-2.5 px-4 rounded-xl font-bold text-sm transition bg-accentGold text-darkBg shadow">Bütün Elanlar</button>
-                <button onclick="switchCategory('cars')" id="tab-cars" class="cat-tab flex-1 min-w-[120px] py-2.5 px-4 rounded-xl font-bold text-sm transition text-gray-400 hover:text-white">Avtomobil Satışı</button>
-                <button onclick="switchCategory('parts')" id="tab-parts" class="cat-tab flex-1 min-w-[120px] py-2.5 px-4 rounded-xl font-bold text-sm transition text-gray-400 hover:text-white">Ehtiyat Hissələri</button>
-                <button onclick="switchCategory('services')" id="tab-services" class="cat-tab flex-1 min-w-[120px] py-2.5 px-4 rounded-xl font-bold text-sm transition text-gray-400 hover:text-white">Servis və Usta</button>
-            </div>
-
-            <!-- Advanced Filter Bar -->
-            <div class="bg-cardBg p-4 sm:p-6 rounded-2xl border border-gray-800 shadow-xl grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 text-left">
+            <!-- Axtarış menyusu -->
+            <div class="bg-cardBg border border-gray-800 p-4 md:p-6 rounded-3xl shadow-2xl max-w-4xl mx-auto mt-8 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-left">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">Marka</label>
-                    <select id="filter-brand" onchange="onBrandChange()" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-accentGold">
-                        <option value="">Bütün Markalar</option>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Marka</label>
+                    <select class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-accentGold">
+                        <option>Bütün Markalar</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">Model</label>
-                    <select id="filter-model" onchange="filterListings()" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-accentGold">
-                        <option value="">Əvvəl marka seçin</option>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Model</label>
+                    <select class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-accentGold">
+                        <option>Əvvəl marka seçin</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">Buraxılış ili</label>
-                    <select id="filter-year" onchange="filterListings()" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-accentGold">
-                        <option value="">Bütün illər</option>
+                    <label class="block text-[11px] font-bold text-gray-400 uppercase mb-1">Buraxılış İli</label>
+                    <select class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-white focus:outline-none focus:border-accentGold">
+                        <option>Bütün illər</option>
                     </select>
                 </div>
-                <div>
-                    <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">VIN Kod</label>
-                    <input type="text" id="filter-vin" placeholder="VIN ilə axtar..." oninput="filterListings()" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-3 py-2.5 text-sm text-gray-200 focus:outline-none focus:border-accentGold uppercase">
-                </div>
-                <div class="flex items-end gap-2">
-                    <button onclick="resetFilters()" class="flex-1 bg-gray-800 hover:bg-gray-700 text-gray-300 font-semibold py-2.5 px-3 rounded-xl text-xs sm:text-sm transition flex items-center justify-center space-x-1">
-                        <i class="fa-solid fa-rotate-right"></i>
-                        <span>Sıfırla</span>
-                    </button>
-                    <button onclick="filterListings()" class="flex-1 bg-accentGold hover:bg-accentHover text-darkBg font-bold py-2.5 px-3 rounded-xl text-xs sm:text-sm transition flex items-center justify-center space-x-1 shadow">
-                        <i class="fa-solid fa-arrow-right"></i>
+                <div class="flex items-end space-x-2">
+                    <button class="w-full bg-accentGold hover:bg-accentHover text-darkBg font-black py-2.5 rounded-xl transition text-sm flex items-center justify-center space-x-1.5 shadow-lg shadow-accentGold/20">
+                        <i class="fa-solid fa-magnifying-glass"></i>
                         <span>Axtar</span>
                     </button>
                 </div>
@@ -107,250 +98,54 @@
         </div>
     </section>
 
-    <!-- Main Content Grid / Listings -->
+    <!-- Elanlar siyahısı -->
     <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full">
-        <div class="flex justify-between items-center mb-6">
-            <h2 class="text-xl font-bold flex items-center space-x-2">
-                <i class="fa-solid fa-list text-accentGold"></i>
-                <span>Aktiv Elanlar</span>
-            </h2>
-            <span id="result-count" class="text-sm text-gray-400 bg-gray-900 px-3 py-1 rounded-full border border-gray-800">0 nəticə tapıldı</span>
-        </div>
-
-        <div id="listings-container" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <!-- Dynamic Listings -->
+        <h2 class="text-xl font-black mb-6 flex items-center space-x-2">
+            <i class="fa-solid fa-fire text-accentGold"></i>
+            <span>Aktiv Elanlar</span>
+        </h2>
+        <div id="listings-grid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <!-- Elanlar dinamik yüklənəcək -->
         </div>
     </main>
 
-    <!-- FLOATING AI ASSISTANT BUTTON & CHAT WINDOW -->
-    <div class="fixed bottom-6 right-6 z-50">
-        <button onclick="toggleAIChat()" id="ai-toggle-btn" class="bg-gradient-to-r from-accentGold to-amber-600 hover:from-amber-500 hover:to-amber-700 text-darkBg w-16 h-16 rounded-full shadow-2xl flex items-center justify-center text-2xl font-bold transition transform hover:scale-105 border-2 border-white/20 relative">
-            <i class="fa-solid fa-robot"></i>
-            <span class="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full animate-pulse">AI</span>
-        </button>
-
-        <div id="ai-chat-box" class="hidden absolute bottom-20 right-0 w-80 sm:w-96 bg-cardBg border border-gray-800 rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[450px]">
-            <div class="bg-gray-900 px-4 py-3 border-b border-gray-800 flex justify-between items-center">
-                <div class="flex items-center space-x-2">
-                    <div class="w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
-                    <span class="font-bold text-sm text-white">SosAvto AI Ekspert</span>
-                </div>
-                <button onclick="toggleAIChat()" class="text-gray-400 hover:text-white">
-                    <i class="fa-solid fa-xmark text-lg"></i>
-                </button>
-            </div>
-
-            <div id="ai-chat-messages" class="flex-grow p-4 overflow-y-auto space-y-3 text-xs sm:text-sm text-gray-300 bg-darkBg/50">
-                <div class="bg-gray-800 p-3 rounded-xl rounded-tl-none max-w-[85%] border border-gray-700">
-                    Salam! Mən SosAvto AI köməkçisiyəm. Avtomobilinizdəki hər hansı detalın şəklini atın və ya probleminizi yazın, sizə saytımızdakı ən yaxın ustanı və uyğun ehtiyat hissəsini dərhal tapım! 🚗🔧
-                </div>
-            </div>
-
-            <div class="p-3 bg-cardBg border-t border-gray-800 flex items-center space-x-2">
-                <label class="cursor-pointer bg-gray-800 hover:bg-gray-700 text-accentGold p-2.5 rounded-xl transition">
-                    <i class="fa-solid fa-camera"></i>
-                    <input type="file" class="hidden" accept="image/*">
-                </label>
-                <input type="text" id="ai-chat-input" placeholder="Sualınızı yazın və ya şəkil atın..." class="flex-grow bg-gray-900 border border-gray-700 rounded-xl px-3 py-2 text-xs sm:text-sm text-white focus:outline-none focus:border-accentGold">
-                <button onclick="sendUserMessage()" class="bg-accentGold hover:bg-accentHover text-darkBg px-3 py-2 rounded-xl font-bold transition">
-                    <i class="fa-solid fa-paper-plane"></i>
-                </button>
-            </div>
-        </div>
-    </div>
-
     <!-- Footer -->
-    <footer class="bg-cardBg border-t border-gray-800 py-6 text-center text-sm text-gray-500 flex flex-col sm:flex-row justify-between items-center px-6 max-w-7xl mx-auto w-full">
-        <p>&copy; 2026 SosAvto.az - Bütün hüquqlar qorunur.</p>
-        <a href="admin.html" class="text-xs text-gray-600 hover:text-gray-400 transition mt-2 sm:mt-0 flex items-center space-x-1">
-            <i class="fa-solid fa-lock"></i>
-            <span>Admin Panel</span>
-        </a>
+    <footer class="bg-cardBg border-t border-gray-800 py-6 text-center text-xs text-gray-500 mt-12">
+        &copy; 2026 SosAvto.az - Bütün hüquqlar qorunur.
     </footer>
 
-    <!-- JavaScript Logic -->
+    <!-- Auth Script -->
     <script>
-        const carDatabase = {
-            "Toyota": ["Camry", "Corolla", "RAV4", "Prado", "Land Cruiser", "Prius", "Avalon", "Highlander", "Yaris", "C-HR", "Hilux", "Fortuner", "Alphard"],
-            "BMW": ["1 Series", "2 Series", "3 Series", "4 Series", "5 Series", "6 Series", "7 Series", "8 Series", "X1", "X3", "X4", "X5", "X6", "X7", "M2", "M3", "M4", "M5", "i4", "iX3", "iX"],
-            "Mercedes-Benz": ["A-Class", "B-Class", "C-Class", "E-Class", "S-Class", "CLA", "CLS", "GLA", "GLB", "GLC", "GLE", "GLS", "G-Class", "EQE", "EQS", "AMG GT"],
-            "Audi": ["A1", "A3", "A4", "A5", "A6", "A7", "A8", "Q2", "Q3", "Q5", "Q7", "Q8", "e-tron", "RS6", "RS7"],
-            "Volkswagen": ["Polo", "Golf", "Jetta", "Passat", "Arteon", "Tiguan", "Touareg", "Atlas", "ID.4", "ID.6"],
-            "Porsche": ["Cayenne", "Macan", "Panamera", "911", "Taycan"],
-            "Hyundai": ["Accent", "Elantra", "Sonata", "Tucson", "Santa Fe", "Palisade", "Kona", "Ioniq 5", "Ioniq 6"],
-            "Kia": ["Rio", "Cerato", "K5", "Optima", "Stinger", "Sportage", "Sorento", "Telluride", "Carnival", "EV6", "EV9"],
-            "BYD": ["Song Plus", "Han", "Tang", "Seal", "Qin Plus", "Destroyer 05", "Yuan Plus", "Atto 3", "Seagull"]
-        };
-
-        const defaultListings = [
-            { id: 1, category: 'cars', title: 'Hyundai Elantra Original Porşen', brand: 'Hyundai', model: 'Elantra', year: 2022, price: 150, image: 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=600&q=80', vin: 'KMHD84AE1HU000000', status: 'approved' },
-            { id: 2, category: 'cars', title: 'BMW X5 M Paket', brand: 'BMW', model: 'X5', year: 2023, price: 54000, image: 'https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=600&q=80', vin: 'WBA3B1C08EP000000', status: 'approved' },
-            { id: 3, category: 'cars', title: 'Toyota Camry 2021', brand: 'Toyota', model: 'Camry', year: 2021, price: 28500, image: 'https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=600&q=80', vin: '1HGCR2F33HA000000', status: 'approved' }
-        ];
-
-        let currentCategory = 'all';
-
-        window.onload = () => {
-            checkAuthNavbar();
-            initBrands();
-            initYears();
-            filterListings();
-        };
-
-        function checkAuthNavbar() {
-            const loggedUser = localStorage.getItem('sosavto_logged_user');
-            const authArea = document.getElementById('auth-nav-area');
-            if (loggedUser) {
-                authArea.innerHTML = `
-                    <div class="flex items-center space-x-2">
-                        <a href="profil.html" class="bg-gray-800 hover:bg-gray-700 text-accentGold px-3 py-2 rounded-xl text-xs sm:text-sm font-bold flex items-center space-x-1">
-                            <i class="fa-solid fa-user"></i>
-                            <span class="max-w-[100px] truncate">${loggedUser}</span>
-                        </a>
-                        <button onclick="logoutUser()" class="bg-red-500/20 hover:bg-red-500/30 text-red-400 p-2 rounded-xl text-xs transition" title="Çıxış">
-                            <i class="fa-solid fa-right-from-bracket"></i>
-                        </button>
-                    </div>
-                `;
-            }
+        const loggedUser = localStorage.getItem('sosavto_logged_user');
+        if (loggedUser) {
+            document.getElementById('auth-container').innerHTML = `
+                <a href="kabinet.html" class="bg-gray-800 hover:bg-gray-700 text-accentGold px-4 py-2 rounded-xl text-sm font-bold transition flex items-center space-x-2 border border-accentGold/30">
+                    <i class="fa-solid fa-user-circle"></i>
+                    <span>${loggedUser}</span>
+                </a>
+            `;
         }
 
-        function logoutUser() {
-            localStorage.removeItem('sosavto_logged_user');
-            window.location.reload();
-        }
+        // Ana səhifədə aktiv elanları göstərmək
+        let listings = JSON.parse(localStorage.getItem('sosavto_listings') || '[]');
+        let activeListings = listings.filter(ad => ad.status === 'active');
+        let grid = document.getElementById('listings-grid');
 
-        function toggleAIChat() {
-            document.getElementById('ai-chat-box').classList.toggle('hidden');
-        }
-
-        function sendUserMessage() {
-            const input = document.getElementById('ai-chat-input');
-            const text = input.value.trim();
-            if (!text) return;
-            const chatMessages = document.getElementById('ai-chat-messages');
-            chatMessages.innerHTML += `<div class="flex justify-end"><div class="bg-accentGold text-darkBg p-3 rounded-xl rounded-tr-none max-w-[85%] font-medium">${text}</div></div>`;
-            input.value = '';
-            chatMessages.scrollTop = chatMessages.scrollHeight;
-
-            setTimeout(() => {
-                let reply = "Sualını başa düşdüm. Zəhmət olmasa tam olaraq hansı hissəni və ya avtomobili axtardığını qeyd et.";
-                const lower = text.toLowerCase();
-                if (lower.includes('salam') || lower.includes('hi')) reply = "Aleykum salam! Mən SosAvto AI köməkçisiyəm. Buyur, necə kömək edə bilərəm?";
-                else if (lower.includes('qiymət')) reply = "Qiymətlər elanın növündən asılıdır. Konkret model yazsan, dəqiq məlumat verərəm.";
-                chatMessages.innerHTML += `<div class="bg-gray-800 p-3 rounded-xl rounded-tl-none max-w-[85%] border border-gray-700">${reply}</div>`;
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-            }, 800);
-        }
-
-        function initBrands() {
-            const brandSelect = document.getElementById('filter-brand');
-            brandSelect.innerHTML = '<option value="">Bütün Markalar</option>';
-            Object.keys(carDatabase).sort().forEach(brand => {
-                brandSelect.innerHTML += `<option value="${brand}">${brand}</option>`;
-            });
-        }
-
-        function initYears() {
-            const yearSelect = document.getElementById('filter-year');
-            yearSelect.innerHTML = '<option value="">Bütün illər</option>';
-            const currentYear = new Date().getFullYear();
-            for (let y = currentYear; y >= 2000; y--) {
-                yearSelect.innerHTML += `<option value="${y}">${y}</option>`;
-            }
-        }
-
-        function onBrandChange() {
-            const brand = document.getElementById('filter-brand').value;
-            const modelSelect = document.getElementById('filter-model');
-            modelSelect.innerHTML = '<option value="">Bütün Modellər</option>';
-            if (brand && carDatabase[brand]) {
-                carDatabase[brand].forEach(model => {
-                    modelSelect.innerHTML += `<option value="${model}">${model}</option>`;
-                });
-            } else {
-                modelSelect.innerHTML = '<option value="">Əvvəl marka seçin</option>';
-            }
-            filterListings();
-        }
-
-        function getListings() {
-            const stored = localStorage.getItem('sosavto_listings');
-            if (!stored) {
-                localStorage.setItem('sosavto_listings', JSON.stringify(defaultListings));
-                return defaultListings;
-            }
-            return JSON.parse(stored);
-        }
-
-        function switchCategory(category) {
-            currentCategory = category;
-            document.querySelectorAll('.cat-tab').forEach(tab => {
-                tab.classList.remove('bg-accentGold', 'text-darkBg', 'shadow');
-                tab.classList.add('text-gray-400', 'hover:text-white');
-            });
-            const activeTab = document.getElementById(`tab-${category}`);
-            if (activeTab) {
-                activeTab.classList.add('bg-accentGold', 'text-darkBg', 'shadow');
-                activeTab.classList.remove('text-gray-400', 'hover:text-white');
-            }
-            filterListings();
-        }
-
-        function filterListings() {
-            const listings = getListings();
-            const approvedListings = listings.filter(item => item.status === 'approved');
-            const brand = document.getElementById('filter-brand').value;
-            const model = document.getElementById('filter-model').value;
-            const year = document.getElementById('filter-year').value;
-            const vinQuery = document.getElementById('filter-vin').value.trim().toLowerCase();
-
-            const filtered = approvedListings.filter(item => {
-                if (currentCategory !== 'all' && item.category !== currentCategory) return false;
-                if (brand && item.brand !== brand) return false;
-                if (model && item.model !== model) return false;
-                if (year && String(item.year) !== year) return false;
-                if (vinQuery && (!item.vin || !item.vin.toLowerCase().includes(vinQuery))) return false;
-                return true;
-            });
-            renderListings(filtered);
-        }
-
-        function renderListings(items) {
-            const container = document.getElementById('listings-container');
-            document.getElementById('result-count').textContent = `${items.length} nəticə tapıldı`;
-            if (items.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-gray-500"><i class="fa-solid fa-box-open text-4xl mb-3"></i><p class="text-lg">Heç bir aktiv elan tapılmadı.</p></div>`;
-                return;
-            }
-            container.innerHTML = items.map(item => `
-                <div class="bg-cardBg border border-gray-800 rounded-2xl overflow-hidden shadow-lg hover:border-gray-700 transition flex flex-col">
-                    <div class="h-48 overflow-hidden relative">
-                        <img src="${item.image || 'https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=600&q=80'}" alt="${item.title}" class="w-full h-full object-cover">
-                        <span class="absolute top-3 left-3 bg-darkBg/80 backdrop-blur text-accentGold text-xs font-bold px-3 py-1 rounded-full border border-gray-800 uppercase">${item.category}</span>
-                    </div>
-                    <div class="p-5 flex flex-col flex-grow justify-between">
-                        <div>
-                            <h3 class="font-bold text-lg mb-2 text-white line-clamp-1">${item.title}</h3>
-                            <div class="text-accentGold font-black text-xl mb-3">${item.price} AZN</div>
-                            <div class="text-xs text-gray-400 space-y-1">
-                                <div><i class="fa-solid fa-car mr-1"></i> ${item.brand || ''} ${item.model || ''} (${item.year || 'N/A'})</div>
-                                ${item.vin ? `<div><i class="fa-solid fa-barcode mr-1"></i> VIN: ${item.vin}</div>` : ''}
-                                <div class="text-gray-500 pt-1"><i class="fa-solid fa-user-tag mr-1"></i> Satıcı: ${item.owner || 'Admin'}</div>
-                            </div>
+        if(activeListings.length === 0) {
+            grid.innerHTML = `<p class="text-gray-400 text-sm col-span-full">Hal-hazırda aktiv elan yoxdur.</p>`;
+        } else {
+            grid.innerHTML = activeListings.map(ad => `
+                <div class="bg-cardBg border border-gray-800 rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between">
+                    <div>
+                        <img src="${ad.image}" class="w-full h-48 object-cover">
+                        <div class="p-4">
+                            <h3 class="font-bold text-white text-base mb-1">${ad.title}</h3>
+                            <p class="text-accentGold font-black text-lg">${ad.price} AZN</p>
+                            <p class="text-gray-400 text-xs mt-2"><i class="fa-solid fa-location-dot"></i> ${ad.city || 'Bakı'}</p>
                         </div>
-                        <button class="mt-4 w-full bg-gray-800 hover:bg-gray-700 text-gray-200 py-2 rounded-xl text-sm font-semibold transition">Ətraflı Bax</button>
                     </div>
                 </div>
             `).join('');
-        }
-
-        function resetFilters() {
-            document.getElementById('filter-brand').value = '';
-            document.getElementById('filter-model').innerHTML = '<option value="">Əvvəl marka seçin</option>';
-            document.getElementById('filter-year').value = '';
-            document.getElementById('filter-vin').value = '';
-            filterListings();
         }
     </script>
 </body>
