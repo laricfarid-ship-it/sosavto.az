@@ -239,12 +239,12 @@
         }
         yearSelect.innerHTML = yearsHtml;
 
-        // VIN Kod daxil edildikdə hem texniki detalları, hem de stabil şəkil mənbəsindən şəkli gətirən sistem
+        // VIN Kod daxil edildikdə birbaşa işlək Wikimedia / Unsplash birbaşa şəkil linkləri ilə təminat
         vinInput.addEventListener('input', async function() {
             let vin = this.value.trim().toUpperCase();
             if(vin.length === 17) {
                 vinResultBox.classList.remove('hidden');
-                vinDetails.innerHTML = `<span class="col-span-full text-accentGold">Orijinal məlumatlar və şəkil internet bazasından axtarılır...</span>`;
+                vinDetails.innerHTML = `<span class="col-span-full text-accentGold">Məlumatlar və şəkil yüklənir...</span>`;
                 carPreviewImg.src = "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=600&q=80";
                 
                 try {
@@ -269,8 +269,16 @@
                         <div class="col-span-2 text-accentGold font-semibold mt-1"><i class="fa-solid fa-fingerprint"></i> VIN: ${vin}</div>
                     `;
 
-                    // Stabil və işlək açıq avtomobil şəkil bazası (Wikimedia Commons / Unsplash dinamik axtarış linki)
-                    carPreviewImg.src = `https://source.unsplash.com/featured/600x400/?${encodeURIComponent(make + ' ' + model)}`;
+                    // Unsplash birbaşa aktiv foto bazası (Heç vaxt bloklanmayan birbaşa şəkil ID-ləri)
+                    const carImages = {
+                        "HYUNDAI": "https://images.unsplash.com/photo-1580273916550-e323be2ae537?auto=format&fit=crop&w=600&q=80",
+                        "BMW": "https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=600&q=80",
+                        "TOYOTA": "https://images.unsplash.com/photo-1621007947382-bb3c3994e3fb?auto=format&fit=crop&w=600&q=80",
+                        "MERCEDES-BENZ": "https://images.unsplash.com/photo-1618843479313-40f8afb4b4d8?auto=format&fit=crop&w=600&q=80",
+                        "FORD": "https://images.unsplash.com/photo-1551836022-d5d88e9218df?auto=format&fit=crop&w=600&q=80"
+                    };
+
+                    carPreviewImg.src = carImages[make.toUpperCase()] || "https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=600&q=80";
 
                     if(carData[make]) {
                         brandSelect.value = make;
@@ -280,7 +288,7 @@
                     if(year) yearSelect.value = year;
 
                 } catch (error) {
-                    vinDetails.innerHTML = `<span class="col-span-full text-red-400">VIN kod üzrə məlumat tapılmadı. Zəhmət olmasa düzgün 17 simvollu kod daxil edin.</span>`;
+                    vinDetails.innerHTML = `<span class="col-span-full text-red-400">VIN kod üzrə məlumat tapılmadı.</span>`;
                 }
             } else {
                 vinResultBox.classList.add('hidden');
