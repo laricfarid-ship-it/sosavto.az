@@ -4,14 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SosAvto.az - Avtomobilinizin bütün ehtiyacı</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body class="bg-gradient-to-br from-gray-900 via-zinc-900 to-amber-950 min-h-screen text-slate-100 font-sans">
 
-    <!-- Header -->
     <header class="border-b border-amber-500/20 h-20 flex items-center justify-between px-4 md:px-12 bg-gray-950/70 backdrop-blur sticky top-0 z-50">
         <a href="index.html" class="flex items-center gap-2 text-amber-400 font-bold text-2xl tracking-wider">
             <i class="fa-solid fa-truck-monster"></i>
@@ -27,15 +24,12 @@
         </div>
     </header>
 
-    <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 py-8">
         <div class="text-center mb-8">
             <p class="text-xs md:text-sm text-slate-400">Ehtiyat hissələri, GPS servis xəritəsi, Çin və digər avtomobillər üçün elanlar</p>
         </div>
 
-        <!-- Filter Panel -->
         <div class="bg-gray-950/80 border border-amber-500/30 p-4 rounded-3xl shadow-2xl backdrop-blur-md mb-10">
-            <!-- Category Tabs -->
             <div class="flex flex-wrap gap-2 mb-4 border-b border-gray-800 pb-4">
                 <button onclick="setCategoryFilter('')" id="catBtnAll" class="px-4 py-2 rounded-xl text-xs font-bold transition bg-amber-500 text-slate-950 flex items-center gap-2">
                     <i class="fa-solid fa-border-all"></i> Bütün Elanlar
@@ -51,7 +45,6 @@
                 </button>
             </div>
 
-            <!-- Inputs Row -->
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                 <select id="filterFirst" onchange="onFirstChange()" class="bg-gray-900 border border-gray-800 text-slate-200 text-xs rounded-xl px-3 py-3 outline-none focus:border-amber-500">
                     <option value="">Bütün Kateqoriyalar</option>
@@ -66,7 +59,6 @@
             </div>
         </div>
 
-        <!-- Ads Grid Header -->
         <div class="flex items-center justify-between mb-6">
             <h2 class="text-base font-extrabold text-slate-200 flex items-center gap-2">
                 <i class="fa-solid fa-rectangle-ad text-amber-500"></i> Bütün Elanlar
@@ -74,11 +66,9 @@
             <span id="adCounter" class="text-xs text-slate-400 bg-gray-900 px-3 py-1.5 rounded-lg border border-gray-800">Cəmi 0 elan tapıldı</span>
         </div>
 
-        <!-- Ads Grid -->
         <div id="adsGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6"></div>
     </main>
 
-    <!-- Modal -->
     <div id="adModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden items-center justify-center p-4">
         <div class="bg-gray-900 border border-gray-800 w-full max-w-xl rounded-3xl overflow-hidden shadow-2xl relative max-h-[90vh] flex flex-col">
             <button onclick="closeModal()" class="absolute top-4 right-4 bg-gray-950/80 hover:bg-amber-500 hover:text-slate-950 text-slate-300 w-8 h-8 rounded-full flex items-center justify-center transition z-10">
@@ -88,7 +78,6 @@
         </div>
     </div>
 
-    <!-- Script Logic -->
     <script>
         let currentCategoryFilter = "";
 
@@ -258,13 +247,13 @@
                                 vin: vinVal,
                                 category: 'auto',
                                 address: `${res.PlantCountry || 'Baza məlumatı'}, ${res.VehicleType || 'Avtomobil'}`,
-                                autoPrice: 'Qlobal Baza',
-                                description: `Zavod məlumatları: Mühərrik: ${res.DisplacementL || '-'}L, Yanacaq: ${res.FuelTypePrimary || '-'}`
+                                autoPrice: 'Qlobal Baza Nəticəsi',
+                                description: `Ən rəsmi zavod məlumatları: Mühərrik: ${res.DisplacementL || '-'}L, Yanacaq növü: ${res.FuelTypePrimary || '-'}, İstehsalçı: ${res.Manufacturer || '-'}`
                             };
                         }
                     }
                 } catch (e) {
-                    console.error("Baza xətası:", e);
+                    console.error("Xarici baza xətası:", e);
                 }
             }
 
@@ -280,16 +269,16 @@
                 grid.innerHTML = `
                     <div class="col-span-full text-center py-16 text-slate-500">
                         <i class="fa-solid fa-car-slash text-4xl mb-3 text-amber-500/50"></i>
-                        <p class="text-sm">Axtarışa uyğun nəticə tapılmadı.</p>
+                        <p class="text-sm">Heç bir yerdə bu VIN koda uyğun avtomobil tapılmadı.</p>
                     </div>
                 `;
                 return;
             }
 
             displayList.reverse().forEach(ad => {
-                let badgeText = ad.autoPrice === 'Qlobal Baza' ? 'Rəsmi Baza' : 'Avtomobil';
-                let badgeClass = ad.autoPrice === 'Qlobal Baza' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30';
-                let priceText = ad.autoPrice === 'Qlobal Baza' ? 'Rəsmi Yoxlama' : `${ad.autoPrice} AZN`;
+                let badgeText = ad.autoPrice === 'Qlobal Baza Nəticəsi' ? 'Rəsmi Baza' : 'Avtomobil';
+                let badgeClass = ad.autoPrice === 'Qlobal Baza Nəticəsi' ? 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30' : 'bg-red-500/20 text-red-400 border-red-500/30';
+                let priceText = ad.autoPrice === 'Qlobal Baza Nəticəsi' ? 'Rəsmi Baza Nəticəsi' : `${ad.autoPrice} AZN`;
                 let subInfo = `${ad.autoBrand || ''} ${ad.autoModel || ''} (${ad.autoYear || ''})`;
 
                 const imageHtml = ad.image 
