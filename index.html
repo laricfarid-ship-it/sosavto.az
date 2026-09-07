@@ -54,17 +54,17 @@
         <!-- Axtarış Paneli (Dinamik Dəyişir) -->
         <div class="bg-gray-900/90 border border-amber-500/30 p-4 rounded-2xl shadow-2xl backdrop-blur max-w-4xl mx-auto grid grid-cols-1 sm:grid-cols-5 gap-3 items-center">
             
-            <!-- 1-ci Seçim (Marka və ya Ehtiyat Hissə / Xidmət növü) -->
+            <!-- 1-ci Seçim -->
             <select id="filterFirst" onchange="onFirstFilterChange()" class="w-full bg-gray-950 border border-gray-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 cursor-pointer">
                 <option value="">Bütün Markalar</option>
             </select>
             
-            <!-- 2-ci Seçim (Model və ya Əlavə Alt Kateqoriya) -->
+            <!-- 2-ci Seçim -->
             <select id="filterSecond" onchange="filterAds()" disabled class="w-full bg-gray-950 border border-gray-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 cursor-pointer disabled:opacity-50">
-                <option value="">Əvvəlcə Marka Seçin</option>
+                <option value="">Əvvəlcə seçim edin</option>
             </select>
 
-            <!-- 3-cü Seçim (İl və ya Əlavə Filtr) -->
+            <!-- 3-cü Seçim (İl) -->
             <select id="filterThird" onchange="filterAds()" class="w-full bg-gray-950 border border-gray-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">
                 <option value="">Bütün İllər</option>
             </select>
@@ -144,10 +144,10 @@
         };
 
         const partsData = {
-            "Mühərrik və Detalları": ["Remen və Roliklər", "Mühərrik Yastığı (Paduşka)", "Porşen və Klapanlar", "Kart்டர் və Qapaqlar", "Turbina və Kompressor"],
-            "Filterlər və Yağlar": ["Yağ फिल्टरi", "Hava Filteri", "Salon Filteri", "Yanacaq Filteri", "Mühərrik Yağı", "Sürətlər Qutusu Yağı"],
-            "Əyləc Sistemi": ["Əyləc Bəndi ( Naklatka )", "Əyləc Diski", "Əyləc Silindri", "Əyləc Mayesiyle"],
-            "Asqı və Xodovoy": ["Amortizator", "Ling (R рычаг)", "Stoyka Stalibizator", "Şarnir (Qranat)", "Suprav və Vtulka"],
+            "Mühərrik və Detalları": ["Remen və Roliklər", "Mühərrik Yastığı (Paduşka)", "Porşen və Klapanlar", "Karter və Qapaqlar", "Turbina və Kompressor"],
+            "Filterlər və Yağlar": ["Yağ Filteri", "Hava Filteri", "Salon Filteri", "Yanacaq Filteri", "Mühərrik Yağı", "Sürətlər Qutusu Yağı"],
+            "Əyləc Sistemi": ["Əyləc Bəndi (Naklatka)", "Əyləc Diski", "Əyləc Silindri", "Əyləc Mayesi"],
+            "Asqı və Xodovoy": ["Amortizator", "Ling (Rıçaq)", "Stoyka Stabilizator", "Şarnir (Qranat)", "Suprav və Vtulka"],
             "Kuzov və Optika": ["Fara və İşıqlar", "Bumfer (Bufer)", "Qanad (Krilo)", "Kapot və Baqaj", "Güzgü və Şüşələr"],
             "Elektrik Avadanlıqları": ["Akkumulyator", "Starter və Dinamo", "Sensor və Datçiklər", "Şamlar (Sveça) və Qatlama"]
         };
@@ -175,7 +175,7 @@
             secondSelect.disabled = true;
             thirdSelect.disabled = false;
 
-            // İlləri sıfırdan doldur
+            // İlləri doldur
             thirdSelect.innerHTML = '<option value="">Bütün İllər</option>';
             const currentYear = new Date().getFullYear();
             for (let y = currentYear; y >= 1990; y--) {
@@ -184,9 +184,47 @@
                 opt.textContent = y;
                 thirdSelect.appendChild(opt);
             }
+            thirdSelect.className = "w-full bg-gray-950 border border-gray-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 cursor-pointer";
 
-            if (currentCategoryFilter === "" || currentCategoryFilter === "auto") {
-                // Avtomobil rejimi
+            if (currentCategoryFilter === "") {
+                // BÜTÜN ELANLAR: Həm Markalar, həm Ehtiyat Hissəsi Kateqoriyaları, həm Servislər bir yerdə qrup halında gəlir
+                let defOpt = document.createElement('option');
+                defOpt.value = "";
+                defOpt.textContent = "Bütün Kateqoriyalar və Markalar";
+                firstSelect.appendChild(defOpt);
+
+                // Qruplar əlavə edirik
+                let optGroup1 = document.createElement('optgroup');
+                optGroup1.label = "--- Avtomobil Markaları ---";
+                Object.keys(carData).sort().forEach(brand => {
+                    let opt = document.createElement('option');
+                    opt.value = brand;
+                    opt.textContent = brand;
+                    optGroup1.appendChild(opt);
+                });
+                firstSelect.appendChild(optGroup1);
+
+                let optGroup2 = document.createElement('optgroup');
+                optGroup2.label = "--- Ehtiyat Hissəsi Növləri ---";
+                Object.keys(partsData).forEach(cat => {
+                    let opt = document.createElement('option');
+                    opt.value = cat;
+                    opt.textContent = cat;
+                    optGroup2.appendChild(opt);
+                });
+                firstSelect.appendChild(optGroup2);
+
+                let optGroup3 = document.createElement('optgroup');
+                optGroup3.label = "--- Xidmət Sahələri ---";
+                Object.keys(serviceData).forEach(srv => {
+                    let opt = document.createElement('option');
+                    opt.value = srv;
+                    opt.textContent = srv;
+                    optGroup3.appendChild(opt);
+                });
+                firstSelect.appendChild(optGroup3);
+
+            } else if (currentCategoryFilter === "auto") {
                 let defOpt = document.createElement('option');
                 defOpt.value = "";
                 defOpt.textContent = "Bütün Markalar";
@@ -198,11 +236,8 @@
                     opt.textContent = brand;
                     firstSelect.appendChild(opt);
                 });
-                thirdSelect.disabled = false;
-                thirdSelect.className = "w-full bg-gray-950 border border-gray-700 text-slate-200 text-sm rounded-xl px-4 py-3 focus:outline-none focus:border-amber-400 cursor-pointer";
 
             } else if (currentCategoryFilter === "parts") {
-                // Ehtiyat hissələri rejimi
                 let defOpt = document.createElement('option');
                 defOpt.value = "";
                 defOpt.textContent = "Bütün Ehtiyat Hissə Növləri";
@@ -215,13 +250,11 @@
                     firstSelect.appendChild(opt);
                 });
 
-                // Ehtiyat hissəsində il vacib deyil -> bozardırıq (disabled)
                 thirdSelect.value = "";
                 thirdSelect.disabled = true;
                 thirdSelect.className = "w-full bg-gray-950/40 border border-gray-800 text-slate-600 text-sm rounded-xl px-4 py-3 cursor-not-allowed opacity-40";
 
             } else if (currentCategoryFilter === "service") {
-                // Servis / Usta rejimi
                 let defOpt = document.createElement('option');
                 defOpt.value = "";
                 defOpt.textContent = "Bütün Xidmət Sahələri";
@@ -234,7 +267,6 @@
                     firstSelect.appendChild(opt);
                 });
 
-                // Servisdə də il vacib deyil -> bozardırıq (disabled)
                 thirdSelect.value = "";
                 thirdSelect.disabled = true;
                 thirdSelect.className = "w-full bg-gray-950/40 border border-gray-800 text-slate-600 text-sm rounded-xl px-4 py-3 cursor-not-allowed opacity-40";
@@ -265,8 +297,8 @@
             secondSelect.appendChild(defOpt);
 
             let sourceMap = carData;
-            if (currentCategoryFilter === 'parts') sourceMap = partsData;
-            if (currentCategoryFilter === 'service') sourceMap = serviceData;
+            if (partsData[val]) sourceMap = partsData;
+            else if (serviceData[val]) sourceMap = serviceData;
 
             if (sourceMap[val]) {
                 sourceMap[val].forEach(item => {
@@ -316,16 +348,26 @@
                 let matchSecond = true;
                 let matchThird = true;
 
-                if (currentCategoryFilter === 'auto' || currentCategoryFilter === "") {
-                    if (firstVal && ad.autoBrand !== firstVal) matchFirst = false;
-                    if (secondVal && ad.autoModel !== secondVal) matchSecond = false;
-                    if (thirdVal && String(ad.autoYear) !== String(thirdVal)) matchThird = false;
-                } else if (currentCategoryFilter === 'parts') {
-                    if (firstVal && ad.partCategory !== firstVal) matchFirst = false;
-                    if (secondVal && ad.partSubCategory !== secondVal) matchSecond = false;
-                } else if (currentCategoryFilter === 'service') {
-                    if (firstVal && ad.serviceCategory !== firstVal) matchFirst = false;
-                    if (secondVal && ad.serviceType !== secondVal) matchSecond = false;
+                if (firstVal) {
+                    if (ad.autoBrand === firstVal || ad.partCategory === firstVal || ad.serviceCategory === firstVal) {
+                        matchFirst = true;
+                    } else {
+                        matchFirst = false;
+                    }
+                }
+
+                if (secondVal) {
+                    if (ad.autoModel === secondVal || ad.partSubCategory === secondVal || ad.serviceType === secondVal) {
+                        matchSecond = true;
+                    } else {
+                        matchSecond = false;
+                    }
+                }
+
+                if (thirdVal && (currentCategoryFilter === 'auto' || currentCategoryFilter === "")) {
+                    if (ad.autoYear && String(ad.autoYear) !== String(thirdVal)) {
+                        matchThird = false;
+                    }
                 }
 
                 return matchCat && matchFirst && matchSecond && matchThird;
@@ -408,9 +450,7 @@
             secondSelect.value = "";
             secondSelect.disabled = true;
             secondSelect.innerHTML = '<option value="">Əvvəlcə seçim edin</option>';
-            if(currentCategoryFilter === 'auto' || currentCategoryFilter === "") {
-                document.getElementById('filterThird').value = "";
-            }
+            document.getElementById('filterThird').value = "";
             loadAds();
         }
 
