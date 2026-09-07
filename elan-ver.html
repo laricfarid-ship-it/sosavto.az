@@ -30,51 +30,138 @@
     <!-- Form Container -->
     <main class="max-w-3xl mx-auto my-8 px-4">
         <div class="bg-white p-6 md:p-8 rounded-2xl shadow-sm border border-slate-200">
-            <h1 class="text-2xl font-bold text-slate-900 mb-2">Yeni Xidmət / Elan Əlavə Et</h1>
-            <p class="text-slate-500 text-sm mb-6">Məlumatları doldurun və xəritədə dəqiq yerinizi qeyd edin.</p>
+            <h1 class="text-2xl font-bold text-slate-900 mb-2">Yeni Elan Yerləşdir</h1>
+            <p class="text-slate-500 text-sm mb-6">Elan tipini seçin, lazımi məlumatları doldurun və xəritədə yerinizi qeyd edin.</p>
 
-            <form id="adForm" class="space-y-5">
-                <!-- Başlıq -->
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Elanın Başlığı</label>
-                    <input type="text" id="title" required placeholder="Məs: 7/24 Təcili Evakuator Xidməti" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-sm">
+            <form id="adForm" class="space-y-6">
+                <!-- 1. Kateqoriya Seçimi -->
+                <div class="bg-slate-50 p-4 border border-slate-200 rounded-xl">
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">1. Elanın Növünü Seçin</label>
+                    <select id="mainCategory" onchange="handleCategoryChange()" required class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-sm bg-white font-semibold text-slate-800">
+                        <option value="">-- Kateqoriya Seçin --</option>
+                        <option value="auto">🚗 Avtomobil Satışı</option>
+                        <option value="service">🛠️ Xidmət / Obyekt (Moyka, Yağ dəyişmə, Təkər, Servis, Evakuator)</option>
+                        <option value="parts">🧩 Ehtiyat Hissəsi / Aksesuar</option>
+                    </select>
                 </div>
 
-                <!-- Kateqoriya & Telefon -->
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- 2. Əsas Məlumatlar (Hər kəs üçün) -->
+                <div id="generalFields" class="space-y-4 hidden">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Elanın Başlığı</label>
+                            <input type="text" id="title" required placeholder="Məs: BMW F30 2015 / Avto Moyka 7/24 / Mobil 1 Yağ Dəyişmə" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-sm">
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Əlaqə Nömrəsi</label>
+                            <input type="tel" id="phone" required placeholder="+994 50 000 00 00" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-sm">
+                        </div>
+                    </div>
+
+                    <!-- AVTOMOBİL SAHƏLƏRİ -->
+                    <div id="autoSection" class="hidden space-y-4 p-4 bg-red-50/50 border border-red-200 rounded-xl">
+                        <h3 class="text-xs font-bold text-red-600 uppercase tracking-wider">Avtomobil Parametrləri</h3>
+                        <div class="grid grid-cols-2 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Marka</label>
+                                <input type="text" id="autoBrand" placeholder="Məs: Mercedes-Benz" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Model</label>
+                                <input type="text" id="autoModel" placeholder="Məs: E-Class" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Buraxılış İli</label>
+                                <input type="number" id="autoYear" placeholder="2018" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Yürüş (km)</label>
+                                <input type="number" id="autoMileage" placeholder="140000" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Sürətlər Qutusu</label>
+                                <select id="autoTransmission" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                                    <option value="Avtomat">Avtomat</option>
+                                    <option value="Mexanika">Mexanika</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Qiymət (AZN)</label>
+                                <input type="number" id="autoPrice" placeholder="25000" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- XİDMƏT / OBYEKT SAHƏLƏRİ -->
+                    <div id="serviceSection" class="hidden space-y-4 p-4 bg-blue-50/50 border border-blue-200 rounded-xl">
+                        <h3 class="text-xs font-bold text-blue-600 uppercase tracking-wider">Obyekt və Xidmət Növü</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Obyekt Tipi</label>
+                                <select id="serviceType" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                                    <option value="Yağ Dəyişmə">🛢️ Yağ Dəyişmə Məntəqəsi</option>
+                                    <option value="Moyka">🧼 Avto Moyka / Detailing</option>
+                                    <option value="Təkər">🛞 Təkər Təmiri və Balans (Vulkanizasiya)</option>
+                                    <option value="Servis">🛠️ Ümumi Avto Servis / Usta</option>
+                                    <option value="Evakuator">🚨 Evakuator Xidməti</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">İş Saatları</label>
+                                <input type="text" id="serviceHours" placeholder="Məs: 09:00 - 21:00 və ya 24/7 Təcili" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- EHTİYAT HİSSƏSİ SAHƏLƏRİ -->
+                    <div id="partsSection" class="hidden space-y-4 p-4 bg-amber-50/50 border border-amber-200 rounded-xl">
+                        <h3 class="text-xs font-bold text-amber-600 uppercase tracking-wider">Ehtiyat Hissəsi Məlumatı</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Vəziyyəti</label>
+                                <select id="partCondition" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                                    <option value="Yeni">Təzə (Yeni)</option>
+                                    <option value="İşlənmiş">İşlənmiş (İkinci əl)</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Uyğun Marka / Model</label>
+                                <input type="text" id="partFitment" placeholder="Məs: Toyota Corolla / Universal" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                            </div>
+                            <div>
+                                <label class="block text-[11px] font-semibold text-slate-600 mb-1">Qiymət (AZN)</label>
+                                <input type="number" id="partPrice" placeholder="150" class="w-full px-3 py-2 border rounded-lg text-sm bg-white">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Şəkil Əlavə Etmə -->
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Kateqoriya</label>
-                        <select id="category" required class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-sm bg-white">
-                            <option value="evakuator">Evakuator</option>
-                            <option value="servis">Avto Servis / Usta</option>
-                        </select>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Şəkil Əlavə Et</label>
+                        <input type="file" id="imageInput" accept="image/*" class="w-full text-sm text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-100 file:text-slate-700 hover:file:bg-slate-200 transition">
                     </div>
+
+                    <!-- Ünvan -->
                     <div>
-                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Əlaqə Nömrəsi</label>
-                        <input type="tel" id="phone" required placeholder="+994 50 000 00 00" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-sm">
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Ünvan / Yerləşdiyi Məkan</label>
+                        <input type="text" id="address" required placeholder="Məs: Nərimanov r., Təbriz küçəsi 45" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-sm">
                     </div>
-                </div>
 
-                <!-- Ünvan -->
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Ünvan / Məkan Təsviri</label>
-                    <input type="text" id="address" required placeholder="Məs: Nərimanov r., Təbriz küçəsi" class="w-full px-4 py-3 border border-slate-300 rounded-xl focus:ring-2 focus:ring-red-500 focus:outline-none text-sm">
-                </div>
-
-                <!-- Xəritədən Nöqtə Seçimi -->
-                <div>
-                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Xəritədə Yerinizi Qeyd Edin (Klikləyin)</label>
-                    <div id="picker-map" class="mb-2 border border-slate-300"></div>
-                    <div class="grid grid-cols-2 gap-2 text-xs text-slate-500">
-                        <input type="text" id="lat" readonly required placeholder="Enlem (Lat)" class="bg-slate-50 border px-3 py-2 rounded-lg text-slate-600">
-                        <input type="text" id="lng" readonly required placeholder="Boylam (Lng)" class="bg-slate-50 border px-3 py-2 rounded-lg text-slate-600">
+                    <!-- Xəritədən Nöqtə Seçimi -->
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Xəritədə Yerinizi Qeyd Edin (Mütləqdir)</label>
+                        <div id="picker-map" class="mb-2 border border-slate-300"></div>
+                        <div class="grid grid-cols-2 gap-2 text-xs text-slate-500">
+                            <input type="text" id="lat" readonly required placeholder="Enlem (Lat)" class="bg-slate-50 border px-3 py-2 rounded-lg text-slate-600">
+                            <input type="text" id="lng" readonly required placeholder="Boylam (Lng)" class="bg-slate-50 border px-3 py-2 rounded-lg text-slate-600">
+                        </div>
                     </div>
-                </div>
 
-                <!-- Düymə -->
-                <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-red-600/20 text-sm">
-                    <i class="fa-solid fa-paper-plane mr-1"></i> Elanı Dərc Et və Xəritəyə Əlavə Et
-                </button>
+                    <!-- Göndər Düyməsi -->
+                    <button type="submit" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3.5 rounded-xl transition shadow-lg shadow-red-600/20 text-sm">
+                        <i class="fa-solid fa-paper-plane mr-1"></i> Elanı Dərc Et
+                    </button>
+                </div>
             </form>
         </div>
     </main>
@@ -93,7 +180,6 @@
 
         pickerMap.on('click', function(e) {
             const { lat, lng } = e.latlng;
-
             document.getElementById('lat').value = lat.toFixed(6);
             document.getElementById('lng').value = lng.toFixed(6);
 
@@ -104,29 +190,85 @@
             }
         });
 
-        // Form Göndərildikdə Məlumatı LocalStorage-ə yazmaq
+        // Kateqoriyaya uyğun form xanalarını göstərmək
+        function handleCategoryChange() {
+            const cat = document.getElementById('mainCategory').value;
+            const general = document.getElementById('generalFields');
+            const autoSection = document.getElementById('autoSection');
+            const serviceSection = document.getElementById('serviceSection');
+            const partsSection = document.getElementById('partsSection');
+
+            if (!cat) {
+                general.classList.add('hidden');
+                return;
+            }
+
+            general.classList.remove('hidden');
+            autoSection.classList.add('hidden');
+            serviceSection.classList.add('hidden');
+            partsSection.classList.add('hidden');
+
+            if (cat === 'auto') autoSection.classList.remove('hidden');
+            if (cat === 'service') serviceSection.classList.remove('hidden');
+            if (cat === 'parts') partsSection.classList.remove('hidden');
+            
+            // Xəritənin ölçüsünü yeniləmək
+            setTimeout(() => pickerMap.invalidateSize(), 200);
+        }
+
+        // Form Göndərildikdə Məlumatı Saxlamaq
         document.getElementById('adForm').addEventListener('submit', function(e) {
             e.preventDefault();
 
-            const newAd = {
-                id: Date.now(),
-                title: document.getElementById('title').value,
-                category: document.getElementById('category').value,
-                phone: document.getElementById('phone').value,
-                address: document.getElementById('address').value,
-                lat: parseFloat(document.getElementById('lat').value),
-                lng: parseFloat(document.getElementById('lng').value)
+            const cat = document.getElementById('mainCategory').value;
+            const imageFile = document.getElementById('imageInput').files[0];
+
+            const saveAd = (imageData = '') => {
+                const newAd = {
+                    id: Date.now(),
+                    category: cat,
+                    title: document.getElementById('title').value,
+                    phone: document.getElementById('phone').value,
+                    address: document.getElementById('address').value,
+                    image: imageData,
+                    lat: parseFloat(document.getElementById('lat').value),
+                    lng: parseFloat(document.getElementById('lng').value),
+                    
+                    // Avto Məlumatları
+                    autoBrand: document.getElementById('autoBrand').value,
+                    autoModel: document.getElementById('autoModel').value,
+                    autoYear: document.getElementById('autoYear').value,
+                    autoMileage: document.getElementById('autoMileage').value,
+                    autoTransmission: document.getElementById('autoTransmission').value,
+                    autoPrice: document.getElementById('autoPrice').value,
+
+                    // Servis Məlumatları
+                    serviceType: document.getElementById('serviceType').value,
+                    serviceHours: document.getElementById('serviceHours').value,
+
+                    // Hissə Məlumatları
+                    partCondition: document.getElementById('partCondition').value,
+                    partFitment: document.getElementById('partFitment').value,
+                    partPrice: document.getElementById('partPrice').value
+                };
+
+                const existingAds = JSON.parse(localStorage.getItem('sosavto_ads')) || [];
+                existingAds.push(newAd);
+                localStorage.setItem('sosavto_ads', JSON.stringify(existingAds));
+
+                alert('Elanınız uğurla yerləşdirildi!');
+                window.location.href = 'xarita.html';
             };
 
-            // Yaddaşdakı köhnə elanları almaq
-            const existingAds = JSON.parse(localStorage.getItem('sosavto_ads')) || [];
-            existingAds.push(newAd);
-
-            // Yenilənmiş siyahını yaddaşa yazmaq
-            localStorage.setItem('sosavto_ads', JSON.stringify(existingAds));
-
-            alert('Elanınız uğurla əlavə olundu və xəritədə yerləşdirildi!');
-            window.location.href = 'xarita.html';
+            if (imageFile) {
+                const reader = new FileReader();
+                reader.onload = function(evt) {
+                    saveAd(evt.target.result);
+                };
+                reader.readAsDataURL(imageFile);
+            } else {
+                saveAd();
+            }
         });
     </script>
 </body>
