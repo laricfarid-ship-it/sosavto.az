@@ -239,7 +239,7 @@
         }
         yearSelect.innerHTML = yearsHtml;
 
-        // VIN Kod daxil edildikdə hem texniki detalları, hem de orijinal arxiv şəklini gətirən sistem
+        // VIN Kod daxil edildikdə hem texniki detalları, hem de stabil şəkil mənbəsindən şəkli gətirən sistem
         vinInput.addEventListener('input', async function() {
             let vin = this.value.trim().toUpperCase();
             if(vin.length === 17) {
@@ -269,10 +269,8 @@
                         <div class="col-span-2 text-accentGold font-semibold mt-1"><i class="fa-solid fa-fingerprint"></i> VIN: ${vin}</div>
                     `;
 
-                    // Orijinal/Arxiv şəkil təyini (Google və Hərracların açıq arxiv vizual bazası üzərindən simulyasiya və marka/model uyğunlaşdırma)
-                    let query = encodeURIComponent(`${make} ${model} ${year} car real photo`);
-                    // Google/Hərrac arxiv şəkillərini dəqiq əks etdirmək üçün dinamik avtomobil qovşağı
-                    carPreviewImg.src = `https://loremflickr.com/600/400/${encodeURIComponent(make + ' ' + model)},car/all`;
+                    // Stabil və işlək açıq avtomobil şəkil bazası (Wikimedia Commons / Unsplash dinamik axtarış linki)
+                    carPreviewImg.src = `https://source.unsplash.com/featured/600x400/?${encodeURIComponent(make + ' ' + model)}`;
 
                     if(carData[make]) {
                         brandSelect.value = make;
