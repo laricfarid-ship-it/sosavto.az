@@ -76,7 +76,7 @@
         <div class="neon-glass neon-glow p-8 rounded-3xl space-y-6">
             <div class="text-center space-y-2">
                 <h1 class="text-2xl md:text-3xl font-black text-white">Yeni Elan <span class="text-transparent bg-clip-text bg-gradient-to-r from-accentBlue to-accentPurple neon-text-glow">Yerləşdirin</span></h1>
-                <p class="text-gray-400 text-xs">Kateqoriya seçin, parametrləri təyin edin və xəritədə dəqiq yerinizi qeyd edin.</p>
+                <p class="text-gray-400 text-xs">Dünya bazarının bütün marka və modellərindən seçiminizi edin.</p>
             </div>
 
             <form onsubmit="submitAd(event)" class="space-y-5">
@@ -94,58 +94,115 @@
                 <!-- Ümumi Başlıq -->
                 <div>
                     <label class="block text-xs font-semibold text-gray-300 mb-1.5">Elan Başlığı</label>
-                    <input type="text" id="adTitle" placeholder="Məs: İdeal vəziyyətdə Kia Optima buferi və ya Peşəkar Motor Ustası" required class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
+                    <input type="text" id="adTitle" placeholder="Məs: İdeal vəziyyətdə BYD Song Plus və ya Peşəkar Motor Ustası" required class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                 </div>
 
-                <!-- 1. AVTOMOBİL SEKTORU -->
+                <!-- 1. AVTOMOBİL SEKTORU (BÜTÜN DÜNYA BAZARI) -->
                 <div id="carFields" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">Marka</label>
-                        <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
+                        <select id="carBrand" onchange="updateModels()" class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                             <option value="">Marka seçin</option>
-                            <option>Mercedes</option><option>BMW</option><option>Kia</option><option>Hyundai</option><option>Toyota</option><option>Chevrolet</option>
+                            <optgroup label="🇩🇪 Almaniya / Avropa">
+                                <option value="Mercedes-Benz">Mercedes-Benz</option>
+                                <option value="BMW">BMW</option>
+                                <option value="Audi">Audi</option>
+                                <option value="Volkswagen">Volkswagen</option>
+                                <option value="Porsche">Porsche</option>
+                                <option value="Skoda">Skoda</option>
+                                <option value="Renault">Renault</option>
+                                <option value="Peugeot">Peugeot</option>
+                                <option value="Land Rover">Land Rover</option>
+                                <option value="Volvo">Volvo</option>
+                            </optgroup>
+                            <optgroup label="🇨🇳 Çin Bazarı">
+                                <option value="BYD">BYD</option>
+                                <option value="Changan">Changan</option>
+                                <option value="Chery">Chery</option>
+                                <option value="Geely">Geely</option>
+                                <option value="LiXiang">LiXiang (Lixiang)</option>
+                                <option value="Zeekr">Zeekr</option>
+                                <option value="Exeed">Exeed</option>
+                                <option value="Haval">Haval</option>
+                                <option value="Tank">Tank</option>
+                                <option value="Nio">Nio</option>
+                            </optgroup>
+                            <optgroup label="🇰🇷 Koreya Bazarı">
+                                <option value="Hyundai">Hyundai</option>
+                                <option value="Kia">Kia</option>
+                                <option value="Genesis">Genesis</option>
+                                <option value="Daewoo">Daewoo</option>
+                            </optgroup>
+                            <optgroup label="🇯🇵 Yaponiya Bazarı">
+                                <option value="Toyota">Toyota</option>
+                                <option value="Lexus">Lexus</option>
+                                <option value="Nissan">Nissan</option>
+                                <option value="Honda">Honda</option>
+                                <option value="Subaru">Subaru</option>
+                                <option value="Mitsubishi">Mitsubishi</option>
+                                <option value="Mazda">Mazda</option>
+                                <option value="Infiniti">Infiniti</option>
+                            </optgroup>
+                            <optgroup label="🇺🇸 Amerika & Digər">
+                                <option value="Chevrolet">Chevrolet</option>
+                                <option value="Ford">Ford</option>
+                                <option value="Tesla">Tesla</option>
+                                <option value="Jeep">Jeep</option>
+                                <option value="Dodge">Dodge</option>
+                                <option value="Cadillac">Cadillac</option>
+                                <option value="Fiat">Fiat</option>
+                                <option value="Lada">Lada (VAZ)</option>
+                            </optgroup>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">Model</label>
-                        <input type="text" placeholder="Məs: E 220 / Optima" class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
+                        <select id="carModel" class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
+                            <option value="">Əvvəlcə marka seçin</option>
+                        </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">Buraxılış İli</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
-                            <option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2020</option><option>2015</option><option>2010</option>
+                            <option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2015</option><option>2010</option><option>2005</option><option>2000 və əvvəl</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">Yürüş (km)</label>
-                        <input type="number" placeholder="Məs: 140000" class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
+                        <input type="number" placeholder="Məs: 45000" class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                     </div>
                     <div class="md:col-span-2">
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">Qiymət (AZN)</label>
-                        <input type="number" placeholder="Məs: 28000" class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
+                        <input type="number" placeholder="Məs: 35000" class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                     </div>
                 </div>
 
                 <!-- 2. EHTİYAT HİSSƏSİ SEKTORU -->
                 <div id="spareFields" class="grid grid-cols-1 md:grid-cols-3 gap-4 hidden">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Model</label>
-                        <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
-                            <option value="">Model seçin</option>
-                            <option>Kia Optima / K5</option><option>Hyundai Sonata</option><option>Mercedes W211</option><option>BMW F30</option>
-                        </select>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Hansı Model Üçündür?</label>
+                        <input type="text" placeholder="Məs: BYD Song Plus / Kia K5" class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">Ehtiyat Hissəsinin Növü</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                             <option value="">Hissə seçin</option>
-                            <option>Ön / Arxa Bufer</option><option>Fara / Stop işığı</option><option>Əyləc bəndi (Naklatka)</option><option>Filterlər</option><option>Amortizator</option>
+                            <option>Ön / Arxa Bufer</option>
+                            <option>Fara / Stop işığı</option>
+                            <option>Əyləc bəndi (Naklatka)</option>
+                            <option>Filterlər (Yağ, Hava)</option>
+                            <option>Amortizator / Asqı</option>
+                            <option>Mühərrik və karobka hissələri</option>
+                            <option>Batareya / Elektrik hissələri</option>
+                            <option>Aksesuar</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">Vəziyyəti</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
-                            <option>Yeni</option><option>Az işlənmiş</option><option>Köhnə / Bərpa olunan</option>
+                            <option>Yeni (Orijinal / Firm)</option>
+                            <option>Az işlənmiş (Üstdənçıxma)</option>
+                            <option>Köhnə / Bərpa olunan</option>
                         </select>
                     </div>
                     <div class="md:col-span-3">
@@ -160,13 +217,20 @@
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">İxtisas Sahəsi</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                             <option value="">Usta sahəsi seçin</option>
-                            <option>🔧 Motorist</option><option>⚙️ Xodovik</option><option>⚡ Avtoelektrik / Diaqnostika</option><option>🎨 Malyar</option><option>🔨 Çilingər</option>
+                            <option>🔧 Motorist (Mühərrik ustası)</option>
+                            <option>⚙️ Xodovik (Asqı sistemləri)</option>
+                            <option>⚡ Elektrik / Diaqnostika (Tesla & Çin xüsusi)</option>
+                            <option>🎨 Malyar / Rəngsaz</option>
+                            <option>🔨 Çilingər / Rixtovka</option>
+                            <option>🚗 Ümumi Avtoservis</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">İş Saatları</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
-                            <option>09:00 - 19:00 (Hər gün)</option><option>09:00 - 20:00</option><option>24 Saat (Gecə də işləyir)</option>
+                            <option>09:00 - 19:00 (Hər gün)</option>
+                            <option>09:00 - 20:00 (Bazar ertəsi - Şənbə)</option>
+                            <option>24 Saat (Gecə də işləyir)</option>
                         </select>
                     </div>
                 </div>
@@ -177,13 +241,16 @@
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">Xidmət Növü</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                             <option value="">Moyka növü seçin</option>
-                            <option>🧼 Əl ilə Sadə Moyka</option><option>✨ Detailing & Ximçistka</option><option>🛡️ Keramika & Polirovkа</option>
+                            <option>🧼 Əl ilə Sadə Moyka</option>
+                            <option>✨ Detailing & Ximçistka</option>
+                            <option>🛡️ Keramika örtük & Polirovkа</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">İş Saatları</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
-                            <option>08:00 - 22:00 (Hər gün)</option><option>24 Saat</option>
+                            <option>08:00 - 22:00 (Hər gün)</option>
+                            <option>24 Saat (Gecə moykası)</option>
                         </select>
                     </div>
                 </div>
@@ -239,7 +306,75 @@
     <!-- Leaflet JS Xəritə Skripti -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
-        // Xəritəni Bakı mərkəzli başladırıq
+        // Markalara uyğun zəngin model bazası
+        const modelsData = {
+            "Mercedes-Benz": ["C-Class", "E-Class", "S-Class", "GLE", "GLS", "G-Class", "A-Class", "CLA", "ML-Class", "W210", "W211", "W212", "W140"],
+            "BMW": ["3 Series (E46, F30, G20)", "5 Series (E39, E60, F10, G30)", "7 Series", "X3", "X5", "X6", "M3", "M5"],
+            "Audi": ["A4", "A6", "A8", "Q5", "Q7", "Q8", "RS6"],
+            "Volkswagen": ["Golf", "Passat", "Tiguan", "Jetta", "Touareg", "Polo"],
+            "Porsche": ["Cayenne", "Macan", "Panamera", "Taycan"],
+            "Skoda": ["Octavia", "Superb", "Kodiaq", "Rapid"],
+            "Renault": ["Megane", "Duster", "Logan", "Symbol"],
+            "Peugeot": ["3008", "5008", "2008", "308", "408"],
+            "Land Rover": ["Range Rover", "Range Rover Sport", "Defender", "Discovery"],
+            "Volvo": ["XC60", "XC90", "S60", "S90"],
+            
+            "BYD": ["Song Plus", "Han", "Seal", "Qin Plus", "Atto 3", "Destroyer 05"],
+            "Changan": ["CS35 Plus", "CS55 Plus", "CS75 Plus", "Uni-K", "Uni-T"],
+            "Chery": ["Tiggo 2", "Tiggo 4 Pro", "Tiggo 7 Pro", "Tiggo 8 Pro", "Arrizo 8"],
+            "Geely": ["Coolray", "Monjaro", "Atlas Pro", "Tugella"],
+            "LiXiang": ["L7", "L8", "L9"],
+            "Zeekr": ["001", "X", "009"],
+            "Exeed": ["LX", "TXL", "VX", "RX"],
+            "Haval": ["H6", "Jolion", "Dargo"],
+            "Tank": ["300", "500"],
+            "Nio": ["ET5", "ET7", "ES6", "ES8"],
+
+            "Hyundai": ["Elantra", "Sonata", "Tucson", "Santa Fe", "Accent", "Kona", "Palisade"],
+            "Kia": ["Optima / K5", "Sorento", "Sportage", "Cerato", "Rio", "Carnival", "Stinger"],
+            "Genesis": ["G70", "G80", "G90", "GV70", "GV80"],
+            "Daewoo": ["Nexia", "Matiz", "Gentra"],
+
+            "Toyota": ["Camry", "Corolla", "RAV4", "Land Cruiser", "Prado", "Prius", "Highlander", "Avalon"],
+            "Lexus": ["RX 350", "NX 200", "LX 570", "LX 600", "ES 350", "GX 460"],
+            "Nissan": ["X-Trail", "Qashqai", "Patrol", "Sentra", "Teana", "Rogue"],
+            "Honda": ["Civic", "Accord", "CR-V", "HR-V", "Pilot"],
+            "Subaru": ["Forester", "Outback", "Impreza", "XV"],
+            "Mitsubishi": ["Pajero", "Outlander", "ASX", "L200"],
+            "Mazda": ["Mazda 3", "Mazda 6", "CX-5", "CX-9", "CX-30"],
+            "Infiniti": ["FX35", "QX56", "QX80", "Q50"],
+
+            "Chevrolet": ["Cruze", "Malibu", "Equinox", "Traverse", "Niva", "Aveo", "Camaro"],
+            "Ford": ["Fusion", "Focus", "Mustang", "Escape", "Explorer", "Transit"],
+            "Tesla": ["Model 3", "Model Y", "Model S", "Model X", "Cybertruck"],
+            "Jeep": ["Grand Cherokee", "Wrangler", "Compass"],
+            "Dodge": ["Challenger", "Charger", "Durango"],
+            "Cadillac": ["Escalade", "XT5", "XT6"],
+            "Fiat": ["Doblo", "Tipo", "500"],
+            "Lada": ["Niva (2121)", "Priora", "Granta", "Vesta"]
+        };
+
+        function updateModels() {
+            const brandSelect = document.getElementById("carBrand").value;
+            const modelSelect = document.getElementById("carModel");
+            modelSelect.innerHTML = '<option value="">Model seçin</option>';
+
+            if (modelsData[brandSelect]) {
+                modelsData[brandSelect].forEach(model => {
+                    const opt = document.createElement("option");
+                    opt.value = model;
+                    opt.textContent = model;
+                    modelSelect.appendChild(opt);
+                });
+            } else {
+                const opt = document.createElement("option");
+                opt.value = "Digər";
+                opt.textContent = "Digər model";
+                modelSelect.appendChild(opt);
+            }
+        }
+
+        // Xəritə başlanğıcı
         const map = L.map('map').setView([40.4093, 49.8671], 13);
 
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -249,7 +384,6 @@
 
         let marker;
 
-        // Xəritəyə hər dəfə kliklədikdə və ya toxunduqda işarə qoy və ünvanı tap
         map.on('click', function(e) {
             const lat = e.latlng.lat;
             const lng = e.latlng.lng;
@@ -266,7 +400,6 @@
             getAddressFromCoords(lat, lng);
         }
 
-        // Seçilən yerin ünvanını avtomatik olaraq Nominatim API ilə əldə edirik
         function getAddressFromCoords(lat, lng) {
             const addressInput = document.getElementById('selectedAddress');
             addressInput.value = "Ünvan təyin edilir...";
@@ -289,7 +422,6 @@
             });
         }
 
-        // Məni Tap (GPS) düyməsi
         function locateUser() {
             if (navigator.geolocation) {
                 navigator.geolocation.getCurrentPosition(position => {
@@ -329,7 +461,7 @@
                 alert("Zəhmət olmasa xəritədən obyektinizin yerini qeyd edin!");
                 return;
             }
-            alert("Elanınız ünvanla birlikdə uğurla qeydə alındı!");
+            alert("Elanınız bütün detallarla birlikdə uğurla qeydə alındı!");
             window.location.href = "index.html";
         }
 
