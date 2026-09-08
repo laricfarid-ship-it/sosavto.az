@@ -49,6 +49,10 @@
             </a>
             
             <div class="flex items-center space-x-3.5">
+                <button onclick="locateUser()" class="bg-gradient-to-r from-accentBlue to-accentPurple text-darkBg px-4 py-2 rounded-xl text-sm font-bold shadow-lg shadow-accentBlue/20 hover:opacity-90 transition flex items-center space-x-2">
+                    <i class="fa-solid fa-location-crosshairs"></i>
+                    <span>Məni Tap</span>
+                </button>
                 <a href="index.html" class="bg-gray-900/80 hover:bg-gray-800 text-gray-200 px-4.5 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 border border-gray-800">
                     <i class="fa-solid fa-arrow-left text-accentBlue"></i>
                     <span>Ana Səhifə</span>
@@ -64,7 +68,7 @@
                 Servis və Ustaların <span class="text-transparent bg-clip-text bg-gradient-to-r from-accentBlue to-accentPurple neon-text-glow">Xəritəsi</span>
             </h1>
             <p class="text-gray-400 text-sm max-w-lg mx-auto font-light">
-                Bakı şəhəri üzrə etibarlı avto servis, diaqnostika və təmirciləri xəritədən tapın.
+                Bakı şəhəri üzrə etibarlı avto servis və ustaları xəritədən tapın və ya "Məni Tap" düyməsi ilə cari konumunuzu görün.
             </p>
         </div>
 
@@ -77,7 +81,6 @@
                     <span>Yaxınlıqdakı Servislər</span>
                 </h3>
                 <div class="space-y-3" id="service-list">
-                    <!-- Dinamik servis elementləri -->
                     <div onclick="focusService(40.4093, 49.8671, 'Baku Auto Service')" class="bg-gray-900/60 hover:bg-gray-800/80 p-3.5 rounded-xl border border-gray-800 hover:border-accentBlue/50 transition cursor-pointer space-y-1">
                         <h4 class="font-bold text-white text-sm">Baku Auto Service</h4>
                         <p class="text-xs text-gray-400">Ünvan: Babək pr. 45</p>
@@ -120,6 +123,21 @@
         function focusService(lat, lng, name) {
             let iframe = document.getElementById('map-iframe');
             iframe.src = `https://maps.google.com/maps?q=${lat},${lng}&t=&z=15&ie=UTF8&iwloc=&output=embed`;
+        }
+
+        function locateUser() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    let lat = position.coords.latitude;
+                    let lng = position.coords.longitude;
+                    let iframe = document.getElementById('map-iframe');
+                    iframe.src = `https://maps.google.com/maps?q=${lat},${lng}&t=&z=16&ie=UTF8&iwloc=&output=embed`;
+                }, function(error) {
+                    alert("Konum əldə edilə bilmədi. Zəhmət olmasa brauzer icazələrini yoxlayın.");
+                });
+            } else {
+                alert("Sizin brauzer geolokasiyanı dəstəkləmir.");
+            }
         }
     </script>
 </body>
