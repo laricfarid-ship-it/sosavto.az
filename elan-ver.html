@@ -69,16 +69,14 @@
         &copy; 2026 SosAvto.az - Bütün hüquqlar qorunur.
     </footer>
 
-    <!-- JavaScript (İstədiyin skript hissəsi buradadır) -->
     <script>
-        // İstifadəçi daxil olub-olmadığını yoxlayırıq
         const loggedUser = localStorage.getItem('sosavto_logged_user');
         if (!loggedUser) {
-            alert('Elan yerləşdirmək üçün əvvəlcə giriş etməlisiniz!');
+            // İstifadəçinin elan səhifəsindən gəldiyini qeyd edirik
+            localStorage.setItem('sosavto_redirect_after_login', 'elan-ver.html');
             window.location.href = 'giris.html';
         }
 
-        // Elan formunun göndərilməsi məntiqi
         document.getElementById('ad-form').addEventListener('submit', function(e) {
             e.preventDefault();
 
