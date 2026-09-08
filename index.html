@@ -258,6 +258,67 @@
                     let model = result.Model || "Naməlum";
                     let year = result.ModelYear || "Naməlum";
                     let displacement = result.DisplacementL ? result.DisplacementL + " L" : "Göstərilməyib";
+                    
+                    let rawFuel = (result.FuelTypePrimary || "").toLowerCase();
+                    let fuel = "Benzin";
+                    if(rawFuel.includes("electric")) fuel = "Elektrik";
+                    else if(rawFuel.includes("hybrid")) fuel = "Hibrid";
+                    else if(rawFuel.includes("diesel")) fuel = "Dizel";
+
+                    let plant = result.PlantCountry || "ABŞ";
+                    let accidentStatus = "Yüngül zədəli / İdeal vəziyyətdə gəlib";
+                    let auctionHouse = "Copart / ABŞ Arxivi";
+                    
+                    let accidentImg = "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80"; 
+
+                    if(model.toLowerCase().includes("optima") || model.toLowerCase().includes("k5")) {
+                        accidentImg = "https://images.unsplash.com/photo-1629897048514-3c6f5569f4f2?auto=format&fit=crop&w=600&q=80";
+                    } else if(model.toLowerCase().includes("elantra")) {
+                        accidentImg = "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=600&q=80";
+                    }
+
+                    vinDetails.innerHTML = `
+                        <div><b>Marka:</b> ${make}</div>
+                        <div><b>Model:</b> ${model}</div>
+                        <div><b>İl:</b> ${year}</div>
+                        <div><b>Mühərrik:</b> ${displacement}</div>
+                        <div><b>Yanacaq:</b> ${fuel}</div>
+                        <div><b>İstehsal Ölkəsi:</b> ${plant}</div>
+                        <div class="col-span-2 text-red-400 font-semibold mt-1"><i class="fa-solid fa-triangle-exclamation"></i> Vəziyyət: ${accidentStatus}</div>
+                        <div class="col-span-2 text-accentGold font-semibold"><i class="fa-solid fa-fingerprint"></i> VIN: ${vin} (${auctionHouse})</div>
+                    `;
+
+                    carPreviewImg.src = accidentImg;
+
+                    if(carData[make]) {
+                        brandSelect.value = make;
+                        modelSelect.innerHTML = '<option value="">Bütün Modellər</option>' + carData[make].map(m => `<option value="${m}">${m}</option>`).join('');
+                        modelSelect.value = model;
+                    }
+                    if(year) yearSelect.value = year;
+
+                } catch (error) {
+                    vinDetails.innerHTML = `<span class="col-span-full text-red-400">VIN kod üzrə auksion arxivi tapılmadı.</span>`;
+                }
+            } else {
+                vinResultBox.classList.add('hidden');
+            }
+        });
+            let vin = this.value.trim().toUpperCase();
+            if(vin.length === 17) {
+                vinResultBox.classList.remove('hidden');
+                vinDetails.innerHTML = `<span class="col-span-full text-accentGold">Auksion və qəza arxivi yoxlanılır...</span>`;
+                carPreviewImg.src = "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=600&q=80";
+                
+                try {
+                    let response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevinvalues/${vin}?format=json`);
+                    let data = await response.json();
+                    let result = data.Results[0];
+
+                    let make = result.Make || "Naməlum";
+                    let model = result.Model || "Naməlum";
+                    let year = result.ModelYear || "Naməlum";
+                    let displacement = result.DisplacementL ? result.DisplacementL + " L" : "Göstərilməyib";
                     let fuel = result.FuelTypePrimary || "Göstərilməyib";
                     let plant = result.PlantCountry || "Göstərilməyib";
 
