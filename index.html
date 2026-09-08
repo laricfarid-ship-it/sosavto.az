@@ -88,7 +88,7 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                     <div id="car-image-container" class="md:col-span-1 relative">
-                        <img id="car-preview-img" src="https://images.unsplash.com/photo-1629897048514-3c6f5569f4f2?auto=format&fit=crop&w=600&q=80" alt="Real Auksion Şəkli" class="w-full h-40 object-cover rounded-xl border border-gray-700 shadow-md">
+                        <img id="car-preview-img" src="https://picsum.photos/seed/carauction/600/400" alt="Real Auksion Şəkli" class="w-full h-40 object-cover rounded-xl border border-gray-700 shadow-md">
                         <span id="auction-badge" class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow">Auksion / Qəza Arxivi</span>
                         <p class="text-[10px] text-gray-400 text-center mt-1">Maşının Əsl Gəldiyi Vəziyyət</p>
                     </div>
@@ -245,7 +245,7 @@
             if(vin.length === 17) {
                 vinResultBox.classList.remove('hidden');
                 vinDetails.innerHTML = `<span class="col-span-full text-accentGold">Auksion və qəza arxivi yoxlanılır...</span>`;
-                carPreviewImg.src = "https://images.unsplash.com/photo-1629897048514-3c6f5569f4f2?auto=format&fit=crop&w=600&q=80";
+                carPreviewImg.src = "https://picsum.photos/seed/carauction/600/400";
                 
                 try {
                     let response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevinvalues/${vin}?format=json`);
@@ -269,7 +269,7 @@
                         <div class="col-span-2 text-accentGold font-semibold"><i class="fa-solid fa-fingerprint"></i> VIN: ${vin} (Copart / ABŞ Arxivi)</div>
                     `;
 
-                    carPreviewImg.src = "https://images.unsplash.com/photo-1629897048514-3c6f5569f4f2?auto=format&fit=crop&w=600&q=80";
+                    carPreviewImg.src = "https://picsum.photos/seed/carauction/600/400";
 
                     if(carData[make]) {
                         brandSelect.value = make;
