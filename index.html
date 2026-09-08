@@ -11,50 +11,54 @@
             theme: { 
                 extend: { 
                     colors: { 
-                        darkBg: '#0b0f17', 
-                        cardBg: 'rgba(19, 28, 46, 0.7)', 
-                        accentGold: '#d4af37', 
-                        accentHover: '#c5a059',
-                        borderGold: 'rgba(212, 175, 55, 0.2)'
+                        darkBg: '#05070b', 
+                        cardBg: 'rgba(13, 20, 36, 0.85)', 
+                        accentBlue: '#00f2fe', 
+                        accentPurple: '#4facfe',
+                        accentHover: '#38bdf8'
                     } 
                 } 
             }
         }
     </script>
     <style>
-        .glass-effect {
-            background: rgba(15, 23, 42, 0.65);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(212, 175, 55, 0.15);
+        .neon-glass {
+            background: rgba(13, 20, 36, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 242, 254, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
         }
-        .gold-glow {
-            box-shadow: 0 0 30px rgba(212, 175, 55, 0.08);
+        .neon-glow {
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.2);
+        }
+        .neon-text-glow {
+            text-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
         }
     </style>
 </head>
-<body class="bg-darkBg text-gray-100 min-h-screen flex flex-col justify-between font-sans selection:bg-accentGold selection:text-darkBg">
+<body class="bg-darkBg text-gray-100 min-h-screen flex flex-col justify-between font-sans selection:bg-accentBlue selection:text-darkBg">
     <!-- Navbar -->
-    <header class="glass-effect border-b border-gray-800/80 sticky top-0 z-50">
+    <header class="neon-glass border-b border-gray-800 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-6 py-3.5 flex justify-between items-center">
             <a href="index.html" class="flex items-center space-x-2.5 group">
-                <div class="bg-gradient-to-br from-accentGold to-accentHover text-darkBg p-2.5 rounded-2xl font-black text-xl shadow-lg shadow-accentGold/20 flex items-center justify-center">
+                <div class="bg-gradient-to-r from-accentBlue to-accentPurple text-darkBg p-2.5 rounded-2xl font-black text-xl shadow-lg shadow-accentBlue/30 flex items-center justify-center">
                     <i class="fa-solid fa-car-side"></i>
                 </div>
-                <span class="text-2xl font-black tracking-wider text-white">Sos<span class="text-accentGold">Avto</span>.az</span>
+                <span class="text-2xl font-black tracking-wider text-white">Sos<span class="text-transparent bg-clip-text bg-gradient-to-r from-accentBlue to-accentPurple neon-text-glow">Avto</span>.az</span>
             </a>
             
             <div class="flex items-center space-x-3.5">
-                <a href="servis-xaritasi.html" class="bg-gray-900/60 hover:bg-gray-800 text-gray-200 px-4.5 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 border border-gray-800">
-                    <i class="fa-solid fa-map-location-dot text-accentGold"></i>
+                <a href="servis-xaritasi.html" class="bg-gray-900/80 hover:bg-gray-800 text-gray-200 px-4.5 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 border border-gray-800">
+                    <i class="fa-solid fa-map-location-dot text-accentBlue"></i>
                     <span>Servis Xəritəsi</span>
                 </a>
-                <a href="elan-ver.html" class="bg-gradient-to-r from-accentGold to-accentHover hover:opacity-90 text-darkBg px-5 py-2.5 rounded-xl text-sm font-extrabold transition flex items-center space-x-2 shadow-xl shadow-accentGold/20">
+                <a href="elan-ver.html" class="bg-gradient-to-r from-accentBlue to-accentPurple hover:opacity-90 text-darkBg px-5 py-2.5 rounded-xl text-sm font-extrabold transition flex items-center space-x-2 shadow-xl shadow-accentBlue/30">
                     <i class="fa-solid fa-plus"></i>
                     <span>Elan Ver</span>
                 </a>
                 <div id="auth-container">
-                    <a href="giris.html" class="bg-gray-900/60 hover:bg-gray-800 text-accentGold px-4.5 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 border border-accentGold/30">
+                    <a href="giris.html" class="bg-gray-900/80 hover:bg-gray-800 text-accentBlue px-4.5 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 border border-accentBlue/30">
                         <i class="fa-solid fa-right-to-bracket"></i>
                         <span>Giriş</span>
                     </a>
@@ -67,7 +71,7 @@
     <main class="max-w-7xl mx-auto px-6 py-14 flex-grow w-full space-y-12">
         <div class="text-center space-y-4 pt-2">
             <h1 class="text-4xl md:text-6xl font-black tracking-tight text-white">
-                Avtomobiliniz üçün <span class="text-transparent bg-clip-text bg-gradient-to-r from-accentGold via-[#f3e5ab] to-accentHover">hər şey</span> bir arada
+                Avtomobiliniz üçün <span class="text-transparent bg-clip-text bg-gradient-to-r from-accentBlue to-accentPurple neon-text-glow">hər şey</span> bir arada
             </h1>
             <p class="text-gray-400 text-sm md:text-base max-w-xl mx-auto font-light">
                 Ehtiyacınız olan premium avtomobil elanları, ehtiyat hissələri, eksklüziv ustalar və servis xidmətləri tək ünvanda.
@@ -75,30 +79,30 @@
         </div>
 
         <!-- Search Filter Box -->
-        <div class="glass-effect gold-glow p-8 rounded-3xl max-w-4xl mx-auto space-y-6">
+        <div class="neon-glass neon-glow p-8 rounded-3xl max-w-4xl mx-auto space-y-6">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div>
-                    <label class="block text-xs font-bold text-accentGold/80 mb-2 uppercase tracking-widest">Marka</label>
-                    <select id="brand-select" class="w-full bg-[#080c14] border border-gray-800 rounded-xl px-4.5 py-3.5 text-sm text-white focus:outline-none focus:border-accentGold transition">
+                    <label class="block text-xs font-bold text-accentBlue mb-2 uppercase tracking-widest">Marka</label>
+                    <select id="brand-select" class="w-full bg-[#030508] border border-gray-800 rounded-xl px-4.5 py-3.5 text-sm text-white focus:outline-none focus:border-accentBlue transition">
                         <option value="">Bütün Markalar</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-accentGold/80 mb-2 uppercase tracking-widest">Model</label>
-                    <select id="model-select" class="w-full bg-[#080c14] border border-gray-800 rounded-xl px-4.5 py-3.5 text-sm text-white focus:outline-none focus:border-accentGold transition">
+                    <label class="block text-xs font-bold text-accentBlue mb-2 uppercase tracking-widest">Model</label>
+                    <select id="model-select" class="w-full bg-[#030508] border border-gray-800 rounded-xl px-4.5 py-3.5 text-sm text-white focus:outline-none focus:border-accentBlue transition">
                         <option value="">Əvvəl marka seçin</option>
                     </select>
                 </div>
                 <div>
-                    <label class="block text-xs font-bold text-accentGold/80 mb-2 uppercase tracking-widest">Buraxılış İli</label>
-                    <select id="year-select" class="w-full bg-[#080c14] border border-gray-800 rounded-xl px-4.5 py-3.5 text-sm text-white focus:outline-none focus:border-accentGold transition">
+                    <label class="block text-xs font-bold text-accentBlue mb-2 uppercase tracking-widest">Buraxılış İli</label>
+                    <select id="year-select" class="w-full bg-[#030508] border border-gray-800 rounded-xl px-4.5 py-3.5 text-sm text-white focus:outline-none focus:border-accentBlue transition">
                         <option value="">Bütün illər</option>
                     </select>
                 </div>
             </div>
 
             <div>
-                <button onclick="filterBySearch()" class="w-full bg-gradient-to-r from-accentGold to-accentHover hover:opacity-90 text-darkBg font-black py-4 rounded-xl transition text-sm flex items-center justify-center space-x-2.5 shadow-xl shadow-accentGold/20 cursor-pointer tracking-wide">
+                <button onclick="filterBySearch()" class="w-full bg-gradient-to-r from-accentBlue to-accentPurple hover:opacity-90 text-darkBg font-black py-4 rounded-xl transition text-sm flex items-center justify-center space-x-2.5 shadow-xl shadow-accentBlue/30 cursor-pointer tracking-wide">
                     <i class="fa-solid fa-magnifying-glass"></i>
                     <span>Elanlar arasında axtar</span>
                 </button>
@@ -108,48 +112,48 @@
         <!-- Kateqoriyalar -->
         <div class="space-y-5">
             <h2 class="text-xl font-black text-white flex items-center space-x-2.5">
-                <i class="fa-solid fa-layer-group text-accentGold"></i>
+                <i class="fa-solid fa-layer-group text-accentBlue"></i>
                 <span>Kateqoriyalar</span>
             </h2>
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
-                <div onclick="switchCategory('all', 'Bütün Elanlar', this)" class="cat-card glass-effect border-2 border-accentGold p-4.5 rounded-2xl text-center transition flex flex-col items-center space-y-3 group shadow-lg cursor-pointer">
-                    <div class="bg-accentGold text-darkBg p-3.5 rounded-xl transition shadow-md">
+                <div onclick="switchCategory('all', 'Bütün Elanlar', this)" class="cat-card neon-glass border-2 border-accentBlue p-4.5 rounded-2xl text-center transition flex flex-col items-center space-y-3 group shadow-lg cursor-pointer">
+                    <div class="bg-accentBlue text-darkBg p-3.5 rounded-xl transition shadow-md">
                         <i class="fa-solid fa-globe text-xl"></i>
                     </div>
                     <span class="text-xs font-bold text-white tracking-wide">Bütün Elanlar</span>
                 </div>
-                <div onclick="switchCategory('car', 'Minik Avtomobilləri', this)" class="cat-card glass-effect border border-gray-800 hover:border-accentGold/60 p-4.5 rounded-2xl text-center transition flex flex-col items-center space-y-3 group shadow-lg cursor-pointer">
-                    <div class="bg-[#080c14] text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3.5 rounded-xl transition">
+                <div onclick="switchCategory('car', 'Minik Avtomobilləri', this)" class="cat-card neon-glass border border-gray-800 hover:border-accentBlue/60 p-4.5 rounded-2xl text-center transition flex flex-col items-center space-y-3 group shadow-lg cursor-pointer">
+                    <div class="bg-[#030508] text-accentBlue group-hover:bg-accentBlue group-hover:text-darkBg p-3.5 rounded-xl transition">
                         <i class="fa-solid fa-car text-xl"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-300 group-hover:text-white tracking-wide">Minik Avtomobilləri</span>
                 </div>
-                <div onclick="switchCategory('parts', 'Ehtiyat Hissələri', this)" class="cat-card glass-effect border border-gray-800 hover:border-accentGold/60 p-4.5 rounded-2xl text-center transition flex flex-col items-center space-y-3 group shadow-lg cursor-pointer">
-                    <div class="bg-[#080c14] text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3.5 rounded-xl transition">
+                <div onclick="switchCategory('parts', 'Ehtiyat Hissələri', this)" class="cat-card neon-glass border border-gray-800 hover:border-accentBlue/60 p-4.5 rounded-2xl text-center transition flex flex-col items-center space-y-3 group shadow-lg cursor-pointer">
+                    <div class="bg-[#030508] text-accentBlue group-hover:bg-accentBlue group-hover:text-darkBg p-3.5 rounded-xl transition">
                         <i class="fa-solid fa-gears text-xl"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-300 group-hover:text-white tracking-wide">Ehtiyat Hissələri</span>
                 </div>
-                <div onclick="switchCategory('service', 'Ustalar və Servislər', this)" class="cat-card glass-effect border border-gray-800 hover:border-accentGold/60 p-4.5 rounded-2xl text-center transition flex flex-col items-center space-y-3 group shadow-lg cursor-pointer">
-                    <div class="bg-[#080c14] text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3.5 rounded-xl transition">
+                <div onclick="switchCategory('service', 'Ustalar və Servislər', this)" class="cat-card neon-glass border border-gray-800 hover:border-accentBlue/60 p-4.5 rounded-2xl text-center transition flex flex-col items-center space-y-3 group shadow-lg cursor-pointer">
+                    <div class="bg-[#030508] text-accentBlue group-hover:bg-accentBlue group-hover:text-darkBg p-3.5 rounded-xl transition">
                         <i class="fa-solid fa-wrench text-xl"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-300 group-hover:text-white tracking-wide">Ustalar & Servis</span>
                 </div>
-                <div onclick="switchCategory('wash', 'Avtoyuma', this)" class="cat-card glass-effect border border-gray-800 hover:border-accentGold/60 p-4.5 rounded-2xl text-center transition flex flex-col items-center space-y-3 group shadow-lg cursor-pointer">
-                    <div class="bg-[#080c14] text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3.5 rounded-xl transition">
+                <div onclick="switchCategory('wash', 'Avtoyuma', this)" class="cat-card neon-glass border border-gray-800 hover:border-accentBlue/60 p-4.5 rounded-2xl text-center transition flex flex-col items-center space-y-3 group shadow-lg cursor-pointer">
+                    <div class="bg-[#030508] text-accentBlue group-hover:bg-accentBlue group-hover:text-darkBg p-3.5 rounded-xl transition">
                         <i class="fa-solid fa-soap text-xl"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-300 group-hover:text-white tracking-wide">Avtoyuma</span>
                 </div>
-                <div onclick="switchCategory('detailing', 'Detailing', this)" class="cat-card glass-effect border border-gray-800 hover:border-accentGold/60 p-4.5 rounded-2xl text-center transition flex flex-col items-center space-y-3 group shadow-lg cursor-pointer">
-                    <div class="bg-[#080c14] text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3.5 rounded-xl transition">
+                <div onclick="switchCategory('detailing', 'Detailing', this)" class="cat-card neon-glass border border-gray-800 hover:border-accentBlue/60 p-4.5 rounded-2xl text-center transition flex flex-col items-center space-y-3 group shadow-lg cursor-pointer">
+                    <div class="bg-[#030508] text-accentBlue group-hover:bg-accentBlue group-hover:text-darkBg p-3.5 rounded-xl transition">
                         <i class="fa-solid fa-wand-magic-sparkles text-xl"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-300 group-hover:text-white tracking-wide">Detailing</span>
                 </div>
-                <div onclick="switchCategory('insurance', 'Sığorta Xidmətləri', this)" class="cat-card glass-effect border border-gray-800 hover:border-accentGold/60 p-4.5 rounded-2xl text-center transition flex flex-col items-center space-y-3 group shadow-lg cursor-pointer">
-                    <div class="bg-[#080c14] text-accentGold group-hover:bg-accentGold group-hover:text-darkBg p-3.5 rounded-xl transition">
+                <div onclick="switchCategory('insurance', 'Sığorta Xidmətləri', this)" class="cat-card neon-glass border border-gray-800 hover:border-accentBlue/60 p-4.5 rounded-2xl text-center transition flex flex-col items-center space-y-3 group shadow-lg cursor-pointer">
+                    <div class="bg-[#030508] text-accentBlue group-hover:bg-accentBlue group-hover:text-darkBg p-3.5 rounded-xl transition">
                         <i class="fa-solid fa-file-shield text-xl"></i>
                     </div>
                     <span class="text-xs font-bold text-gray-300 group-hover:text-white tracking-wide">Sığorta</span>
@@ -161,10 +165,10 @@
         <div class="space-y-5">
             <div class="flex items-center justify-between">
                 <h2 id="section-title" class="text-xl font-black text-white flex items-center space-x-2.5">
-                    <i class="fa-solid fa-fire text-accentGold"></i>
+                    <i class="fa-solid fa-fire text-accentBlue"></i>
                     <span>Bütün Elanlar</span>
                 </h2>
-                <span id="result-count" class="text-xs font-semibold text-accentGold bg-accentGold/10 border border-accentGold/20 px-3.5 py-1.5 rounded-xl">0 elan tapıldı</span>
+                <span id="result-count" class="text-xs font-semibold text-accentBlue bg-accentBlue/10 border border-accentBlue/20 px-3.5 py-1.5 rounded-xl">0 elan tapıldı</span>
             </div>
             
             <div id="listings-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -174,7 +178,7 @@
     </main>
 
     <!-- Footer -->
-    <footer class="glass-effect border-t border-gray-800/80 py-6 text-center text-xs text-gray-400 mt-16">
+    <footer class="neon-glass border-t border-gray-800 py-6 text-center text-xs text-gray-400 mt-16">
         &copy; 2026 SosAvto.az - Bütün hüquqlar qorunur.
     </footer>
 
@@ -182,7 +186,7 @@
         const loggedUser = localStorage.getItem('sosavto_logged_user');
         if (loggedUser) {
             document.getElementById('auth-container').innerHTML = `
-                <a href="kabinet.html" class="bg-gray-900/60 hover:bg-gray-800 text-accentGold px-4.5 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 border border-accentGold/30 shadow-md">
+                <a href="kabinet.html" class="bg-gray-900/80 hover:bg-gray-800 text-accentBlue px-4.5 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 border border-accentBlue/30 shadow-md">
                     <i class="fa-solid fa-user-circle"></i>
                     <span>${loggedUser}</span>
                 </a>
@@ -262,24 +266,24 @@
             document.getElementById('result-count').innerText = `${filteredList.length} elan tapıldı`;
 
             if(filteredList.length === 0) {
-                grid.innerHTML = `<p class="text-gray-400 text-sm col-span-full py-12 text-center glass-effect rounded-2xl border border-gray-800">Bu kateqoriyada aktiv elan yoxdur.</p>`;
+                grid.innerHTML = `<p class="text-gray-400 text-sm col-span-full py-12 text-center neon-glass rounded-2xl border border-gray-800">Bu kateqoriyada aktiv elan yoxdur.</p>`;
                 return;
             }
 
             grid.innerHTML = filteredList.map(ad => `
-                <div class="glass-effect border border-gray-800/80 rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between hover:border-accentGold/50 transition group">
+                <div class="neon-glass border border-gray-800 rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between hover:border-accentBlue/60 transition group">
                     <div>
                         <div class="relative overflow-hidden">
                             <img src="${ad.image || 'https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=600&q=80'}" class="w-full h-48 object-cover group-hover:scale-105 transition duration-500">
-                            <span class="absolute top-2.5 right-2.5 bg-darkBg/80 backdrop-blur-md text-accentGold text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase border border-accentGold/20">
+                            <span class="absolute top-2.5 right-2.5 bg-darkBg/80 backdrop-blur-md text-accentBlue text-[10px] font-bold px-2.5 py-1 rounded-lg uppercase border border-accentBlue/30">
                                 ${ad.category || 'Elan'}
                             </span>
                         </div>
                         <div class="p-4.5 space-y-2">
                             <h3 class="font-bold text-white text-base line-clamp-1">${ad.title}</h3>
-                            <p class="text-accentGold font-black text-lg">${ad.price} AZN</p>
+                            <p class="text-accentBlue font-black text-lg">${ad.price} AZN</p>
                             <p class="text-gray-400 text-xs flex items-center space-x-1.5">
-                                <i class="fa-solid fa-location-dot text-accentGold"></i>
+                                <i class="fa-solid fa-location-dot text-accentBlue"></i>
                                 <span>${ad.city || 'Bakı'}</span>
                             </p>
                         </div>
@@ -290,27 +294,27 @@
 
         function switchCategory(catKey, catTitle, element) {
             document.querySelectorAll('.cat-card').forEach(card => {
-                card.classList.remove('border-accentGold', 'border-2');
+                card.classList.remove('border-accentBlue', 'border-2');
                 card.classList.add('border', 'border-gray-800');
                 let iconDiv = card.querySelector('div');
-                iconDiv.classList.remove('bg-accentGold', 'text-darkBg');
-                iconDiv.classList.add('bg-[#080c14]', 'text-accentGold');
+                iconDiv.classList.remove('bg-accentBlue', 'text-darkBg');
+                iconDiv.classList.add('bg-[#030508]', 'text-accentBlue');
                 let spanText = card.querySelector('span');
                 spanText.classList.remove('text-white');
                 spanText.classList.add('text-gray-300');
             });
 
             element.classList.remove('border-gray-800');
-            element.classList.add('border-accentGold', 'border-2');
+            element.classList.add('border-accentBlue', 'border-2');
             let activeIconDiv = element.querySelector('div');
-            activeIconDiv.classList.remove('bg-[#080c14]', 'text-accentGold');
-            activeIconDiv.classList.add('bg-accentGold', 'text-darkBg');
+            activeIconDiv.classList.remove('bg-[#030508]', 'text-accentBlue');
+            activeIconDiv.classList.add('bg-accentBlue', 'text-darkBg');
             let activeSpan = element.querySelector('span');
             activeSpan.classList.remove('text-gray-300');
             activeSpan.classList.add('text-white');
 
             document.getElementById('section-title').innerHTML = `
-                <i class="fa-solid fa-fire text-accentGold"></i>
+                <i class="fa-solid fa-fire text-accentBlue"></i>
                 <span>${catTitle}</span>
             `;
 
@@ -336,7 +340,7 @@
             }
             
             document.getElementById('section-title').innerHTML = `
-                <i class="fa-solid fa-magnifying-glass text-accentGold"></i>
+                <i class="fa-solid fa-magnifying-glass text-accentBlue"></i>
                 <span>Axtarış Nəticələri</span>
             `;
             renderListings(activeListings);
