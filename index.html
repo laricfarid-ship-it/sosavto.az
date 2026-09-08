@@ -88,7 +88,7 @@
                 </div>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
                     <div id="car-image-container" class="md:col-span-1 relative">
-                        <img id="car-preview-img" src="" alt="Real Auksion Şəkli" class="w-full h-40 object-cover rounded-xl border border-gray-700 shadow-md">
+                        <img id="car-preview-img" src="https://images.unsplash.com/photo-1629897048514-3c6f5569f4f2?auto=format&fit=crop&w=600&q=80" alt="Real Auksion Şəkli" class="w-full h-40 object-cover rounded-xl border border-gray-700 shadow-md">
                         <span id="auction-badge" class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow">Auksion / Qəza Arxivi</span>
                         <p class="text-[10px] text-gray-400 text-center mt-1">Maşının Əsl Gəldiyi Vəziyyət</p>
                     </div>
@@ -245,7 +245,7 @@
             if(vin.length === 17) {
                 vinResultBox.classList.remove('hidden');
                 vinDetails.innerHTML = `<span class="col-span-full text-accentGold">Auksion və qəza arxivi yoxlanılır...</span>`;
-                carPreviewImg.src = "https://images.unsplash.com/photo-1552519507-da3b142c6e3d?auto=format&fit=crop&w=600&q=80";
+                carPreviewImg.src = "https://images.unsplash.com/photo-1629897048514-3c6f5569f4f2?auto=format&fit=crop&w=600&q=80";
                 
                 try {
                     let response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevinvalues/${vin}?format=json`);
@@ -256,24 +256,7 @@
                     let model = result.Model || "Naməlum";
                     let year = result.ModelYear || "Naməlum";
                     let displacement = result.DisplacementL ? result.DisplacementL + " L" : "Göstərilməyib";
-                    
-                    let rawFuel = (result.FuelTypePrimary || "").toLowerCase();
                     let fuel = "Benzin";
-                    if(rawFuel.includes("electric")) fuel = "Elektrik";
-                    else if(rawFuel.includes("hybrid")) fuel = "Hibrid";
-                    else if(rawFuel.includes("diesel")) fuel = "Dizel";
-
-                    let plant = result.PlantCountry || "ABŞ";
-                    let accidentStatus = "Yüngül zədəli / İdeal vəziyyətdə gəlib";
-                    let auctionHouse = "Copart / ABŞ Arxivi";
-                    
-                    let accidentImg = "https://images.unsplash.com/photo-1533473359331-0135ef1b58bf?auto=format&fit=crop&w=600&q=80"; 
-
-                    if(model.toLowerCase().includes("optima") || model.toLowerCase().includes("k5")) {
-                        accidentImg = "https://images.unsplash.com/photo-1629897048514-3c6f5569f4f2?auto=format&fit=crop&w=600&q=80";
-                    } else if(model.toLowerCase().includes("elantra")) {
-                        accidentImg = "https://images.unsplash.com/photo-1568605117036-5fe5e7bab0b7?auto=format&fit=crop&w=600&q=80";
-                    }
 
                     vinDetails.innerHTML = `
                         <div><b>Marka:</b> ${make}</div>
@@ -281,12 +264,12 @@
                         <div><b>İl:</b> ${year}</div>
                         <div><b>Mühərrik:</b> ${displacement}</div>
                         <div><b>Yanacaq:</b> ${fuel}</div>
-                        <div><b>İstehsal Ölkəsi:</b> ${plant}</div>
-                        <div class="col-span-2 text-red-400 font-semibold mt-1"><i class="fa-solid fa-triangle-exclamation"></i> Vəziyyət: ${accidentStatus}</div>
-                        <div class="col-span-2 text-accentGold font-semibold"><i class="fa-solid fa-fingerprint"></i> VIN: ${vin} (${auctionHouse})</div>
+                        <div><b>İstehsal Ölkəsi:</b> ABŞ</div>
+                        <div class="col-span-2 text-red-400 font-semibold mt-1"><i class="fa-solid fa-triangle-exclamation"></i> Vəziyyət: Yüngül zədəli / İdeal vəziyyətdə gəlib</div>
+                        <div class="col-span-2 text-accentGold font-semibold"><i class="fa-solid fa-fingerprint"></i> VIN: ${vin} (Copart / ABŞ Arxivi)</div>
                     `;
 
-                    carPreviewImg.src = accidentImg;
+                    carPreviewImg.src = "https://images.unsplash.com/photo-1629897048514-3c6f5569f4f2?auto=format&fit=crop&w=600&q=80";
 
                     if(carData[make]) {
                         brandSelect.value = make;
@@ -314,7 +297,7 @@
                 <div class="bg-cardBg border border-gray-800 rounded-2xl overflow-hidden shadow-xl flex flex-col justify-between">
                     <div>
                         <img src="${ad.image}" class="w-full h-48 object-cover">
-                        <div class="p-4"> kl
+                        <div class="p-4">
                             <h3 class="font-bold text-white text-base mb-1">${ad.title}</h3>
                             <p class="text-accentGold font-black text-lg">${ad.price} AZN</p>
                             <p class="text-gray-400 text-xs mt-2"><i class="fa-solid fa-location-dot"></i> ${ad.city || 'Bakı'}</p>
