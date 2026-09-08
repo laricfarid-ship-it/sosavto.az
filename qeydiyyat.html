@@ -8,87 +8,97 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
-            theme: { extend: { colors: { darkBg: '#0b0f19', cardBg: '#131c2e', accentGold: '#f59e0b', accentHover: '#d97706' } } }
+            theme: { 
+                extend: { 
+                    colors: { 
+                        darkBg: '#05070b', 
+                        cardBg: 'rgba(13, 20, 36, 0.85)', 
+                        accentBlue: '#00f2fe', 
+                        accentPurple: '#4facfe',
+                        accentHover: '#38bdf8'
+                    } 
+                } 
+            }
         }
     </script>
+    <style>
+        .neon-glass {
+            background: rgba(13, 20, 36, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 242, 254, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .neon-glow {
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.2);
+        }
+        .neon-text-glow {
+            text-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+        }
+    </style>
 </head>
-<body class="bg-darkBg text-gray-100 min-h-screen flex flex-col justify-between font-sans">
+<body class="bg-darkBg text-gray-100 min-h-screen flex flex-col justify-between font-sans selection:bg-accentBlue selection:text-darkBg">
     <!-- Navbar -->
-    <header class="bg-cardBg border-b border-gray-800 shadow-lg">
-        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
-            <a href="index.html" class="flex items-center space-x-2">
-                <div class="bg-accentGold text-darkBg p-2 rounded-xl font-black text-xl flex items-center justify-center">
+    <header class="neon-glass border-b border-gray-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-3.5 flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-2.5 group">
+                <div class="bg-gradient-to-r from-accentBlue to-accentPurple text-darkBg p-2.5 rounded-2xl font-black text-xl shadow-lg shadow-accentBlue/30 flex items-center justify-center">
                     <i class="fa-solid fa-car-side"></i>
                 </div>
-                <span class="text-2xl font-black tracking-wider text-white">Sos<span class="text-accentGold">Avto</span>.az</span>
+                <span class="text-2xl font-black tracking-wider text-white">Sos<span class="text-transparent bg-clip-text bg-gradient-to-r from-accentBlue to-accentPurple neon-text-glow">Avto</span>.az</span>
             </a>
-            <a href="index.html" class="text-gray-400 hover:text-white text-sm font-semibold flex items-center space-x-1">
-                <i class="fa-solid fa-arrow-left"></i>
-                <span>Ana səhifə</span>
+            <a href="index.html" class="bg-gray-900/80 hover:bg-gray-800 text-gray-200 px-4.5 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 border border-gray-800">
+                <i class="fa-solid fa-arrow-left text-accentBlue"></i>
+                <span>Ana Səhifə</span>
             </a>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex items-center justify-center p-4 my-auto">
-        <div class="bg-cardBg border border-gray-800 p-8 rounded-2xl shadow-2xl w-full max-w-md">
-            <div class="text-center mb-6">
-                <div class="w-12 h-12 bg-accentGold/10 text-accentGold rounded-full flex items-center justify-center mx-auto mb-3 text-xl border border-accentGold/20">
+    <!-- Content -->
+    <main class="max-w-md mx-auto px-6 py-16 flex-grow w-full flex items-center">
+        <div class="neon-glass neon-glow p-8 rounded-3xl space-y-6 w-full">
+            <div class="text-center space-y-2">
+                <div class="inline-flex bg-gradient-to-r from-accentBlue to-accentPurple text-darkBg p-3 rounded-2xl text-xl shadow-lg shadow-accentBlue/30 mb-2">
                     <i class="fa-solid fa-user-plus"></i>
                 </div>
-                <h2 class="text-2xl font-black text-white">Yeni Hesab Yarat</h2>
-                <p class="text-xs text-gray-400 mt-1">Elan vermək və idarə etmək üçün qeydiyyatdan keçin</p>
+                <h1 class="text-2xl font-black text-white">Yeni Hesab <span class="text-transparent bg-clip-text bg-gradient-to-r from-accentBlue to-accentPurple neon-text-glow">Yarat</span></h1>
+                <p class="text-gray-400 text-xs">Elan vermək və idarə etmək üçün qeydiyyatdan keçin.</p>
             </div>
-            
-            <div id="error-msg" class="hidden bg-red-500/20 border border-red-500 text-red-300 text-xs p-3 rounded-xl mb-4 text-center"></div>
 
             <form onsubmit="handleRegister(event)" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">Ad və Soyad</label>
-                    <input type="text" id="reg-name" required placeholder="Məs: Fərid Məmmədov" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accentGold">
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">Ad və Soyad</label>
+                    <input type="text" id="fullname" placeholder="Məs: Fərid Məmmədov" required class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">İstifadəçi adı</label>
-                    <input type="text" id="reg-username" required placeholder="Unikal istifadəçi adı seçin" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accentGold">
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">İstifadəçi Adı</label>
+                    <input type="text" id="reg-username" placeholder="Unikal istifadəçi adı seçin" required class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                 </div>
                 <div>
-                    <label class="block text-xs font-semibold text-gray-400 mb-1 uppercase tracking-wider">Şifrə</label>
-                    <input type="password" id="reg-password" required placeholder="••••••••" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accentGold">
+                    <label class="block text-xs font-semibold text-gray-300 mb-1">Şifrə</label>
+                    <input type="password" id="reg-password" placeholder="••••••••" required class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                 </div>
-                <button type="submit" class="w-full bg-accentGold hover:bg-accentHover text-darkBg font-bold py-3 rounded-xl transition shadow-lg mt-2">Qeydiyyatdan keç</button>
+                <button type="submit" class="w-full bg-gradient-to-r from-accentBlue to-accentPurple text-darkBg font-bold py-3.5 rounded-xl shadow-lg shadow-accentBlue/20 hover:opacity-90 transition cursor-pointer">
+                    Qeydiyyatdan keç
+                </button>
             </form>
 
-            <p class="text-center text-xs text-gray-400 mt-6">
-                Artıq hesabınız var? <a href="giris.html" class="text-accentGold font-bold hover:underline">Daxil ol</a>
-            </p>
+            <div class="text-center text-xs text-gray-400 pt-2 border-t border-gray-800/60">
+                Artıq hesabınız var? <a href="giris.html" class="text-accentBlue font-semibold hover:underline">Daxil ol</a>
+            </div>
         </div>
     </main>
 
     <!-- Footer -->
-    <footer class="bg-cardBg border-t border-gray-800 py-4 text-center text-xs text-gray-500">
+    <footer class="neon-glass border-t border-gray-800 py-6 text-center text-xs text-gray-400 mt-16">
         &copy; 2026 SosAvto.az - Bütün hüquqlar qorunur.
     </footer>
 
     <script>
-        function handleRegister(e) {
-            e.preventDefault();
-            const name = document.getElementById('reg-name').value.trim();
-            const username = document.getElementById('reg-username').value.trim();
-            const password = document.getElementById('reg-password').value.trim();
-            const errorDiv = document.getElementById('error-msg');
-
-            let users = JSON.parse(localStorage.getItem('sosavto_users') || '[]');
-            if (users.some(u => u.username === username)) {
-                errorDiv.textContent = "Bu istifadəçi adı artıq qeydiyyatdan keçib!";
-                errorDiv.classList.remove('hidden');
-                return;
-            }
-
-            users.push({ name, username, password });
-            localStorage.setItem('sosavto_users', JSON.stringify(users));
-            localStorage.setItem('sosavto_logged_user', username);
-            
-            window.location.href = 'index.html';
+        function handleRegister(event) {
+            event.preventDefault();
+            localStorage.setItem("isLoggedIn", "true");
+            window.location.href = "elan-ver.html";
         }
     </script>
 </body>
