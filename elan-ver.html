@@ -7,7 +7,6 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
-        // Giriş yoxlaması - əgər daxil olmayıbsa dərhal girişə atır
         if (localStorage.getItem("isLoggedIn") !== "true") {
             window.location.replace("giris.html");
         }
@@ -88,7 +87,7 @@
                 <!-- Ümumi Məlumatlar -->
                 <div>
                     <label class="block text-xs font-semibold text-gray-300 mb-1.5">Elan Başlığı</label>
-                    <input type="text" id="adTitle" placeholder="Məs: Mercedes E 220 və ya Peşəkar Usta Xidməti" required class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
+                    <input type="text" id="adTitle" placeholder="Məs: Kia Optima ön buferi və ya Peşəkar Usta Xidməti" required class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                 </div>
 
                 <!-- 1. Avtomobil Üçün Xüsusi Xanalar -->
@@ -115,19 +114,43 @@
                     </div>
                 </div>
 
-                <!-- 2. Usta / Moyka / Detailing Üçün Xüsusi Xanalar (Əvvəlcə gizli) -->
+                <!-- 2. Ehtiyat Hissəsi Üçün Xüsusi Xanalar (Əvvəlcə gizli) -->
+                <div id="spareFields" class="grid grid-cols-1 md:grid-cols-3 gap-4 hidden">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Avtomobil Markası</label>
+                        <input type="text" placeholder="Məs: Kia" class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Avtomobil Modeli</label>
+                        <input type="text" placeholder="Məs: Optima" class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Hissənin Adı</label>
+                        <input type="text" placeholder="Məs: Ön bufer / Fara" class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Məhsulun Vəziyyəti</label>
+                        <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
+                            <option value="yeni">✨ Yeni</option>
+                            <option value="az-islenmis">🔄 Az işlənmiş (2-ci əl)</option>
+                            <option value="kohne">🛠️ Köhnə / Təmire ehtiyacı var</option>
+                        </select>
+                    </div>
+                    <div class="md:col-span-2">
+                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Qiymət (AZN)</label>
+                        <input type="number" placeholder="Məs: 150" class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
+                    </div>
+                </div>
+
+                <!-- 3. Usta / Moyka Üçün Xüsusi Xanalar -->
                 <div id="serviceFields" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Xidmət / Obyekt Sahəsi</label>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Xidmət Sahəsi</label>
                         <input type="text" placeholder="Məs: Motor ustası, Detailing, Əl moykası" class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">İş Saatları</label>
                         <input type="text" placeholder="Məs: 09:00 - 20:00" class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
-                    </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Yerləşdiyi Ünvan / Rayon</label>
-                        <input type="text" placeholder="Məs: Bakı ş., Nərimanov r." class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                     </div>
                 </div>
 
@@ -143,9 +166,22 @@
                     </div>
                 </div>
 
+                <!-- Xəritədə Yer Seçimi -->
+                <div class="space-y-2">
+                    <label class="block text-xs font-semibold text-gray-300 flex items-center justify-between">
+                        <span>Xəritədə Yerləşdiyiniz Nöqtəni Seçin</span>
+                        <span class="text-accentBlue text-[11px]"><i class="fa-solid fa-location-dot"></i> Ünvan / Obyekt yeri</span>
+                    </label>
+                    <div class="w-full h-36 bg-gray-900/90 border border-gray-800 rounded-xl flex flex-col items-center justify-center text-gray-400 space-y-2 p-4 text-center cursor-pointer hover:border-accentBlue/50 transition">
+                        <i class="fa-solid fa-map-location-dot text-2xl text-accentBlue"></i>
+                        <span class="text-xs">Xəritəni açmaq və mövqe seçmək üçün klikləyin (və ya ünvan qeyd edin)</span>
+                        <input type="text" placeholder="Məs: Bakı ş., Babək pr. 22" class="w-full bg-darkBg border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-200 focus:border-accentBlue focus:outline-none mt-1">
+                    </div>
+                </div>
+
                 <div>
                     <label class="block text-xs font-semibold text-gray-300 mb-1.5">Ətraflı Məlumat / Qeydlər</label>
-                    <textarea rows="4" placeholder="Avtomobilin vəziyyəti, xidmətləriniz və ya təklifləriniz barədə ətraflı yazın..." class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition"></textarea>
+                    <textarea rows="3" placeholder="Məhsul və ya xidmət haqqında əlavə məlumat yazın..." class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition"></textarea>
                 </div>
 
                 <button type="submit" class="w-full bg-gradient-to-r from-accentBlue to-accentPurple text-darkBg font-bold py-3.5 rounded-xl shadow-lg shadow-accentBlue/20 hover:opacity-90 transition cursor-pointer">
@@ -164,13 +200,18 @@
         function toggleCategoryFields() {
             const category = document.getElementById("categorySelect").value;
             const carFields = document.getElementById("carFields");
+            const spareFields = document.getElementById("spareFields");
             const serviceFields = document.getElementById("serviceFields");
 
-            if (category === "car" || category === "spare") {
+            carFields.classList.add("hidden");
+            spareFields.classList.add("hidden");
+            serviceFields.classList.add("hidden");
+
+            if (category === "car") {
                 carFields.classList.remove("hidden");
-                serviceFields.classList.add("hidden");
+            } else if (category === "spare") {
+                spareFields.classList.remove("hidden");
             } else {
-                carFields.classList.add("hidden");
                 serviceFields.classList.remove("hidden");
             }
         }
