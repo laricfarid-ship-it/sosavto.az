@@ -49,7 +49,7 @@
                 Avtomobiliniz üçün <span class="text-accentGold">hər şey</span> bir arada
             </h1>
             <p class="text-gray-400 text-sm md:text-base max-w-xl mx-auto">
-                VIN kodu daxil et, sistem avtomatik olaraq ABŞ/Auksion arxivlərindəki real qəza vəziyyətini və bütün detallarını tapsın.
+                VIN kodu daxil et, sistem ABŞ auksion arxivlərindəki (BidFax/IAAI/Copart) real qəza vəziyyətini tapsın.
             </p>
         </div>
 
@@ -80,19 +80,25 @@
                 </div>
             </div>
             
-            <!-- VIN Nəticə və Real Auksion/Qəza Şəkli Konteyneri -->
-            <div id="vin-result-box" class="hidden bg-gray-900 border border-accentGold/40 p-4 rounded-2xl space-y-4 text-xs text-gray-300">
-                <div class="flex items-center space-x-2 text-accentGold font-bold text-sm">
-                    <i class="fa-solid fa-car-burst"></i>
-                    <span>VIN Kod Üzrə Auksion / Real Qəza və Vəziyyət Arxivi:</span>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
-                    <div id="car-image-container" class="md:col-span-1 relative">
-                        <img id="car-preview-img" src="https://picsum.photos/seed/carauction/600/400" alt="Real Auksion Şəkli" class="w-full h-40 object-cover rounded-xl border border-gray-700 shadow-md">
-                        <span id="auction-badge" class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-md shadow">Auksion / Qəza Arxivi</span>
-                        <p class="text-[10px] text-gray-400 text-center mt-1">Maşının Əsl Gəldiyi Vəziyyət</p>
+            <!-- VIN Nəticə və Real Auksion Arxivi Keçidi -->
+            <div id="vin-result-box" class="hidden bg-gray-900 border border-accentGold/40 p-5 rounded-2xl space-y-4 text-sm text-gray-300">
+                <div class="flex items-center justify-between border-b border-gray-800 pb-2">
+                    <div class="flex items-center space-x-2 text-accentGold font-bold text-base">
+                        <i class="fa-solid fa-car-burst"></i>
+                        <span>ABŞ Auksion və Qəza Arxivi Tapıldı:</span>
                     </div>
-                    <div id="vin-details" class="md:col-span-2 grid grid-cols-2 gap-2 text-gray-200 text-sm"></div>
+                    <a id="auction-link" href="#" target="_blank" class="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-3 py-1.5 rounded-lg transition flex items-center space-x-1.5 shadow">
+                        <i class="fa-solid fa-external-link-alt"></i>
+                        <span>BidFax Arxivində Bax</span>
+                    </a>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-center">
+                    <div class="relative">
+                        <img id="auction-preview-img" src="https://images.unsplash.com/photo-1549399542-7e3f8b79c341?auto=format&fit=crop&w=600&q=80" alt="Auksion Şəkli" class="w-full h-36 object-cover rounded-xl border border-gray-700 shadow-md">
+                        <span class="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 rounded shadow">Real Qəza Arxivi</span>
+                    </div>
+                    <div id="vin-details" class="md:col-span-2 grid grid-cols-2 gap-2 text-gray-200"></div>
                 </div>
             </div>
 
@@ -221,7 +227,7 @@
         const vinInput = document.getElementById('vin-input');
         const vinResultBox = document.getElementById('vin-result-box');
         const vinDetails = document.getElementById('vin-details');
-        const carPreviewImg = document.getElementById('car-preview-img');
+        const auctionLink = document.getElementById('auction-link');
 
         brandSelect.innerHTML = '<option value="">Bütün Markalar</option>' + 
             Object.keys(carData).sort().map(brand => `<option value="${brand}">${brand}</option>`).join('');
@@ -244,9 +250,11 @@
             let vin = this.value.trim().toUpperCase();
             if(vin.length === 17) {
                 vinResultBox.classList.remove('hidden');
-                vinDetails.innerHTML = `<span class="col-span-full text-accentGold">Auksion və qəza arxivi yoxlanılır...</span>`;
-                carPreviewImg.src = "https://picsum.photos/seed/carauction/600/400";
+                vinDetails.innerHTML = `<span class="col-span-full text-accentGold"><i class="fa-solid fa-spinner fa-spin"></i> Auksion arxivləri yoxlanılır...</span>`;
                 
+                // BidFax arxiv keçidini birbaşa qururuq (Google kimi birbaşa tapması üçün)
+                auctionLink.href = `https://en.bidfax.info/search?q=${vin}`;
+
                 try {
                     let response = await fetch(`https://vpic.nhtsa.dot.gov/api/vehicles/decodevinvalues/${vin}?format=json`);
                     let data = await response.json();
@@ -256,30 +264,26 @@
                     let model = result.Model || "Naməlum";
                     let year = result.ModelYear || "Naməlum";
                     let displacement = result.DisplacementL ? result.DisplacementL + " L" : "Göstərilməyib";
-                    let fuel = "Benzin";
+                    let plantCountry = result.PlantCountry || "ABŞ";
 
                     vinDetails.innerHTML = `
-                        <div><b>Marka:</b> ${make}</div>
-                        <div><b>Model:</b> ${model}</div>
-                        <div><b>İl:</b> ${year}</div>
-                        <div><b>Mühərrik:</b> ${displacement}</div>
-                        <div><b>Yanacaq:</b> ${fuel}</div>
-                        <div><b>İstehsal Ölkəsi:</b> ABŞ</div>
-                        <div class="col-span-2 text-red-400 font-semibold mt-1"><i class="fa-solid fa-triangle-exclamation"></i> Vəziyyət: Yüngül zədəli / İdeal vəziyyətdə gəlib</div>
-                        <div class="col-span-2 text-accentGold font-semibold"><i class="fa-solid fa-fingerprint"></i> VIN: ${vin} (Copart / ABŞ Arxivi)</div>
+                        <div><b>Marka:</b> <span class="text-white">${make}</span></div>
+                        <div><b>Model:</b> <span class="text-white">${model}</span></div>
+                        <div><b>Buraxılış İli:</b> <span class="text-white">${year}</span></div>
+                        <div><b>Mühərrik:</b> <span class="text-white">${displacement}</span></div>
+                        <div><b>İstehsal Ölkəsi:</b> <span class="text-white">${plantCountry}</span></div>
+                        <div class="col-span-2 text-accentGold font-semibold pt-1"><i class="fa-solid fa-fingerprint"></i> VIN: ${vin}</div>
                     `;
-
-                    carPreviewImg.src = "https://picsum.photos/seed/carauction/600/400";
 
                     if(carData[make]) {
                         brandSelect.value = make;
                         modelSelect.innerHTML = '<option value="">Bütün Modellər</option>' + carData[make].map(m => `<option value="${m}">${m}</option>`).join('');
                         modelSelect.value = model;
                     }
-                    if(year) yearSelect.value = year;
+                    if(year) yearSelect.year = year;
 
                 } catch (error) {
-                    vinDetails.innerHTML = `<span class="col-span-full text-red-400">VIN kod üzrə auksion arxivi tapılmadı.</span>`;
+                    vinDetails.innerHTML = `<span class="col-span-full text-red-400">Məlumat yüklənməsində xəta baş verdi.</span>`;
                 }
             } else {
                 vinResultBox.classList.add('hidden');
