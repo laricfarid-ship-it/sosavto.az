@@ -6,6 +6,8 @@
     <title>Elan Yerləşdir - SosAvto.az</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Leaflet CSS Xəritə Kitabxanası -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <script>
         if (localStorage.getItem("isLoggedIn") !== "true") {
             window.location.replace("giris.html");
@@ -18,8 +20,7 @@
                         darkBg: '#05070b', 
                         cardBg: 'rgba(13, 20, 36, 0.85)', 
                         accentBlue: '#00f2fe', 
-                        accentPurple: '#4facfe',
-                        accentHover: '#38bdf8'
+                        accentPurple: '#4facfe'
                     } 
                 } 
             }
@@ -38,6 +39,12 @@
         }
         .neon-text-glow {
             text-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
+        }
+        #map {
+            width: 100%;
+            height: 220px;
+            border-radius: 0.75rem;
+            z-index: 1;
         }
     </style>
 </head>
@@ -69,7 +76,7 @@
         <div class="neon-glass neon-glow p-8 rounded-3xl space-y-6">
             <div class="text-center space-y-2">
                 <h1 class="text-2xl md:text-3xl font-black text-white">Yeni Elan <span class="text-transparent bg-clip-text bg-gradient-to-r from-accentBlue to-accentPurple neon-text-glow">Yerləşdirin</span></h1>
-                <p class="text-gray-400 text-xs">Kateqoriya seçin və sistemin təqdim etdiyi düzgün seçimlərlə elanınızı tamamlayın.</p>
+                <p class="text-gray-400 text-xs">Kateqoriya seçin, parametrləri təyin edin və xəritədə dəqiq yerinizi qeyd edin.</p>
             </div>
 
             <form onsubmit="submitAd(event)" class="space-y-5">
@@ -90,19 +97,13 @@
                     <input type="text" id="adTitle" placeholder="Məs: İdeal vəziyyətdə Kia Optima buferi və ya Peşəkar Motor Ustası" required class="w-full bg-gray-900/80 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                 </div>
 
-                <!-- 1. AVTOBOSIL SEKTORU -->
+                <!-- 1. AVTOMOBİL SEKTORU -->
                 <div id="carFields" class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">Marka</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                             <option value="">Marka seçin</option>
-                            <option>Mercedes</option>
-                            <option>BMW</option>
-                            <option>Kia</option>
-                            <option>Hyundai</option>
-                            <option>Toyota</option>
-                            <option>Chevrolet</option>
-                            <option>Nissan</option>
+                            <option>Mercedes</option><option>BMW</option><option>Kia</option><option>Hyundai</option><option>Toyota</option><option>Chevrolet</option>
                         </select>
                     </div>
                     <div>
@@ -112,7 +113,7 @@
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">Buraxılış İli</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
-                            <option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2022</option><option>2021</option><option>2020</option><option>2019</option><option>2018</option><option>2015</option><option>2010</option><option>2005</option><option>2000 və əvvəl</option>
+                            <option>2026</option><option>2025</option><option>2024</option><option>2023</option><option>2020</option><option>2015</option><option>2010</option>
                         </select>
                     </div>
                     <div>
@@ -128,35 +129,23 @@
                 <!-- 2. EHTİYAT HİSSƏSİ SEKTORU -->
                 <div id="spareFields" class="grid grid-cols-1 md:grid-cols-3 gap-4 hidden">
                     <div>
-                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Hansı Model Üçündür?</label>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Model</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                             <option value="">Model seçin</option>
-                            <option>Kia Optima / K5</option>
-                            <option>Hyundai Sonata</option>
-                            <option>Mercedes W211 / W212</option>
-                            <option>BMW E46 / F30</option>
-                            <option>Toyota Prius</option>
+                            <option>Kia Optima / K5</option><option>Hyundai Sonata</option><option>Mercedes W211</option><option>BMW F30</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">Ehtiyat Hissəsinin Növü</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                             <option value="">Hissə seçin</option>
-                            <option>Ön / Arxa Bufer</option>
-                            <option>Fara / Stop işığı</option>
-                            <option>Əyləc bəndi (Naklatka)</option>
-                            <option>Filterlər (Yağ, Hava)</option>
-                            <option>Amortizator / Asqı sistemi</option>
-                            <option>Mühərrik hissələri</option>
-                            <option>Aksesuar</option>
+                            <option>Ön / Arxa Bufer</option><option>Fara / Stop işığı</option><option>Əyləc bəndi (Naklatka)</option><option>Filterlər</option><option>Amortizator</option>
                         </select>
                     </div>
                     <div>
-                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Məhsulun Vəziyyəti</label>
+                        <label class="block text-xs font-semibold text-gray-300 mb-1.5">Vəziyyəti</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
-                            <option value="yeni">✨ Yeni (Orijinal / Firm)</option>
-                            <option value="az-islenmis">🔄 Az işlənmiş (Üstdənçıxma)</option>
-                            <option value="kohne">🛠️ Köhnə / Bərpa olunan</option>
+                            <option>Yeni</option><option>Az işlənmiş</option><option>Köhnə / Bərpa olunan</option>
                         </select>
                     </div>
                     <div class="md:col-span-3">
@@ -171,42 +160,30 @@
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">İxtisas Sahəsi</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                             <option value="">Usta sahəsi seçin</option>
-                            <option>🔧 Motorist (Mühərrik ustası)</option>
-                            <option>⚙️ Xodovik (Asqı sistemləri)</option>
-                            <option>⚡ Avtoelektrik / Diaqnostika</option>
-                            <option>🎨 Malyar / Rəngsaz</option>
-                            <option>🔨 Çilingər / Rixtovka</option>
-                            <option>🚗 Ümumi Avtoservis</option>
+                            <option>🔧 Motorist</option><option>⚙️ Xodovik</option><option>⚡ Avtoelektrik / Diaqnostika</option><option>🎨 Malyar</option><option>🔨 Çilingər</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">İş Saatları</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
-                            <option>09:00 - 19:00 (Hər gün)</option>
-                            <option>09:00 - 20:00 (Bazar ertəsi - Şənbə)</option>
-                            <option>24 Saat (Gecə də işləyir)</option>
+                            <option>09:00 - 19:00 (Hər gün)</option><option>09:00 - 20:00</option><option>24 Saat (Gecə də işləyir)</option>
                         </select>
                     </div>
                 </div>
 
-                <!-- 4. MOYKA / DETAİLİNG SEKTORU -->
+                <!-- 4. MOYKA SEKTORU -->
                 <div id="washFields" class="grid grid-cols-1 md:grid-cols-2 gap-4 hidden">
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">Xidmət Növü</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
                             <option value="">Moyka növü seçin</option>
-                            <option>🧼 Əl ilə Sadə Moyka</option>
-                            <option>✨ Detailing & Ximçistka</option>
-                            <option>🛡️ Keramika örtük & Polirovkа</option>
-                            <option>🚿 Dəmir tozundan təmizləmə</option>
+                            <option>🧼 Əl ilə Sadə Moyka</option><option>✨ Detailing & Ximçistka</option><option>🛡️ Keramika & Polirovkа</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-xs font-semibold text-gray-300 mb-1.5">İş Saatları</label>
                         <select class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-sm text-gray-100 focus:border-accentBlue focus:outline-none transition">
-                            <option>08:00 - 22:00 (Hər gün)</option>
-                            <option>24 Saat (Gecə moykası)</option>
-                            <option>09:00 - 20:00</option>
+                            <option>08:00 - 22:00 (Hər gün)</option><option>24 Saat</option>
                         </select>
                     </div>
                 </div>
@@ -223,19 +200,22 @@
                     </div>
                 </div>
 
-                <!-- Xəritə Ünvan Seçimi -->
+                <!-- İNTERAKTİV XƏRİTƏ VƏ ÜNVAN SEÇİMİ -->
                 <div class="space-y-2">
-                    <label class="block text-xs font-semibold text-gray-300 flex items-center justify-between">
-                        <span>Xəritədə Yerləşdiyiniz Nöqtəni Seçin</span>
-                        <button type="button" onclick="alert('Cari GPS konumunuz xəritəyə əlavə edildi!')" class="text-accentBlue text-[11px] hover:underline flex items-center space-x-1 cursor-pointer">
+                    <div class="flex items-center justify-between">
+                        <label class="block text-xs font-semibold text-gray-300">Xəritədə Yerləşdiyiniz Nöqtəni Seçin (Üzərinə toxunun)</label>
+                        <button type="button" onclick="locateUser()" class="text-accentBlue text-[11px] hover:underline flex items-center space-x-1 cursor-pointer">
                             <i class="fa-solid fa-crosshairs"></i>
                             <span>Məni Tap (GPS)</span>
                         </button>
-                    </label>
-                    <div class="w-full h-32 bg-gray-900/90 border border-gray-800 rounded-xl flex flex-col items-center justify-center text-gray-400 space-y-2 p-4 text-center">
-                        <i class="fa-solid fa-map-location-dot text-2xl text-accentBlue animate-pulse"></i>
-                        <span class="text-xs">Xəritədə obyektinizin üzərinə toxunaraq dəqiq yerinizi qeyd edin</span>
-                        <input type="text" placeholder="Ünvan avtomatik olaraq seçiləcək və ya qeyd edin..." class="w-full bg-darkBg border border-gray-800 rounded-lg px-3 py-2 text-xs text-gray-200 focus:border-accentBlue focus:outline-none">
+                    </div>
+                    
+                    <!-- Real Xəritə Qutusu -->
+                    <div id="map"></div>
+
+                    <!-- Avtomatik Doldurulan Ünvan Xanası -->
+                    <div>
+                        <input type="text" id="selectedAddress" placeholder="Xəritədən nöqtə seçin və ya küçə adı avtomatik yazılacaq..." readonly class="w-full bg-gray-900/90 border border-gray-800 rounded-xl px-4 py-3 text-xs text-accentBlue focus:outline-none font-medium">
                     </div>
                 </div>
 
@@ -256,7 +236,74 @@
         &copy; 2026 SosAvto.az - Bütün hüquqlar qorunur.
     </footer>
 
+    <!-- Leaflet JS Xəritə Skripti -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
+        // Xəritəni Bakı mərkəzli başladırıq
+        const map = L.map('map').setView([40.4093, 49.8671], 13);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        let marker;
+
+        // Xəritəyə kliklədikdə işarə at və ünvanı tap
+        map.on('click', function(e) {
+            const lat = e.latlng.lat;
+            const lng = e.latlng.lng;
+            placeMarker(lat, lng);
+        });
+
+        function placeMarker(lat, lng) {
+            if (marker) {
+                marker.setLatLng([lat, lng]);
+            } else {
+                marker = L.marker([lat, lng]).addTo(map);
+            }
+            map.setView([lat, lng], 15);
+            getAddressFromCoords(lat, lng);
+        }
+
+        // Nominatim API vasitəsilə koordinatı ünvana (küçə adına) çeviririk
+        function getAddressFromCoords(lat, lng) {
+            const addressInput = document.getElementById('selectedAddress');
+            addressInput.value = "Ünvan təyin edilir...";
+
+            fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}&zoom=18&addressdetails=1`, {
+                headers: {
+                    'Accept-Language': 'az'
+                }
+            })
+            .fetchResponse => response.json())
+            .then(data => {
+                if (data && data.display_name) {
+                    addressInput.value = data.display_name;
+                } else {
+                    addressInput.value = `Seçilən nöqtə: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                }
+            })
+            .catch(() => {
+                addressInput.value = `Koordinat: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            });
+        }
+
+        // Məni Tap (GPS) düyməsi
+        function locateUser() {
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(position => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+                    placeMarker(lat, lng);
+                }, () => {
+                    alert("Cari yeriniz təyin edilə bildi. Zəhmət olmasa xəritədən özünüz toxunaraq seçin.");
+                });
+            } else {
+                alert("Brauzeriniz GPS xidmətini dəstəkləmir.");
+            }
+        }
+
         function toggleCategoryFields() {
             const category = document.getElementById("categorySelect").value;
             document.getElementById("carFields").classList.add("hidden");
@@ -277,7 +324,12 @@
 
         function submitAd(event) {
             event.preventDefault();
-            alert("Elanınız uğurla qəbul edildi! Moderator yoxlamasından sonra saytda dərc olunacaq.");
+            const address = document.getElementById("selectedAddress").value;
+            if (!address || address.includes("təyin edilir")) {
+                alert("Zəhmət olmasa xəritədən obyektinizin yerini qeyd edin!");
+                return;
+            }
+            alert("Elanınız ünvanla birlikdə uğurla qeydə alındı!");
             window.location.href = "index.html";
         }
 
