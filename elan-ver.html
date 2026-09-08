@@ -4,63 +4,106 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Yeni Elan Yerləşdir - SosAvto.az</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
         tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        darkBg: '#0b0f19',
-                        cardBg: '#131c2e',
-                        accentGold: '#f59e0b',
-                        accentHover: '#d97706'
-                    }
-                }
-            }
+            theme: { extend: { colors: { darkBg: '#0b0f19', cardBg: '#131c2e', accentGold: '#f59e0b', accentHover: '#d97706' } } }
         }
     </script>
 </head>
-<body class="bg-darkBg text-gray-100 min-h-screen flex flex-col font-sans">
-
-    <!-- Header -->
-    <header class="bg-cardBg border-b border-gray-800 h-20 flex items-center justify-between px-4 sm:px-6 relative z-20">
-        <a href="index.html" class="flex items-center space-x-2">
-            <div class="bg-accentGold text-darkBg p-2 rounded-xl font-black text-xl flex items-center justify-center shadow-md">
-                <i class="fa-solid fa-car-side"></i>
-            </div>
-            <span class="text-xl sm:text-2xl font-black tracking-wider text-white">Sos<span class="text-accentGold">Avto</span>.az</span>
-        </a>
-
-        <div class="flex items-center space-x-2">
-            <a href="xarita.html" class="flex items-center space-x-2 bg-accentGold hover:bg-accentHover text-darkBg px-4 py-2 rounded-xl font-bold text-xs sm:text-sm shadow transition">
+<body class="bg-darkBg text-gray-100 min-h-screen flex flex-col justify-between font-sans">
+    
+    <!-- Navbar -->
+    <header class="bg-cardBg border-b border-gray-800 shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-2">
+                <div class="bg-accentGold text-darkBg p-2 rounded-xl font-black text-xl flex items-center justify-center">
+                    <i class="fa-solid fa-car-side"></i>
+                </div>
+                <span class="text-2xl font-black tracking-wider text-white">Sos<span class="text-accentGold">Avto</span>.az</span>
+            </a>
+            <a href="index.html" class="text-gray-400 hover:text-white text-sm font-semibold transition flex items-center space-x-1">
                 <i class="fa-solid fa-arrow-left"></i>
-                <span>Xəritəyə Qayıt</span>
+                <span>Ana Səhifəyə Qayıt</span>
             </a>
         </div>
     </header>
 
     <!-- Main Content -->
-    <main class="flex-grow flex items-center justify-center p-4 sm:p-6">
-        <div class="bg-cardBg border border-gray-800 rounded-2xl p-6 sm:p-8 w-full max-w-2xl shadow-xl">
-            <h1 class="text-2xl font-black text-white mb-2">Yeni Elan Yerləşdir</h1>
-            <p class="text-gray-400 text-sm mb-6">Məlumatları tam və dəqiq doldurun.</p>
+    <main class="max-w-2xl mx-auto px-4 py-10 flex-grow w-full space-y-6">
+        <div class="text-center space-y-2">
+            <h1 class="text-3xl font-black text-white">Yeni Elan Yerləşdir</h1>
+            <p class="text-gray-400 text-sm">Avtomobilinizi və ya xidmətinizi sürətli şəkildə saytda paylaşın.</p>
+        </div>
 
-            <div class="space-y-4">
+        <div class="bg-cardBg border border-gray-800 p-8 rounded-3xl shadow-2xl space-y-6">
+            <form id="ad-form" class="space-y-4">
                 <div>
-                    <label class="block text-xs font-bold text-gray-400 uppercase tracking-wider mb-2">1. Elanın Növünü Seçin</label>
-                    <select class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-accentGold transition">
-                        <option value="">-- Kateqoriya Seçin --</option>
-                        <option value="avtomobil">Avtomobil Satışı</option>
-                        <option value="ehtiyat">Ehtiyat Hissələri</option>
-                        <option value="servis">Servis və Usta</option>
-                        <option value="evakuator">Evakuator Xidməti</option>
-                    </select>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Elanın Başlığı</label>
+                    <input type="text" id="ad-title" required placeholder="Məs: Hyundai Elantra, 2017" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accentGold">
                 </div>
-            </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Qiymət (AZN)</label>
+                        <input type="number" id="ad-price" required placeholder="Məs: 22000" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accentGold">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Şəhər</label>
+                        <input type="text" id="ad-city" required placeholder="Bakı" value="Bakı" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accentGold">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-semibold text-gray-400 mb-1.5 uppercase tracking-wider">Şəkil Linki (URL)</label>
+                    <input type="url" id="ad-image" required placeholder="https://example.com/image.jpg" class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-accentGold">
+                </div>
+                <button type="submit" class="w-full bg-accentGold hover:bg-accentHover text-darkBg font-black py-4 rounded-xl transition text-sm shadow-lg shadow-accentGold/20 mt-4">
+                    Elanı Təsdiq Et və Paylaş
+                </button>
+            </form>
         </div>
     </main>
 
+    <!-- Footer -->
+    <footer class="bg-cardBg border-t border-gray-800 py-6 text-center text-xs text-gray-500">
+        &copy; 2026 SosAvto.az - Bütün hüquqlar qorunur.
+    </footer>
+
+    <!-- JavaScript (İstədiyin skript hissəsi buradadır) -->
+    <script>
+        // İstifadəçi daxil olub-olmadığını yoxlayırıq
+        const loggedUser = localStorage.getItem('sosavto_logged_user');
+        if (!loggedUser) {
+            alert('Elan yerləşdirmək üçün əvvəlcə giriş etməlisiniz!');
+            window.location.href = 'giris.html';
+        }
+
+        // Elan formunun göndərilməsi məntiqi
+        document.getElementById('ad-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+
+            let title = document.getElementById('ad-title').value;
+            let price = document.getElementById('ad-price').value;
+            let city = document.getElementById('ad-city').value;
+            let image = document.getElementById('ad-image').value;
+
+            let newAd = {
+                id: Date.now(),
+                title: title,
+                price: price,
+                city: city,
+                image: image,
+                user: loggedUser,
+                status: 'active'
+            };
+
+            let listings = JSON.parse(localStorage.getItem('sosavto_listings') || '[]');
+            listings.unshift(newAd);
+            localStorage.setItem('sosavto_listings', JSON.stringify(listings));
+
+            alert('Elan uğurla yerləşdirildi!');
+            window.location.href = 'index.html';
+        });
+    </script>
 </body>
 </html>
