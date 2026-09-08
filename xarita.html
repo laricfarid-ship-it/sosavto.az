@@ -3,190 +3,86 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GPS Servis və Evakuator Xəritəsi - SosAvto.az</title>
-    <!-- Tailwind CSS -->
+    <title>Servis Xəritəsi - SosAvto.az</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Leaflet CSS -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
     <script>
         tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        darkBg: '#0b0f19',
-                        cardBg: '#131c2e',
-                        accentGold: '#f59e0b',
-                        accentHover: '#d97706'
-                    }
-                }
+            theme: { 
+                extend: { 
+                    colors: { 
+                        darkBg: '#05070b', 
+                        cardBg: 'rgba(13, 20, 36, 0.85)', 
+                        accentBlue: '#00f2fe', 
+                        accentPurple: '#4facfe',
+                        accentHover: '#38bdf8'
+                    } 
+                } 
             }
         }
     </script>
     <style>
-        #map { height: calc(100vh - 80px); width: 100%; z-index: 10; }
-        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
-            background-color: #131c2e !important;
-            color: #fff !important;
-            border: 1px solid #374151;
-            border-radius: 12px;
+        .neon-glass {
+            background: rgba(13, 20, 36, 0.75);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(0, 242, 254, 0.25);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+        .neon-glow {
+            box-shadow: 0 0 25px rgba(0, 242, 254, 0.2);
+        }
+        .neon-text-glow {
+            text-shadow: 0 0 20px rgba(0, 242, 254, 0.5);
         }
     </style>
 </head>
-<body class="bg-darkBg text-gray-100 min-h-screen flex flex-col font-sans overflow-hidden">
-
-    <!-- Header -->
-    <header class="bg-cardBg border-b border-gray-800 h-20 flex items-center justify-between px-4 sm:px-6 relative z-20">
-        <a href="index.html" class="flex items-center space-x-2">
-            <div class="bg-accentGold text-darkBg p-2 rounded-xl font-black text-xl flex items-center justify-center shadow-md">
-                <i class="fa-solid fa-car-side"></i>
-            </div>
-            <span class="text-xl sm:text-2xl font-black tracking-wider text-white">Sos<span class="text-accentGold">Avto</span>.az</span>
-        </a>
-
-        <!-- Filter Buttons -->
-        <div class="flex items-center space-x-1 sm:space-x-2 bg-gray-900/80 p-1.5 rounded-2xl border border-gray-800">
-            <button onclick="filterMap('all')" id="btn-all" class="map-filter px-3 sm:px-4 py-1.5 rounded-xl font-bold text-xs sm:text-sm transition bg-accentGold text-darkBg shadow">Bütün Nöqtələr</button>
-            <button onclick="filterMap('tow')" id="btn-tow" class="map-filter px-3 sm:px-4 py-1.5 rounded-xl font-bold text-xs sm:text-sm transition text-gray-400 hover:text-white">Evakuator</button>
-            <button onclick="filterMap('service')" id="btn-service" class="map-filter px-3 sm:px-4 py-1.5 rounded-xl font-bold text-xs sm:text-sm transition text-gray-400 hover:text-white">Servis</button>
-        </div>
-
-        <div class="flex items-center space-x-2">
-            <!-- Məni Tap düyməsi -->
-            <button onclick="locateUser()" title="Məni Tap" class="bg-blue-600 hover:bg-blue-500 text-white px-3 sm:px-4 py-2 rounded-xl font-bold text-xs sm:text-sm shadow transition flex items-center space-x-1.5">
-                <i class="fa-solid fa-crosshairs"></i>
-                <span class="hidden sm:inline">Məni Tap</span>
-            </button>
-            <a href="elan-ver.html" class="hidden md:flex items-center space-x-2 bg-accentGold hover:bg-accentHover text-darkBg px-4 py-2 rounded-xl font-bold text-xs sm:text-sm shadow transition">
-                <i class="fa-solid fa-plus"></i>
-                <span>Elan Yerləşdir</span>
+<body class="bg-darkBg text-gray-100 min-h-screen flex flex-col justify-between font-sans selection:bg-accentBlue selection:text-darkBg">
+    <!-- Navbar -->
+    <header class="neon-glass border-b border-gray-800 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-6 py-3.5 flex justify-between items-center">
+            <a href="index.html" class="flex items-center space-x-2.5 group">
+                <div class="bg-gradient-to-r from-accentBlue to-accentPurple text-darkBg p-2.5 rounded-2xl font-black text-xl shadow-lg shadow-accentBlue/30 flex items-center justify-center">
+                    <i class="fa-solid fa-car-side"></i>
+                </div>
+                <span class="text-2xl font-black tracking-wider text-white">Sos<span class="text-transparent bg-clip-text bg-gradient-to-r from-accentBlue to-accentPurple neon-text-glow">Avto</span>.az</span>
             </a>
+            
+            <div class="flex items-center space-x-3.5">
+                <a href="index.html" class="bg-gray-900/80 hover:bg-gray-800 text-gray-200 px-4.5 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 border border-gray-800">
+                    <i class="fa-solid fa-arrow-left text-accentBlue"></i>
+                    <span>Ana Səhifə</span>
+                </a>
+            </div>
         </div>
     </header>
 
-    <!-- Map Container -->
-    <div id="map" class="w-full flex-grow"></div>
+    <!-- Content -->
+    <main class="max-w-7xl mx-auto px-6 py-14 flex-grow w-full space-y-8">
+        <div class="text-center space-y-3">
+            <h1 class="text-3xl md:text-5xl font-black tracking-tight text-white">
+                Servis və Ustaların <span class="text-transparent bg-clip-text bg-gradient-to-r from-accentBlue to-accentPurple neon-text-glow">Xəritəsi</span>
+            </h1>
+            <p class="text-gray-400 text-sm max-w-lg mx-auto font-light">
+                Yaxınlığınızdakı avto servis, diaqnostika və təmir mərkəzlərini xəritə üzərindən tapın.
+            </p>
+        </div>
 
-    <!-- Leaflet JS -->
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
-    <script>
-        // Bakı mərkəzli xəritə
-        const map = L.map('map').setView([40.4093, 49.8671], 12);
+        <div class="neon-glass neon-glow p-4 rounded-3xl max-w-5xl mx-auto overflow-hidden">
+            <!-- Xəritə yerləşdirmək üçün sahə (Google Maps embed və ya interaktiv blok) -->
+            <div class="w-full h-[500px] rounded-2xl bg-[#030508] border border-gray-800 flex flex-col items-center justify-center space-y-4 text-center p-6">
+                <div class="bg-accentBlue/10 border border-accentBlue/30 text-accentBlue p-4 rounded-full text-3xl">
+                    <i class="fa-solid fa-map-location-dot"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Xəritə modulu yüklənir...</h3>
+                <p class="text-gray-400 text-xs max-w-md">Bakı şəhəri üzrə qeydiyyatdan keçmiş servis və ustaların GPS koordinatları tezliklə burada aktiv olacaq.</p>
+            </div>
+        </div>
+    </main>
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 19,
-            attribution: '&copy; OpenStreetMap contributors'
-        }).addTo(map);
-
-        // Nöqtələr bazası (Evakuator və Servislər)
-        const locations = [
-            { id: 1, type: 'tow', title: 'Bakı Evakuator Xidməti 24/7', lat: 40.4034, lng: 49.8456, phone: '+994 50 123 45 67', desc: 'Şəhərdaxili və rayonlara təcili evakuasiya.' },
-            { id: 2, type: 'service', title: 'Motors Master - BMW & Mercedes Servis', lat: 40.4312, lng: 49.8723, phone: '+994 55 987 65 43', desc: 'Kompüter diaqnostikası, mühərrik təmiri.' },
-            { id: 3, type: 'tow', title: 'Təcili Evakuator Nəsimi', lat: 40.3951, lng: 49.8221, phone: '+994 70 555 44 33', desc: '10 dəqiqəyə ünvana çatdırılma.' },
-            { id: 4, type: 'service', title: 'Çin Avtomobilləri Servisi (BYD, Changan)', lat: 40.4201, lng: 49.9012, phone: '+994 51 333 22 11', desc: 'Elektromobil və Plug-in hybrid təmiri.' },
-            { id: 5, type: 'service', title: 'Usta Elşən - Otomat Korobka', lat: 40.3785, lng: 49.8920, phone: '+994 50 777 88 99', desc: 'Sürətlər qutusunun təmiri və yağı.' }
-        ];
-
-        let markersLayer = L.layerGroup().addTo(map);
-        let userMarker = null;
-        let userAccuracyCircle = null;
-
-        function renderMarkers(filterType) {
-            markersLayer.clearLayers();
-
-            locations.forEach(loc => {
-                if (filterType === 'all' || loc.type === filterType) {
-                    // İkon təyini
-                    let iconColor = loc.type === 'tow' ? '#ef4444' : '#f59e0b';
-                    let iconClass = loc.type === 'tow' ? 'fa-truck-pickup' : 'fa-wrench';
-
-                    let customIcon = L.divIcon({
-                        className: 'custom-div-icon',
-                        html: `<div style="background-color: ${iconColor}; width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #0b0f19; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.3); border: 2px solid #fff;"><i class="fa-solid ${iconClass}"></i></div>`,
-                        iconSize: [36, 36],
-                        iconAnchor: [18, 18]
-                    });
-
-                    let marker = L.marker([loc.lat, loc.lng], { icon: customIcon });
-
-                    marker.bindPopup(`
-                        <div style="padding: 4px;">
-                            <h3 style="font-weight: bold; font-size: 15px; margin-bottom: 4px; color: #f59e0b;">${loc.title}</h3>
-                            <p style="font-size: 13px; color: #9ca3af; margin-bottom: 8px;">${loc.desc}</p>
-                            <div style="font-size: 13px; font-weight: bold; margin-bottom: 8px;"><i class="fa-solid fa-phone mr-1"></i> ${loc.phone}</div>
-                            <a href="tel:${loc.phone}" style="display: block; text-align: center; background-color: #f59e0b; color: #0b0f19; padding: 6px 12px; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 13px;">Zəng Et</a>
-                        </div>
-                    `);
-
-                    markersLayer.addLayer(marker);
-                }
-            });
-        }
-
-        function filterMap(type) {
-            document.querySelectorAll('.map-filter').forEach(btn => {
-                btn.classList.remove('bg-accentGold', 'text-darkBg', 'shadow');
-                btn.classList.add('text-gray-400', 'hover:text-white');
-            });
-
-            let activeBtn = document.getElementById(`btn-${type}`);
-            if (activeBtn) {
-                activeBtn.classList.add('bg-accentGold', 'text-darkBg', 'shadow');
-                activeBtn.classList.remove('text-gray-400', 'hover:text-white');
-            }
-
-            renderMarkers(type);
-        }
-
-        // Məni Tap (Geolocation) funksiyası
-        function locateUser() {
-            if (!navigator.geolocation) {
-                alert("Sizin brauzer GPS geolokasiyanı dəstəkləmir.");
-                return;
-            }
-
-            navigator.geolocation.getCurrentPosition(
-                (position) => {
-                    const lat = position.coords.latitude;
-                    const lng = position.coords.longitude;
-                    const accuracy = position.coords.accuracy;
-
-                    // Əgər əvvəlki istifadəçi markerləri varsa, silirik
-                    if (userMarker) map.removeLayer(userMarker);
-                    if (userAccuracyCircle) map.removeLayer(userAccuracyCircle);
-
-                    // İstifadəçinin yerində göy rəngli nöqtə və radius dairəsi yaradırıq
-                    userIcon = L.divIcon({
-                        className: 'user-location-icon',
-                        html: `<div style="background-color: #3b82f6; width: 22px; height: 22px; border-radius: 50%; border: 3px solid #ffffff; box-shadow: 0 0 10px rgba(59,130,246,0.8);"></div>`,
-                        iconSize: [22, 22],
-                        iconAnchor: [11, 11]
-                    });
-
-                    userMarker = L.marker([lat, lng], { icon: userIcon }).addTo(map);
-                    userMarker.bindPopup("<b>Siz buradasınız</b>").openPopup();
-
-                    userAccuracyCircle = L.circle([lat, lng], {
-                        radius: accuracy / 2,
-                        color: '#3b82f6',
-                        fillColor: '#3b82f6',
-                        fillOpacity: 0.15,
-                        weight: 1
-                    }).addTo(map);
-
-                    // Xəritəni həmin koordinata yaxınlaşdırırıq
-                    map.setView([lat, lng], 15);
-                },
-                (error) => {
-                    alert("Məkan məlumatı alınmadı. Zəhmət olmasa GPS/Məkan icazələrini yoxlayın.");
-                    console.error(error);
-                },
-                { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
-            );
-        }
-
-        // İlkin yüklənmə
-        renderMarkers('all');
-    </script>
+    <!-- Footer -->
+    <footer class="neon-glass border-t border-gray-800 py-6 text-center text-xs text-gray-400 mt-16">
+        &copy; 2026 SosAvto.az - Bütün hüquqlar qorunur.
+    </footer>
 </body>
 </html>
