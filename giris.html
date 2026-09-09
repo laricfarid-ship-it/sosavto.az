@@ -93,9 +93,14 @@
     <script>
         function handleLogin(event) {
             event.preventDefault();
-            // Test üçün sadə giriş simulyasiyası
+            // İstifadəçinin giriş etdiyini yadda saxlayırıq
             localStorage.setItem("isLoggedIn", "true");
-            window.location.href = "elan-ver.html";
+            
+            // Əgər istifadəçi əvvəlcədən elan verməyə basıbsa ora, yox əgər sadəcə girişə basıbsa ana səhifəyə yönləndiririk
+            const redirectUrl = localStorage.getItem("redirectAfterLogin") || "index.html";
+            localStorage.removeItem("redirectAfterLogin");
+            
+            window.location.href = redirectUrl;
         }
     </script>
 </body>
