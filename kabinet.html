@@ -103,7 +103,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Əlaqə Nömrəsi</label>
-                        <input type="text" id="input-phone" placeholder="+994 (XX) XXX-XX-XX" class="w-full bg-[#030508] border border-gray-800 rounded-xl px-4.5 py-3 text-sm text-gray-100 focus:outline-none focus:border-accentBlarue">
+                        <input type="text" id="input-phone" placeholder="+994 (XX) XXX-XX-XX" class="w-full bg-[#030508] border border-gray-800 rounded-xl px-4.5 py-3 text-sm text-gray-100 focus:outline-none focus:border-accentBlue">
                     </div>
                 </div>
 
@@ -136,10 +136,10 @@
         if (!isLoggedIn && !loggedUser) {
             window.location.href = "giris.html";
         } else {
-            // Əvvəlcə qeyd edilmiş adı yoxlayırıq, yoxdursa "Feko" əvəzinə loggedUser-i götürürük
-            const savedName = localStorage.getItem('sosavto_user_name') || loggedUser || "İstifadəçi";
+            // Əvvəllər yadda saxlanılan məlumatları oxuyuruq, yoxdursa login dəyərindən avtomatik doldururuq
+            const savedName = localStorage.getItem('sosavto_user_name') || (loggedUser && !loggedUser.includes('@') ? loggedUser : "İstifadəçi");
             const savedPhone = localStorage.getItem('sosavto_user_phone') || "";
-            const savedEmail = localStorage.getItem('sosavto_user_email') || "";
+            const savedEmail = localStorage.getItem('sosavto_user_email') || (loggedUser && loggedUser.includes('@') ? loggedUser : "");
 
             document.getElementById('profile-name-title').innerText = savedName;
             document.getElementById('input-name').value = savedName;
@@ -159,12 +159,10 @@
             const phone = document.getElementById('input-phone').value;
             const email = document.getElementById('input-email').value;
 
-            // Yeni adı təkrar yaddaşa yazırıq
+            // Məlumatları localStorage-ə tam və düzgün şəkildə yazırıq
             localStorage.setItem('sosavto_user_name', name);
             localStorage.setItem('sosavto_user_phone', phone);
             localStorage.setItem('sosavto_user_email', email);
-            
-            // ƏMƏLİYYAT: Köhnə səhv mənbəni yeniləyirik ki, səhifə yenilənəndə Feko olmasın
             localStorage.setItem('sosavto_logged_user', name);
 
             alert('Məlumatlar uğurla yeniləndi!');
