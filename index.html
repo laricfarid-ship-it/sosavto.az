@@ -183,14 +183,49 @@
     </footer>
 
     <script>
+        // Giriş yoxlaması və Dinamik Profil Menyu
         const loggedUser = localStorage.getItem('sosavto_logged_user');
-        if (loggedUser) {
-            document.getElementById('auth-container').innerHTML = `
-                <a href="kabinet.html" class="bg-gray-900/80 hover:bg-gray-800 text-accentBlue px-4.5 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 border border-accentBlue/30 shadow-md">
-                    <i class="fa-solid fa-user-circle"></i>
-                    <span>${loggedUser}</span>
-                </a>
+        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        const authContainer = document.getElementById('auth-container');
+
+        if (loggedUser || isLoggedIn) {
+            const displayName = loggedUser || "Şəxsi Kabinet";
+            authContainer.innerHTML = `
+                <div class="relative group">
+                    <button class="bg-gray-900/90 hover:bg-gray-800 text-gray-200 px-4.5 py-2.5 rounded-xl text-sm font-semibold transition flex items-center space-x-2 border border-accentBlue/40 shadow-lg shadow-accentBlue/10 cursor-pointer">
+                        <i class="fa-solid fa-user-circle text-accentBlue text-base"></i>
+                        <span>${displayName}</span>
+                        <i class="fa-solid fa-chevron-down text-xs text-gray-400"></i>
+                    </button>
+                    
+                    <!-- Dropdown Menyu -->
+                    <div class="absolute right-0 mt-2 w-48 bg-gray-900 border border-gray-800 rounded-2xl shadow-2xl py-2 hidden group-hover:block z-50">
+                        <a href="kabinet.html" class="block px-4 py-2.5 text-xs text-gray-200 hover:bg-gray-800 hover:text-accentBlue transition flex items-center space-x-2">
+                            <i class="fa-solid fa-id-badge text-accentBlue w-4"></i>
+                            <span>Hesab Məlumatları</span>
+                        </a>
+                        <a href="menim-elanlarim.html" class="block px-4 py-2.5 text-xs text-gray-200 hover:bg-gray-800 hover:text-accentBlue transition flex items-center space-x-2">
+                            <i class="fa-solid fa-car text-accentBlue w-4"></i>
+                            <span>Mənim Elanlarım</span>
+                        </a>
+                        <a href="favoriler.html" class="block px-4 py-2.5 text-xs text-gray-200 hover:bg-gray-800 hover:text-accentBlue transition flex items-center space-x-2">
+                            <i class="fa-solid fa-heart text-red-400 w-4"></i>
+                            <span>Favorilər</span>
+                        </a>
+                        <div class="border-t border-gray-800 my-1"></div>
+                        <button onclick="logout()" class="w-full text-left px-4 py-2.5 text-xs text-red-400 hover:bg-gray-800 hover:text-red-300 transition flex items-center space-x-2 cursor-pointer">
+                            <i class="fa-solid fa-right-from-bracket w-4"></i>
+                            <span>Çıxış Et</span>
+                        </button>
+                    </div>
+                </div>
             `;
+        }
+
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('sosavto_logged_user');
+            window.location.href = "index.html";
         }
 
         const carData = {
