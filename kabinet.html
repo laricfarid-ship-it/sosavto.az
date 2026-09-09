@@ -103,7 +103,7 @@
                     </div>
                     <div>
                         <label class="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Əlaqə Nömrəsi</label>
-                        <input type="text" id="input-phone" placeholder="+994 (XX) XXX-XX-XX" class="w-full bg-[#030508] border border-gray-800 rounded-xl px-4.5 py-3 text-sm text-gray-100 focus:outline-none focus:border-accentBlue">
+                        <input type="text" id="input-phone" placeholder="+994 (XX) XXX-XX-XX" class="w-full bg-[#030508] border border-gray-800 rounded-xl px-4.5 py-3 text-sm text-gray-100 focus:outline-none focus:border-accentBlarue">
                     </div>
                 </div>
 
@@ -136,7 +136,7 @@
         if (!isLoggedIn && !loggedUser) {
             window.location.href = "giris.html";
         } else {
-            // Məlumatları düzgün açarlardan ayrıca oxuyuruq (Ad və Email qarışmır)
+            // Əvvəlcə qeyd edilmiş adı yoxlayırıq, yoxdursa "Feko" əvəzinə loggedUser-i götürürük
             const savedName = localStorage.getItem('sosavto_user_name') || loggedUser || "İstifadəçi";
             const savedPhone = localStorage.getItem('sosavto_user_phone') || "";
             const savedEmail = localStorage.getItem('sosavto_user_email') || "";
@@ -159,11 +159,13 @@
             const phone = document.getElementById('input-phone').value;
             const email = document.getElementById('input-email').value;
 
-            // Hər məlumatı yalnız öz adına uyğun yadda saxlayırıq
+            // Yeni adı təkrar yaddaşa yazırıq
             localStorage.setItem('sosavto_user_name', name);
             localStorage.setItem('sosavto_user_phone', phone);
             localStorage.setItem('sosavto_user_email', email);
-            // Qeyd: sosavto_logged_user artıq emaile bərabər edilmir ki, ad dəyişəndə email korlanmasın
+            
+            // ƏMƏLİYYAT: Köhnə səhv mənbəni yeniləyirik ki, səhifə yenilənəndə Feko olmasın
+            localStorage.setItem('sosavto_logged_user', name);
 
             alert('Məlumatlar uğurla yeniləndi!');
             location.reload();
