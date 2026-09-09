@@ -93,10 +93,13 @@
     <script>
         function handleLogin(event) {
             event.preventDefault();
-            // İstifadəçinin giriş etdiyini yadda saxlayırıq
-            localStorage.setItem("isLoggedIn", "true");
+            const username = document.getElementById("username").value;
             
-            // Əgər istifadəçi əvvəlcədən elan verməyə basıbsa ora, yox əgər sadəcə girişə basıbsa ana səhifəyə yönləndiririk
+            // İstifadəçi adını və giriş statusunu yaddaşda saxlayırıq
+            localStorage.setItem("isLoggedIn", "true");
+            localStorage.setItem("sosavto_logged_user", username);
+            localStorage.setItem("sosavto_user_name", username);
+            
             const redirectUrl = localStorage.getItem("redirectAfterLogin") || "index.html";
             localStorage.removeItem("redirectAfterLogin");
             
