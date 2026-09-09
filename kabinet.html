@@ -11,19 +11,6 @@
             theme: { 
                 extend: { 
                     colors: { 
-                        darkBg: '#05070b', <!DOCTYPE html>
-<html lang="az">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hesab Məlumatları - SosAvto.az</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script>
-        tailwind.config = {
-            theme: { 
-                extend: { 
-                    colors: { 
                         darkBg: '#05070b', 
                         cardBg: 'rgba(13, 20, 36, 0.85)', 
                         accentBlue: '#00f2fe', 
@@ -149,10 +136,10 @@
         if (!isLoggedIn && !loggedUser) {
             window.location.href = "giris.html";
         } else {
-            // Məlumatları doldur
+            // Məlumatları düzgün açarlardan ayrıca oxuyuruq (Ad və Email qarışmır)
             const savedName = localStorage.getItem('sosavto_user_name') || loggedUser || "İstifadəçi";
             const savedPhone = localStorage.getItem('sosavto_user_phone') || "";
-            const savedEmail = localStorage.getItem('sosavto_user_email') || loggedUser || "";
+            const savedEmail = localStorage.getItem('sosavto_user_email') || "";
 
             document.getElementById('profile-name-title').innerText = savedName;
             document.getElementById('input-name').value = savedName;
@@ -172,10 +159,11 @@
             const phone = document.getElementById('input-phone').value;
             const email = document.getElementById('input-email').value;
 
+            // Hər məlumatı yalnız öz adına uyğun yadda saxlayırıq
             localStorage.setItem('sosavto_user_name', name);
             localStorage.setItem('sosavto_user_phone', phone);
             localStorage.setItem('sosavto_user_email', email);
-            localStorage.setItem('sosavto_logged_user', email);
+            // Qeyd: sosavto_logged_user artıq emaile bərabər edilmir ki, ad dəyişəndə email korlanmasın
 
             alert('Məlumatlar uğurla yeniləndi!');
             location.reload();
@@ -184,101 +172,9 @@
         function logout() {
             localStorage.removeItem('isLoggedIn');
             localStorage.removeItem('sosavto_logged_user');
-            window.location.href = "index.html";
-        }
-    </script>
-</body>
-</html>
-                        cardBg: 'rgba(13, 20, 36, 0.85)', 
-                        accentBlue: '#00f2fe', 
-                        accentPurple: '#4facfe'
-                    } 
-                } 
-            }
-        }
-    </script>
-    <style>
-        .neon-glass {
-            background: rgba(13, 20, 36, 0.75);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(0, 242, 254, 0.25);
-            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
-        }
-    </style>
-</head>
-<body class="bg-darkBg text-gray-100 min-h-screen flex flex-col justify-between font-sans">
-    <header class="neon-glass border-b border-gray-800 sticky top-0 z-50">
-        <div class="max-w-7xl mx-auto px-6 py-3.5 flex justify-between items-center">
-            <a href="index.html" class="flex items-center space-x-2.5">
-                <div class="bg-gradient-to-r from-accentBlue to-accentPurple text-darkBg p-2.5 rounded-2xl font-black text-xl flex items-center justify-center">
-                    <i class="fa-solid fa-car-side"></i>
-                </div>
-                <span class="text-2xl font-black text-white">Sos<span class="text-transparent bg-clip-text bg-gradient-to-r from-accentBlue to-accentPurple">Avto</span>.az</span>
-            </a>
-            <a href="index.html" class="text-xs text-accentBlue hover:underline flex items-center space-x-1.5">
-                <i class="fa-solid fa-arrow-left"></i>
-                <span>Ana Səhifəyə Qayıt</span>
-            </a>
-        </div>
-    </header>
-
-    <main class="max-w-3xl mx-auto px-6 py-12 flex-grow w-full space-y-6">
-        <h1 class="text-2xl font-black text-white flex items-center space-x-3">
-            <i class="fa-solid fa-id-badge text-accentBlue"></i>
-            <span>Hesab Məlumatları</span>
-        </h1>
-        
-        <div class="neon-glass p-8 rounded-3xl space-y-6 border border-gray-800 shadow-xl">
-            <div class="flex items-center space-x-4 pb-6 border-b border-gray-800">
-                <div class="w-16 h-16 rounded-2xl bg-accentBlue/10 border border-accentBlue/30 flex items-center justify-center text-accentBlue text-2xl font-black">
-                    <i class="fa-solid fa-user"></i>
-                </div>
-                <div>
-                    <h2 id="user-name" class="text-xl font-bold text-white">İstifadəçi</h2>
-                    <p class="text-xs text-accentBlue">Aktiv Hesab</p>
-                </div>
-            </div>
-
-            <div class="space-y-4">
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">İstifadəçi Adı / Email</label>
-                    <input type="text" id="user-email-input" disabled class="w-full bg-[#030508] border border-gray-800 rounded-xl px-4.5 py-3 text-sm text-gray-300 focus:outline-none">
-                </div>
-                <div>
-                    <label class="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">Hesabın Statusu</label>
-                    <input type="text" value="Təsdiqlənmiş İstifadəçi" disabled class="w-full bg-[#030508] border border-gray-800 rounded-xl px-4.5 py-3 text-sm text-gray-300 focus:outline-none">
-                </div>
-            </div>
-
-            <div class="pt-4 flex space-x-4">
-                <button onclick="logout()" class="bg-red-500/10 border border-red-500/30 hover:bg-red-500/20 text-red-400 font-bold px-6 py-3 rounded-xl transition text-xs flex items-center space-x-2 cursor-pointer">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                    <span>Hesabdan Çıxış Et</span>
-                </button>
-            </div>
-        </div>
-    </main>
-
-    <footer class="neon-glass border-t border-gray-800 py-6 text-center text-xs text-gray-400">
-        &copy; 2026 SosAvto.az - Bütün hüquqlar qorunur.
-    </footer>
-
-    <script>
-        // Giriş yoxlaması (həm yeni, həm köhnə açarları yoxlayır ki, səhvən atmasın)
-        const loggedUser = localStorage.getItem('sosavto_logged_user');
-        const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-
-        if (!loggedUser && !isLoggedIn) {
-            window.location.href = "giris.html";
-        } else {
-            document.getElementById('user-name').innerText = loggedUser || "İstifadəçi";
-            document.getElementById('user-email-input').value = loggedUser || "Göstərilməyib";
-        }
-
-        function logout() {
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('sosavto_logged_user');
+            localStorage.removeItem('sosavto_user_name');
+            localStorage.removeItem('sosavto_user_email');
+            localStorage.removeItem('sosavto_user_phone');
             window.location.href = "index.html";
         }
     </script>
