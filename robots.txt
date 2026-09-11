@@ -1,0 +1,7 @@
+User-agent: *
+Disallow: /api/
+Disallow: /admin.html
+Disallow: /kabinet.html
+Disallow: /menim-elanlarim.html
+Disallow: /favoriler.html
+Disallow: /bildirisler.html
