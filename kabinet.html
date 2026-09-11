@@ -109,7 +109,7 @@
 
                 <div>
                     <label class="block text-xs font-bold text-gray-400 mb-1 uppercase tracking-widest">E-poçt Ünvanı</label>
-                    <input type="email" id="input-email" required class="w-full bg-[#030508] border border-gray-800 rounded-xl px-4.5 py-3 text-sm text-gray-100 focus:outline-none focus:border-accentBlue">
+                    <input type="email" id="input-email" class="w-full bg-[#030508] border border-gray-800 rounded-xl px-4.5 py-3 text-sm text-gray-100 focus:outline-none focus:border-accentBlue">
                 </div>
 
                 <div class="pt-4 flex items-center justify-between flex-wrap gap-4">
@@ -131,24 +131,25 @@
 
     <script>
         const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        const loggedUser = localStorage.getItem('sosavto_logged_user');
+        const loggedUsername = localStorage.getItem('sosavto_logged_user');
 
-        if (!isLoggedIn && !loggedUser) {
+        // Bazanı oxuyuruq
+        let users = JSON.parse(localStorage.getItem('sosavto_users') || '[]');
+        let currentUser = users.find(u => u.username === loggedUsername);
+
+        if (!isLoggedIn || !loggedUsername || !currentUser) {
+            // Əgər giriş edilməyibsə və ya belə istifadəçi yoxdursa, girişə at
             window.location.href = "giris.html";
         } else {
-            // Əsas prioritet həmişə istifadəçinin özünün yazdığı 'sosavto_user_name'-dir
-            const customName = localStorage.getItem('sosavto_user_name');
-            const savedEmail = localStorage.getItem('sosavto_user_email') || loggedUser || "";
-            
-            // Əgər customName yoxdursa, emaildən ad düzəlt, varsa birbaşa customName-i götür
-            let finalName = customName ? customName : (savedEmail.includes('@') ? savedEmail.split('@')[0] : (loggedUser || "İstifadəçi"));
+            // Məlumatları həmin istifadəçinin öz obyektindən doldururuq
+            let displayName = currentUser.fullname || currentUser.username;
+            let displayPhone = currentUser.phone || "";
+            let displayEmail = currentUser.email || "";
 
-            const savedPhone = localStorage.getItem('sosavto_user_phone') || "";
-
-            document.getElementById('profile-name-title').innerText = finalName;
-            document.getElementById('input-name').value = finalName;
-            document.getElementById('input-phone').value = savedPhone;
-            document.getElementById('input-email').value = savedEmail.includes('@') ? savedEmail : "";
+            document.getElementById('profile-name-title').innerText = displayName;
+            document.getElementById('input-name').value = displayName;
+            document.getElementById('input-phone').value = displayPhone;
+            document.getElementById('input-email').value = displayEmail;
 
             // Statistikaları yaz
             const listings = JSON.parse(localStorage.getItem('sosavto_listings') || '[]');
@@ -159,26 +160,34 @@
 
         function saveProfile(e) {
             e.preventDefault();
-            const name = document.getElementById('input-name').value;
-            const phone = document.getElementById('input-phone').value;
-            const email = document.getElementById('input-email').value;
+            const name = document.getElementById('input-name').value.trim();
+            const phone = document.getElementById('input-phone').value.trim();
+            const email = document.getElementById('input-email').value.trim();
 
-            // Bütün dəyərləri səliqəli və qalıcı şəkildə yaddaşa yazırıq
-            localStorage.setItem('sosavto_user_name', name);
-            localStorage.setItem('sosavto_user_phone', phone);
-            localStorage.setItem('sosavto_user_email', email);
-            localStorage.setItem('sosavto_logged_user', email ? email : name);
+            // Bazadakı cari istifadəçinin məlumatlarını yeniləyirik
+            let users = JSON.parse(localStorage.getItem('sosavto_users') || '[]');
+            let userIndex = users.findIndex(u => u.username === loggedUsername);
 
-            alert('Məlumatlar uğurla yeniləndi!');
-            location.reload();
+            if (userIndex !== -1) {
+                users[userIndex].fullname = name;
+                users[userIndex].phone = phone;
+                users[userIndex].email = email;
+
+                // Bazanı yaddaşa yazırıq
+                localStorage.setItem('sosavto_users', JSON.stringify(users));
+                localStorage.setItem('sosavto_user_name', name);
+
+                alert('Məlumatlar uğurla yeniləndi!');
+                location.reload();
+            } else {
+                alert('Xəta baş verdi!');
+            }
         }
 
         function logout() {
             localStorage.removeItem('isLoggedIn');
             localStorage.removeItem('sosavto_logged_user');
             localStorage.removeItem('sosavto_user_name');
-            localStorage.removeItem('sosavto_user_email');
-            localStorage.removeItem('sosavto_user_phone');
             window.location.href = "index.html";
         }
     </script>
