@@ -97,7 +97,11 @@
             
             localStorage.setItem("isLoggedIn", "true");
             localStorage.setItem("sosavto_logged_user", username);
-            localStorage.setItem("sosavto_user_name", username);
+            
+            // Əgər istifadəçinin daha əvvəl yadda saxlanılmış xüsusi adı yoxdursa, bunu qeyd et
+            if (!localStorage.getItem("sosavto_user_name")) {
+                localStorage.setItem("sosavto_user_name", username);
+            }
             
             const redirectUrl = localStorage.getItem("redirectAfterLogin") || "index.html";
             localStorage.removeItem("redirectAfterLogin");
