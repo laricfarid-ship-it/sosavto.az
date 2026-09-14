@@ -4,6 +4,7 @@ import {query,transaction} from '../server/db.mjs';
 import {HttpError,fail,hash,safeUser,session,createSession,requireUser,requireAdmin,originCheck,rateLimit,body,text,uuid} from '../server/security.mjs';
 import {listingInput,columns,projection,search} from '../server/listings.mjs';
 import {upload} from '../server/uploads.mjs';
+import {decodeVin} from '../server/vin.mjs';
 const json=(res,status,data)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(data));};
 async function imagesFor(c,user,id,ids){
  if(ids.length){const r=await c.query('SELECT id FROM images WHERE id=ANY($1::uuid[]) AND user_id=$2 AND (listing_id IS NULL OR listing_id=$3) FOR UPDATE',[ids,user.id,id]);if(r.rows.length!==ids.length)fail(400,'Şəkil seçimi düzgün deyil.');}
@@ -17,6 +18,7 @@ export default async function handler(req,res){
  const url=new URL(req.url,'http://localhost'); const path=url.pathname.replace(/\/$/,'');const method=req.method;
  originCheck(req);
  if(path==='/api/config'&&method==='GET')return json(res,200,{ai:!!(process.env.OPENAI_API_KEY&&process.env.OPENAI_MODEL),uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
+ if(path==='/api/vin'&&method==='GET')return json(res,200,await decodeVin(url.searchParams.get('vin')));
  const user=await session(req);
  if(path==='/api/me'&&method==='GET')return json(res,200,{user:safeUser(user)});
  if(['/api/register','/api/login'].includes(path)&&method==='POST'){

@@ -85,3 +85,13 @@ Baxış sayı səhifənin açılma sayıdır, unikal ziyarətçi və saxtalaşd�
 `server/schema.sql` təkrar tətbiq edilə bilən ilkin sxemdir. Sonrakı sxem dəyişiklikləri üçün versiyalı migration-lar əlavə olunmalıdır. `server/uploads.mjs` şəkli yoxlayır və S3-compatible storage-a göndərir. `.env.example` yalnız boş parametr adlarını ehtiva edir.
 
 AI inteqrasiyası OpenAI Responses API-nin rəsmi sənədinə əsaslanır: https://developers.openai.com/api/docs/guides/text
+
+## Category filters, registration-number listings and VIN decoding
+
+The category form and API share `assets/catalog.js`. Parts retain compatible make/model plus optional OEM, type, condition and fitment notes. Insurance uses type/company; wash, detailing and service use their own service types/hours. Hidden fields are disabled and the API strips unrelated fields when changing category. Search ignores stale filters belonging to other categories. Existing listings remain readable; new optional detail fields do not require a schema migration.
+
+`plates` is a moderated classifieds category with normalized `10-AA-123` registration numbers, region/letters/digits filters and a rendered number card. It does not transfer registrations, verify legal ownership or collect payments. Listings tell users to verify transfer arrangements with DYP before payment. Source: https://www.dyp.gov.az/ (vehicle registration guidance).
+
+`vin.html` calls `GET /api/vin?vin=...` only after an explicit search. The server accepts a full 17-character VIN and queries NHTSA vPIC (https://vpic.nhtsa.dot.gov/api/). No paid provider or API key is required. A shared DB-backed 60/minute and 1,000/day cap limits upstream requests; a bounded one-hour in-memory cache avoids repeat requests within an instance. There is a 12-second timeout. Provider failures, absent data and partial decoding are distinct UI states. This is manufacturer/build data, principally for US-market vehicles: plant country is not registration/import origin. It does not provide accident history, historical mileage, auction photos or a current-condition assessment. Those require a separately licensed history-data source and budget agreement; none is activated by this change.
+
+This branch is based on main and does not enable the separate draft password-recovery/AI work. Test with `npm test` and `npm run build`. Preview write actions still require `APP_ORIGIN` to match the exact preview host, as in existing deployment setup. Do not relax origin checking to enable a preview.
