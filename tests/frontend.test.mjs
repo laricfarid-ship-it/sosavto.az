@@ -9,7 +9,7 @@ const listing={id:'22222222-2222-4222-8222-222222222222',user_id:user.id,title:'
 async function load(path,me=null,responses={}){
  const dom=new JSDOM('<html><head><meta name="description" content=""></head><body><header id="header"></header><main id="main"></main><footer id="footer"></footer><dialog id="dialog"></dialog><div id="toast"></div></body></html>',{url:'https://sosavto.test/'+path});
  const w=dom.window;const calls=[];const fetch=async(url,options={})=>{calls.push({url,...options});const path=url.replace('/api','');const result=responses[path]||({'/me':{user:me},'/config':{ai:false,uploads:false},'/favorites':{listings:[]},'/my-listings':{listings:[]},'/listings?':{listings:[],total:0,page:1,pages:0}}[path]);if(!result)throw Error('Unexpected API request: '+path);return {ok:!result.error,status:result.error?503:200,json:async()=>result};};
- w.L={map:()=>({setView(){return this;},on(){},removeLayer(){},fitBounds(){},invalidateSize(){}}),tileLayer:()=>({addTo(){}}),marker:()=>({addTo(){return this;},bindPopup(){return this;},getLatLng(){return [40,49];},openPopup(){}})};
+ w.L={map:()=>({setView(){return this;},on(event,handler){w.mapHandlers??={};w.mapHandlers[event]=handler;},removeLayer(){},fitBounds(){},invalidateSize(){}}),tileLayer:()=>({addTo(){}}),marker:()=>({addTo(){return this;},bindPopup(){return this;},getLatLng(){return [40,49];},openPopup(){}})};
  const run=new Function('window','document','location','navigator','localStorage','sessionStorage','fetch','FormData','cars','setTimeout','clearTimeout',source);
  await run(w,w.document,w.location,w.navigator,w.localStorage,w.sessionStorage,fetch,w.FormData,cars,()=>0,()=>{});return {w,doc:w.document,calls,close:()=>dom.window.close()};
 }
@@ -45,4 +45,16 @@ test('nearby sorting and radius exclude distant services after explicit location
 });
 test('service failure is reported without fabricated results',async()=>{
  const d=await load('index.html?category=wash',null,{'/map?category=wash':{error:'Database unavailable'}});assert.match(d.doc.querySelector('#service-list').textContent,/Database unavailable/);assert.equal(d.doc.querySelectorAll('.service-card').length,0);d.close();
+});
+
+test('manual map selection centers a 3km search and clears an unrelated city filter',async()=>{
+ const near={...listing,id:'near',latitude:40.4,longitude:49.8,category:'wash'};
+ const d=await load('index.html?category=wash&city=Gəncə',null,{'/map?category=wash&city=G%C9%99nc%C9%99':{listings:[]},'/map?category=wash':{listings:[near]}});
+ d.w.L.circleMarker=d.w.L.marker;
+ await d.w.mapHandlers.click({latlng:{lat:40.4,lng:49.8}});
+ assert.equal(d.doc.querySelector('[name=city]').value,'');
+ assert.equal(d.doc.querySelector('#service-radius').value,'3');
+ assert.equal(d.doc.querySelector('#service-sort').value,'distance');
+ assert.equal(d.doc.querySelector('.service-card').id,'service-near');
+ assert.match(d.doc.querySelector('#location-message').textContent,/Xəritədə seçdiyiniz/);d.close();
 });
