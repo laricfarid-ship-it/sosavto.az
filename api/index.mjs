@@ -95,7 +95,7 @@ export default async function handler(req,res){
  await query('INSERT INTO reports(id,user_id,listing_id,reason) VALUES($1,$2,$3,$4)',[randomUUID(),user.id,id,text(b.reason,'Şikayət səbəbi',5,1000)]);return json(res,201,{ok:true});
  }
  if(path==='/api/map'&&method==='GET'){
- const s=search(url.searchParams);return json(res,200,{listings:(await query(`SELECT l.id,l.title,l.category,l.city,l.price,l.latitude,l.longitude FROM listings l WHERE ${s.where} AND l.latitude IS NOT NULL ORDER BY l.created_at DESC LIMIT 500`,s.args)).rows});
+ const s=search(url.searchParams);return json(res,200,{listings:(await query(`SELECT l.id,l.title,l.category,l.city,l.price,l.latitude,l.longitude,l.address,l.phone,l.details,l.created_at,(SELECT url FROM images WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS image FROM listings l WHERE ${s.where} AND l.latitude IS NOT NULL ORDER BY l.created_at DESC LIMIT 500`,s.args)).rows});
  }
  if(path.startsWith('/api/admin')){
  requireAdmin(user);
