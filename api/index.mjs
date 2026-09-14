@@ -4,6 +4,8 @@ import {query,transaction} from '../server/db.mjs';
 import {HttpError,fail,hash,safeUser,session,createSession,requireUser,requireAdmin,originCheck,rateLimit,body,text,uuid} from '../server/security.mjs';
 import {listingInput,columns,projection,search} from '../server/listings.mjs';
 import {upload} from '../server/uploads.mjs';
+import {resetEnabled,requestReset,completeReset} from '../server/password-reset.mjs';
+import {assistantReply} from '../server/assistant.mjs';
 const json=(res,status,data)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(data));};
 async function imagesFor(c,user,id,ids){
  if(ids.length){const r=await c.query('SELECT id FROM images WHERE id=ANY($1::uuid[]) AND user_id=$2 AND (listing_id IS NULL OR listing_id=$3) FOR UPDATE',[ids,user.id,id]);if(r.rows.length!==ids.length)fail(400,'Şəkil seçimi düzgün deyil.');}
@@ -16,7 +18,9 @@ export default async function handler(req,res){
  try{
  const url=new URL(req.url,'http://localhost'); const path=url.pathname.replace(/\/$/,'');const method=req.method;
  originCheck(req);
- if(path==='/api/config'&&method==='GET')return json(res,200,{ai:!!(process.env.OPENAI_API_KEY&&process.env.OPENAI_MODEL),uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
+ if(path==='/api/config'&&method==='GET')return json(res,200,{passwordReset:resetEnabled(),ai:!!(process.env.OPENAI_API_KEY&&process.env.OPENAI_MODEL),uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
+ if(path==='/api/forgot-password'&&method==='POST')return json(res,200,await requestReset(await body(req)));
+ if(path==='/api/reset-password'&&method==='POST')return json(res,200,await completeReset(await body(req)));
  const user=await session(req);
  if(path==='/api/me'&&method==='GET')return json(res,200,{user:safeUser(user)});
  if(['/api/register','/api/login'].includes(path)&&method==='POST'){
@@ -46,7 +50,7 @@ export default async function handler(req,res){
  if(path==='/api/password'&&method==='POST'){
  requireUser(user);await rateLimit(`password:${user.id}`,5,900);const b=await body(req);if(!await bcrypt.compare(text(b.current,'Cari şifrə',1,72),user.password_hash))fail(400,'Cari şifrə düzgün deyil.');
  const password=text(b.password,'Yeni şifrə',10,72);if(Buffer.byteLength(password)>72)fail(400,'Şifrə çox uzundur.');
- await transaction(async c=>{await c.query('UPDATE users SET password_hash=$1 WHERE id=$2',[await bcrypt.hash(password,12),user.id]);await c.query('DELETE FROM sessions WHERE user_id=$1',[user.id]);});await createSession(res,user);return json(res,200,{ok:true});
+ await transaction(async c=>{await c.query('UPDATE users SET password_hash=$1 WHERE id=$2',[await bcrypt.hash(password,12),user.id]);await c.query('DELETE FROM sessions WHERE user_id=$1',[user.id]);await c.query('DELETE FROM password_resets WHERE user_id=$1',[user.id]);});await createSession(res,user);return json(res,200,{ok:true});
  }
  if(path==='/api/listings'&&method==='GET'){
  const s=search(url.searchParams);const total=(await query(`SELECT count(*)::integer AS count FROM listings l WHERE ${s.where}`,s.args)).rows[0].count;
@@ -122,8 +126,7 @@ export default async function handler(req,res){
  if(path==='/api/assistant'&&method==='POST'){
  requireUser(user);if(!process.env.OPENAI_API_KEY||!process.env.OPENAI_MODEL)fail(503,'AI köməkçisi hələ aktivləşdirilməyib. Axtarış filtrlərindən istifadə edə bilərsiniz.');
  await rateLimit(`ai:${user.id}`,20,86400);await rateLimit('ai:global',200,86400);
- const b=await body(req);const input=text(b.message,'Mesaj',3,1500);const response=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${process.env.OPENAI_API_KEY}`,'Content-Type':'application/json'},signal:AbortSignal.timeout(20000),body:JSON.stringify({model:process.env.OPENAI_MODEL,store:false,max_output_tokens:700,instructions:'Sən SosAvto.az Azərbaycan avtomobil platformasının köməkçisisən. Azərbaycan dilində qısa cavab ver. Yalnız avtomobil, ehtiyat hissələri və xidmətlər barədə kömək et. Real elanlara, qiymət bazasına və hesablara çıxışın yoxdur; bunları uydurma. İstifadəçi verdiyi faktlarla elan təsviri hazırlaya bilərsən, məlum olmayan vəziyyət və xüsusiyyətləri uydurma. Təcili mexaniki təhlükədə peşəkar servisi tövsiyə et. Heç bir əməliyyat etdiyini demə.',input})});
- if(!response.ok)fail(502,'AI xidməti hazırda cavab vermir. Sonra yenidən sınayın.');const data=await response.json();const answer=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==='output_text').map(x=>x.text).join('\n');if(!answer)fail(502,'Cavab alınmadı.');return json(res,200,{answer});
+ return json(res,200,await assistantReply(await body(req)));
  }
  fail(404,'Səhifə tapılmadı.');
  }catch(e){

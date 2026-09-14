@@ -23,3 +23,10 @@ CREATE INDEX IF NOT EXISTS listings_search ON listings(status,category,city,bran
 CREATE INDEX IF NOT EXISTS listings_owner ON listings(user_id,created_at);
 CREATE INDEX IF NOT EXISTS images_listing ON images(listing_id,sort_order);
 CREATE INDEX IF NOT EXISTS sessions_expiry ON sessions(expires_at);
+CREATE TABLE IF NOT EXISTS password_resets (
+ token_hash text PRIMARY KEY,
+ user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ expires_at timestamptz NOT NULL
+);
+CREATE INDEX IF NOT EXISTS password_resets_user ON password_resets(user_id);
+CREATE INDEX IF NOT EXISTS password_resets_expiry ON password_resets(expires_at);

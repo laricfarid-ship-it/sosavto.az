@@ -85,3 +85,24 @@ Baxış sayı səhifənin açılma sayıdır, unikal ziyarətçi və saxtalaşd�
 `server/schema.sql` təkrar tətbiq edilə bilən ilkin sxemdir. Sonrakı sxem dəyişiklikləri üçün versiyalı migration-lar əlavə olunmalıdır. `server/uploads.mjs` şəkli yoxlayır və S3-compatible storage-a göndərir. `.env.example` yalnız boş parametr adlarını ehtiva edir.
 
 AI inteqrasiyası OpenAI Responses API-nin rəsmi sənədinə əsaslanır: https://developers.openai.com/api/docs/guides/text
+
+## Email ilə şifrə bərpası və şəkilli köməkçi
+
+`feat/password-reset-vision` dəyişiklikləri:
+- `giris.html` → **Şifrəni unutdum** → `sifre-berpa.html`.
+- Resend ilə hesabın emailinə 20 dəqiqəlik, birdəfəlik link göndərilir. Link tokeni bazada yalnız SHA-256 hash olaraq saxlanılır; link açıldıqda token ünvan sətrindən silinir. Uğurlu bərpa bütün sessiyaları və digər bərpa linklərini ləğv edir. Mövcud şifrə ilə giriş saxlanır. SMS qeydiyyat təsdiqi bu mərhələyə daxil deyil.
+- AI söhbəti son 8 mesajla davam edir, JPEG/PNG/WebP (3 MB) qəbul edir. Server şəkli yoxlayır, ölçüsünü azaldır və metadata-nı çıxarır; şəkil R2-yə və elanlara yazılmır. Mətn və şəkil OpenAI Responses API-yə `store:false` ilə göndərilir.
+- Modelin axtarış planı parametrli SQL ilə yalnız aktiv elanlarda axtarılır. Telefon, satıcı adı, ünvan və xəritə linkləri modelin uydurduğu məlumatdan deyil, bazadan hazırlanır. Bu, anbarda mövcudluq/avtomobil uyğunluğu təsdiqi deyil; satıcı ilə dəqiqləşdirmək tələb olunur.
+
+### Canlı aktivləşdirmə
+
+1. Dəyişiklik yayımlanmadan **əvvəl** mövcud Neon bazasında `server/migrations/002-password-reset.sql` faylını icra edin. Yaxud uyğun `DATABASE_URL` ilə `npm run migrate` işlədin. Əməliyyat mövcud məlumatları silmir. Bu cədvəl cari şifrə dəyişdirmə əməliyyatında da istifadə olunur.
+2. Resend hesabında email göndərən domeni təsdiqləyin. `RESEND_API_KEY` və `EMAIL_FROM` (məsələn, `SosAvto <hesab@SIZIN-TESDIQLENMIS-DOMENINIZ>`) server dəyişənlərini əlavə edin. Test göndərəni bütün istifadəçilərə email göndərmək üçün uyğun deyil. Domenin email üçün təsdiqi saytın həmin domenə köçürülməsi demək deyil.
+3. `APP_ORIGIN` linkin işləyəcəyi dəqiq sayt ünvanı olmalıdır. Sınaq üçün Preview ünvanı, əsas sayt üçün Production ünvanı. API origin qoruması qüvvədə qalır.
+4. `OPENAI_API_KEY` və şəkil + Responses API JSON Schema çıxışı dəstəkləyən model ID-si kimi `OPENAI_MODEL` əlavə edin. Açarı brauzer koduna yazmayın. OpenAI API istifadə hesabı/büdcəsi ayrıca tələb olunur. Gündə bir istifadəçiyə 20, ümumi 200 AI sorğusu limiti var. Heç bir ödənişli hesab avtomatik yaradılmır.
+5. Redeploy edin. `/api/config` aktiv olduqda `passwordReset:true` və `ai:true` qaytarır. Bu bayraqlar açarların mövcudluğunu göstərir; faktiki email çatdırılması və model cavabı ayrıca yoxlanmalıdır.
+6. Öz test hesabınızla email çatdırılması → link → yeni şifrə → əvvəlki sessiyanın bağlanması axınını yoxlayın. Sonra bir detal fotosu və real elanla AI nəticəsini yoxlayın. `password_reset_delivery_failed` server hadisəsi email provayderinə göndəriş uğursuzluğunu göstərir; email/token loglanmır.
+
+Yoxlamalar provayderləri saxta HTTP cavabları ilə təcrid edir; canlı email və AI keyfiyyətini təsdiqləmir. Mövcud bazanı qorumaq üçün migration əvvəl, kod yayımı sonra edilməlidir.
+
+İstinadlar: [OpenAI şəkil girişləri](https://developers.openai.com/api/docs/guides/images-vision), [Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs), [Resend göndəriş API-si](https://resend.com/docs/api-reference/emails/send-email).

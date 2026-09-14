@@ -13,3 +13,4 @@
 .service-toggle{display:none;gap:8px}
 .service-toggle [aria-pressed=true]{border-color:#00c8db;color:#00c8db}
 @media(max-width:760px){.service-layout{grid-template-columns:minmax(0,1fr)}.service-layout .map{height:420px;position:relative;top:0}.service-toggle{display:flex}.service-layout[data-view=map] #service-list{display:none}.service-layout[data-view=list] #service-map{display:none}.service-controls{justify-content:space-between}.service-card .form-actions{flex-wrap:wrap}}
+.ai-listings{display:grid;gap:12px;margin-top:16px}.ai-listings .panel{padding:16px}.ai-listings .form-actions{flex-wrap:wrap}.bubble{overflow-wrap:anywhere}#recovery-status{white-space:pre-wrap}
