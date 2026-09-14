@@ -106,3 +106,18 @@ AI inteqrasiyası OpenAI Responses API-nin rəsmi sənədinə əsaslanır: https
 Yoxlamalar provayderləri saxta HTTP cavabları ilə təcrid edir; canlı email və AI keyfiyyətini təsdiqləmir. Mövcud bazanı qorumaq üçün migration əvvəl, kod yayımı sonra edilməlidir.
 
 İstinadlar: [OpenAI şəkil girişləri](https://developers.openai.com/api/docs/guides/images-vision), [Structured Outputs](https://developers.openai.com/api/docs/guides/structured-outputs), [Resend göndəriş API-si](https://resend.com/docs/api-reference/emails/send-email).
+
+### AI limitləri və xərc qoruması
+
+AI əvvəlcədən bağlıdır (`AI_ENABLED=false`). Təkcə OpenAI açarı əlavə etmək onu açmır.
+- Hesab başına Bakı vaxtı ilə gündə 2 şəkil, hər şəkil söhbətinə 3 əlavə sual, ayrıca 10 mətn sualı. Yeni mövzu gündəlik sayğacı sıfırlamır. Mətn sualları real AI-yə göndərilir, limitsiz pulsuz API rejimi yoxdur.
+- Premium hələ satışda deyil və heç bir müştəri planı bu limitləri keçə bilmir. Ödəniş və Premium hüququ ayrıca işdir.
+- `AI_REVIEWED_MODEL` dəqiq `OPENAI_MODEL` ilə eyni olmalıdır. `AI_REQUEST_RESERVE_CENTS`, `AI_DAILY_BUDGET_CENTS`, `AI_MONTHLY_BUDGET_CENTS`, `AI_TOTAL_BUDGET_CENTS` müsbət tam ABŞ senti ilə ayrıca təyin edilməlidir. Dəyərlər boş olduqda sorğu getmir.
+- Hər API çağırışından ƏVVƏL PostgreSQL tranzaksiyası ümumi büdcə sətrini kilidləyir, istifadəçi haqqını və üç büdcə həddini yoxlayır, sonra tam ehtiyat məbləğini qeyd edir. Paralel serverlər eyni sayğacları istifadə edir. Hədd aşıldıqda API-yə müraciət edilmir.
+- Ehtiyat məbləği faktiki OpenAI hesab-fakturası deyil. Modelin ən bahalı mümkün sorğusundan az OLMAMALIDIR: maksimum 16,000 UTF-8 bayt istifadəçi mətn/tarixçə, ayrıca sistem təlimatı və JSON schema, bir 1200×1200-dək şəkil (`detail:high`), maksimum 1600 çıxış tokeni. Modelin rəsmi qiyməti və şəkil tokenləşməsi nəzərə alınaraq bu məbləğ YOXLANMADAN aktivləşdirmək olmaz. Model/qiymət və ya giriş limitləri dəyişəndə yenidən hesablanmalıdır.
+- Çağırış uğursuz və ya cavabsız olsa belə rezerv silinmir: provayder onu hesablamış ola bilər. Təkrar çağırış da ayrıca sayılır; avtomatik retry yoxdur. Limit büdcənin həqiqətdə istifadə olunmamış hissəsini də ehtiyatda saxlaya bilər.
+- Gündəlik/aylıq dövr dəyişir, `total` ömürlük hədd isə avtomatik sıfırlanmır. Onu artırmaq ayrıca maliyyə qərarıdır. `AI_ENABLED=false` yeni müraciətləri bağlayır; artıq başlamış çağırışı geri almır.
+- Sayt xaricində eyni API açarı ilə edilən istifadə bu sayğacda deyil. Yalnız bu layihəyə məxsus açar istifadə edin. Provayderdə avtomatik balans artırılmasını ayrıca söndürmək və maliyyə nəzarətini yoxlamaq lazımdır; bu kod provayderin billing ayarlarını dəyişmir və borcsuzluq zəmanəti deyil.
+- `server/migrations/003-ai-limits.sql` aktivləşdirmədən əvvəl icra edilməlidir. Admin yoxlaması üçün `ai_budget_usage` rezervləri və `ai_requests` sorğu ID/model/status qeydlərini saxlayır; şəkil və mesajları saxlamır. Bunları silmək büdcə qorumasını sıfırlayar.
+
+Yoxlama üçün mövcud testlərə model dəyişmə/bloklama, şəkil və mətn limitləri, başqa hesaba aid söhbət, gündəlik/aylıq/ümumi büdcə və eyni anda son büdcə payına müraciət testləri əlavə edilib. Məbləğlər yalnız test mühitinin uydurma qəpikləridir; real tarif deyil.

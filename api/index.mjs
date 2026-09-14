@@ -5,6 +5,7 @@ import {HttpError,fail,hash,safeUser,session,createSession,requireUser,requireAd
 import {listingInput,columns,projection,search} from '../server/listings.mjs';
 import {upload} from '../server/uploads.mjs';
 import {resetEnabled,requestReset,completeReset} from '../server/password-reset.mjs';
+import {aiEnabled,aiUsage} from '../server/ai-limits.mjs';
 import {assistantReply} from '../server/assistant.mjs';
 const json=(res,status,data)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(data));};
 async function imagesFor(c,user,id,ids){
@@ -18,7 +19,7 @@ export default async function handler(req,res){
  try{
  const url=new URL(req.url,'http://localhost'); const path=url.pathname.replace(/\/$/,'');const method=req.method;
  originCheck(req);
- if(path==='/api/config'&&method==='GET')return json(res,200,{passwordReset:resetEnabled(),ai:!!(process.env.OPENAI_API_KEY&&process.env.OPENAI_MODEL),uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
+ if(path==='/api/config'&&method==='GET')return json(res,200,{passwordReset:resetEnabled(),ai:aiEnabled(),uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
  if(path==='/api/forgot-password'&&method==='POST')return json(res,200,await requestReset(await body(req)));
  if(path==='/api/reset-password'&&method==='POST')return json(res,200,await completeReset(await body(req)));
  const user=await session(req);
@@ -123,10 +124,11 @@ export default async function handler(req,res){
  const b=await body(req);const id=uuid(b.id);await transaction(async c=>{await c.query("UPDATE reports SET status='resolved' WHERE id=$1",[id]);await c.query('INSERT INTO audit_logs VALUES($1,$2,$3,$4,now())',[randomUUID(),user.id,'resolve_report',id]);});return json(res,200,{ok:true});
  }
  }
+ if(path==='/api/assistant/usage'&&method==='GET'){requireUser(user);if(!aiEnabled())return json(res,200,{enabled:false});return json(res,200,{enabled:true,...await aiUsage(user.id)});}
  if(path==='/api/assistant'&&method==='POST'){
- requireUser(user);if(!process.env.OPENAI_API_KEY||!process.env.OPENAI_MODEL)fail(503,'AI köməkçisi hələ aktivləşdirilməyib. Axtarış filtrlərindən istifadə edə bilərsiniz.');
- await rateLimit(`ai:${user.id}`,20,86400);await rateLimit('ai:global',200,86400);
- return json(res,200,await assistantReply(await body(req)));
+ requireUser(user);if(!aiEnabled())fail(503,'AI köməkçisi hələ aktivləşdirilməyib. Axtarış filtrlərindən istifadə edə bilərsiniz.');
+ await rateLimit(`ai:burst:${user.id}`,5,60);
+ return json(res,200,await assistantReply(await body(req),user.id));
  }
  fail(404,'Səhifə tapılmadı.');
  }catch(e){
