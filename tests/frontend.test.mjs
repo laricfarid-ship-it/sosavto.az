@@ -23,7 +23,7 @@ test('anonymous users are redirected to sign-in flow for owner pages',async()=>{
 test('listing form toggles required vehicle fields and normalizes category names',async()=>{const d=await load('elan-ver.html',user);const form=d.doc.querySelector('#listing-form');assert.ok(form.elements.year.required);form.elements.category.value='parts';form.elements.category.dispatchEvent(new d.w.Event('change'));assert.equal(form.elements.year.required,false);assert.equal(d.doc.querySelector('#vehicle').hidden,true);assert.ok(![...form.elements.category.options].some(x=>x.value==='spare'));assert.equal(d.doc.querySelector('#files').disabled,true);d.close();});
 test('detail page shows contact actions and escaped description',async()=>{const d=await load('elan.html?id='+listing.id,null,{['/listings/'+listing.id]:{listing}});assert.ok(d.doc.querySelector('a[href="tel:+994501234567"]'));assert.ok(d.doc.querySelector('a[href="https://wa.me/994501234567"]'));assert.equal(d.doc.querySelectorAll('#main script').length,0);d.close();});
 test('admin content is denied for ordinary accounts',async()=>{const d=await load('admin.html',user);assert.match(d.doc.querySelector('#main').textContent,/icazəniz yoxdur/);assert.equal(d.calls.some(c=>c.url==='/api/admin'),false);d.close();});
-test('AI controls honestly remain disabled until configured',async()=>{const d=await load('ai.html',user);assert.match(d.doc.querySelector('#main').textContent,/hələ aktivləşdirilməyib/);assert.equal(d.doc.querySelector('#chat-form button').disabled,true);d.close();});
+test('AI controls honestly remain disabled until configured',async()=>{const d=await load('ai.html',user);assert.match(d.doc.querySelector('#main').textContent,/hələ aktivləşdirilməyib/);assert.equal(d.doc.querySelector('#chat-form button[type=submit]').disabled,true);d.close();});
 test('service categories discard vehicle filters and show real contact data safely',async()=>{
  for(const category of ['wash','service','detailing']){
  const d=await load('index.html?category='+category+'&brand=BMW&year_min=2020',null,{['/map?category='+category]:{listings:[{...listing,category,latitude:40.4,longitude:49.8,address:'Test ünvan',details:{hours:'09:00–19:00'}}]}});
@@ -57,4 +57,20 @@ test('manual map selection centers a 3km search and clears an unrelated city fil
  assert.equal(d.doc.querySelector('#service-sort').value,'distance');
  assert.equal(d.doc.querySelector('.service-card').id,'service-near');
  assert.match(d.doc.querySelector('#location-message').textContent,/Xəritədə seçdiyiniz/);d.close();
+});
+test('sign-in exposes password recovery and unavailable delivery is clearly disabled',async()=>{
+ const login=await load('giris.html');assert.ok(login.doc.querySelector('a[href="sifre-berpa.html"]'));login.close();
+ const d=await load('sifre-berpa.html');assert.equal(d.doc.querySelector('#recovery-form button').disabled,true);assert.match(d.doc.querySelector('.notice').textContent,/aktivləşdirilməyib/);d.close();
+});
+test('reset token is removed from address and submitted only with matching passwords',async()=>{
+ const token='b'.repeat(64);const d=await load('sifre-berpa.html#token='+token,null,{'/reset-password':{ok:true}});
+ assert.equal(d.w.location.hash,'');const f=d.doc.querySelector('#recovery-form');f.elements.password.value='New-password-123';f.elements.confirm.value='Wrong-password-123';
+ await f.onsubmit({preventDefault(){},target:f});assert.equal(d.calls.some(c=>c.url==='/api/reset-password'),false);
+ f.elements.confirm.value='New-password-123';await f.onsubmit({preventDefault(){},target:f});const call=d.calls.find(c=>c.url==='/api/reset-password');assert.equal(JSON.parse(call.body).token,token);assert.equal(f.hidden,true);d.close();
+});
+test('AI response renders real contact cards safely and retains conversation for follow-up',async()=>{
+ const d=await load('ai.html',user,{'/config':{ai:true,uploads:false},'/assistant':{answer:'<script>bad</script>',listings:[{...listing,seller:'Test Seller',latitude:40.4,longitude:49.8}],notice:'Stoku dəqiqləşdirin.'}});
+ const f=d.doc.querySelector('#chat-form');f.elements.message.value='Hyundai farası';await f.onsubmit({preventDefault(){},target:f});
+ assert.equal(d.doc.querySelectorAll('#chat-history script').length,0);assert.ok(d.doc.querySelector('#chat-history a[href^="tel:"]'));assert.ok(d.doc.querySelector('#chat-history a[href^="https://www.google.com/maps/dir/"]'));
+ f.elements.message.value='Hansı model üçündür?';await f.onsubmit({preventDefault(){},target:f});const calls=d.calls.filter(c=>c.url==='/api/assistant');assert.equal(JSON.parse(calls[1].body).history.length,2);d.close();
 });
