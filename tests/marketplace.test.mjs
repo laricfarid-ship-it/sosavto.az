@@ -42,3 +42,33 @@ test('AI reports unavailable without credentials instead of fake output',async()
 test('password change revokes prior sessions; logout revokes current session',async()=>{const r=await request('/password',{method:'POST',data:{current:'Test-password-123',password:'New-password-123'},cookie:owner.cookie});assert.equal(r.status,200);assert.equal((await request('/me',{cookie:owner.cookie})).body.user,null);owner.cookie=r.cookie;assert.ok((await request('/me',{cookie:owner.cookie})).body.user);assert.equal((await request('/logout',{method:'POST',data:{},cookie:owner.cookie})).status,200);assert.equal((await request('/me',{cookie:owner.cookie})).body.user,null);});
 test('banning revokes sessions and blocks login',async()=>{assert.equal((await request('/admin/user',{method:'POST',data:{id:other.body.user.id,status:'banned'},cookie:admin.cookie})).status,200);assert.equal((await request('/my-listings',{cookie:other.cookie})).status,401);assert.equal((await request('/login',{method:'POST',data:{identifier:'other_test',password:'Test-password-123'}})).status,401);});
 test('login throttle is enforced by shared database',async()=>{let last;for(let i=0;i<11;i++)last=await request('/login',{method:'POST',data:{identifier:'unknown@example.test',password:'Test-password-123'}});assert.equal(last.status,429);});
+
+test('category-specific listings persist, edit and filter real database rows',async()=>{
+ // Re-login after the preceding password/session tests.
+ const login=await request('/login',{method:'POST',data:{identifier:'owner_test',password:'New-password-123'}});
+ const records=[
+  {category:'parts',brand:'Hyundai',model:'Elantra',details:{part_type:'Yağ və filtrlər',oem:'26300-35505',condition:'Yeni',fitment:'2017–2020',fuel:'Dizel'}},
+  {category:'insurance',details:{insurance_type:'KASKO',insurer:'Test Sığorta',fuel:'Dizel'}},
+  {category:'plates',details:{plate_number:'10 aa 123'}},
+  {category:'wash',details:{service_type:'Kompleks yuma',hours:'09:00–20:00'}}
+ ];
+ const ids=[];
+ for(const entry of records){
+  const r=await request('/listings',{method:'POST',cookie:login.cookie,data:{...ad,...entry}});assert.equal(r.status,201,JSON.stringify(r.body));ids.push(r.body.id);
+  const d=await request('/listings/'+r.body.id,{cookie:login.cookie});assert.equal(d.body.listing.year,null);assert.equal(d.body.listing.mileage,null);assert.equal(d.body.listing.details.fuel,undefined);
+  assert.equal(d.body.listing.brand,entry.category==='parts'?'Hyundai':'');
+  assert.equal((await request('/admin/moderate',{method:'POST',cookie:admin.cookie,data:{id:r.body.id,status:'active'}})).status,200);
+ }
+ for(const [filter,index]of [['category=parts&brand=Hyundai&model=Elantra&oem=26300-35505&condition=Yeni&year_min=2026',0],['category=insurance&insurance_type=KASKO&insurer=Test&fuel=Dizel',1],['category=plates&plate_region=10&plate_letters=aa&plate_digits=123',2],['category=wash&service_type=Kompleks%20yuma',3]]){
+  const r=await request('/listings?'+filter);assert.equal(r.status,200,JSON.stringify(r.body));assert.equal(r.body.total,1,filter);assert.equal(r.body.listings[0].id,ids[index]);
+ }
+ assert.equal((await request('/listings?category=parts&oem=wrong')).body.total,0);
+ assert.equal((await request('/listings?category=plates&plate_digits=999')).body.total,0);
+ assert.equal((await request('/listings?category=insurance&insurance_type=İcbari%20sığorta')).body.total,0);
+ const edit=await request('/listings/'+ids[0],{method:'PUT',cookie:login.cookie,data:{...ad,...records[0],details:{...records[0].details,oem:'999-001'}}});assert.equal(edit.status,200);
+ assert.equal((await request('/listings?category=parts&oem=999001')).body.total,0); // Pending edits stay private.
+ const saved=await request('/listings/'+ids[0],{cookie:login.cookie});assert.equal(saved.body.listing.details.oem,'999001');assert.equal(saved.body.listing.model,'Elantra');
+ for(const details of [{plate_number:''},{plate_number:'<script>'}])assert.equal((await request('/listings',{method:'POST',cookie:login.cookie,data:{...ad,category:'plates',details}})).status,400);
+ assert.equal((await request('/listings',{method:'POST',cookie:login.cookie,data:{...ad,category:'wash',details:{service_type:'Mühərrik təmiri'}}})).status,400);
+ assert.equal((await request('/listings?price_min=100&price_max=10')).status,400);
+});

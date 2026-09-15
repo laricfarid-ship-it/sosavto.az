@@ -85,3 +85,13 @@ Baxış sayı səhifənin açılma sayıdır, unikal ziyarətçi və saxtalaşd�
 `server/schema.sql` təkrar tətbiq edilə bilən ilkin sxemdir. Sonrakı sxem dəyişiklikləri üçün versiyalı migration-lar əlavə olunmalıdır. `server/uploads.mjs` şəkli yoxlayır və S3-compatible storage-a göndərir. `.env.example` yalnız boş parametr adlarını ehtiva edir.
 
 AI inteqrasiyası OpenAI Responses API-nin rəsmi sənədinə əsaslanır: https://developers.openai.com/api/docs/guides/text
+
+## Category filters and registration-number listings
+
+The category form and API share `assets/catalog.js`. Parts retain compatible make/model plus optional OEM, type, condition and fitment notes. Insurance uses type/company; wash, detailing and service use their own service types/hours. Hidden fields are disabled and the API strips unrelated fields when changing category. Search ignores stale filters belonging to other categories. Existing listings remain readable; new optional detail fields do not require a schema migration.
+
+`plates` is a moderated classifieds category with normalized `10-AA-123` registration numbers, region/letters/digits filters and a rendered number card. It does not transfer registrations, verify legal ownership or collect payments. Listings tell users to verify transfer arrangements with DYP before payment. Source: https://www.dyp.gov.az/ (vehicle registration guidance).
+
+VIN accident/auction history is deferred until a licensed provider with dated, VIN-matched historical photos is connected. The basic manufacturer decoder was removed at the owner’s request because it does not satisfy that requirement. No VIN feature is advertised or exposed in this version.
+
+This branch is based on main and does not enable the separate draft password-recovery/AI work. Test with `npm test` and `npm run build`. Preview write actions still require `APP_ORIGIN` to match the exact preview host, as in existing deployment setup. Do not relax origin checking to enable a preview.
