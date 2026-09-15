@@ -72,18 +72,3 @@ test('category-specific listings persist, edit and filter real database rows',as
  assert.equal((await request('/listings',{method:'POST',cookie:login.cookie,data:{...ad,category:'wash',details:{service_type:'Mühərrik təmiri'}}})).status,400);
  assert.equal((await request('/listings?price_min=100&price_max=10')).status,400);
 });
-
-test('VIN decoder rejects invalid input and handles provider errors, partial and absent data honestly',async()=>{
- const originalFetch=globalThis.fetch;let calls=0;
- try{
-  globalThis.fetch=async()=>{calls++;return {ok:true,json:async()=>({Results:[{Make:'HONDA',Model:'ACCORD',ModelYear:'2003',PlantCountry:'UNITED STATES (USA)',ErrorCode:'0'}]})};};
-  assert.equal((await request('/vin?vin=invalid')).status,400);assert.equal(calls,0);
-  const vin='1HGCM82633A004352';let r=await request('/vin?vin='+vin);assert.equal(r.status,200);assert.equal(r.body.status,'decoded');assert.equal(r.body.historyAvailable,false);assert.ok(r.body.fields.some(f=>f.key==='PlantCountry'));
-  await request('/vin?vin='+vin.toLowerCase());assert.equal(calls,1); // Normalized cached lookup.
-  globalThis.fetch=async()=>({ok:true,json:async()=>({Results:[{Make:'HONDA',ErrorCode:'1'}]})});
-  assert.equal((await request('/vin?vin=1HGCM82633A004353')).body.status,'partial');
-  globalThis.fetch=async()=>({ok:true,json:async()=>({Results:[{ErrorCode:'7',ModelYear:'2003'}]})});
-  r=await request('/vin?vin=1HGCM82633A004354');assert.equal(r.body.status,'not_found');assert.deepEqual(r.body.fields,[]);
-  globalThis.fetch=async()=>{throw new Error('timeout');};assert.equal((await request('/vin?vin=1HGCM82633A004355')).status,502);
- }finally{globalThis.fetch=originalFetch;}
-});

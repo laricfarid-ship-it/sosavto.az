@@ -13,7 +13,6 @@ export function listingInput(b){
  if(v.category!=='car'){v.year=null;v.mileage=null;}
  for(const [k,values]of [['part_type',partTypes],['insurance_type',insuranceTypes],['service_type',serviceTypes[v.category]],['condition',['Yeni','İşlənmiş']]])if(details[k]&&values&&!values.includes(details[k]))fail(400,'Seçilən növ kateqoriyaya uyğun deyil.');
  if(details.oem)details.oem=normalizeCode(details.oem);
- if(details.vin){details.vin=details.vin.toUpperCase();if(!/^[A-HJ-NPR-Z0-9]{17}$/.test(details.vin))fail(400,'VIN 17 simvoldan ibarət olmalıdır; I, O və Q istifadə edilmir.');}
  if(v.category==='plates'){details.plate_number=normalizePlate(details.plate_number);if(!/^\d{2}-[A-Z]{2}-\d{3}$/.test(details.plate_number))fail(400,'Nömrəni 10-AA-123 formatında yazın.');}
  v.details=JSON.stringify(details);
  if(!Array.isArray(b.imageIds)||b.imageIds.length>8||new Set(b.imageIds).size!==b.imageIds.length)fail(400,'Maksimum 8 fərqli şəkil seçin.');

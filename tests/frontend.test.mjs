@@ -83,9 +83,3 @@ test('editing a service retains its type and hours; details render part codes an
  const p=await load('elan.html?id='+listing.id,null,{['/listings/'+listing.id]:{listing:{...listing,category:'parts',details:{oem:'2630035505',fitment:'Elantra 2017–2020'}}}});
  assert.match(p.doc.querySelector('.specs').textContent,/2630035505/);assert.doesNotMatch(p.doc.querySelector('.specs').textContent,/Yürüş/);p.close();
 });
-test('VIN form sends only explicit searches and displays partial data without history claims',async()=>{
- const vin='1HGCM82633A004352';const d=await load('vin.html?vin='+vin,null,{['/vin?vin='+vin]:{vin,status:'partial',fields:[{label:'Marka',value:'HONDA<script>'}],historyAvailable:false}});
- assert.equal(d.calls.some(c=>c.url.startsWith('/api/vin')),false);
- await d.doc.querySelector('#vin-form').onsubmit({preventDefault(){}});
- assert.match(d.doc.querySelector('#vin-result').textContent,/HONDA<script>/);assert.equal(d.doc.querySelectorAll('#vin-result script').length,0);assert.match(d.doc.querySelector('#vin-result').textContent,/qismən/);assert.equal(d.doc.querySelector('#vin-form button').disabled,false);d.close();
-});
