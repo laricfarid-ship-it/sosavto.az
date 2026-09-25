@@ -37,3 +37,17 @@
 }
 @keyframes brand-arrive{from{opacity:0;translate:-8px 0;scale:.94}to{opacity:1;translate:0 0;scale:1}}
 @keyframes brand-reveal{from{opacity:0;translate:0 3px}to{opacity:1;translate:0 0}}
+
+/* A contained aurora behind the hero copy and photograph. */
+.hero{position:relative;isolation:isolate;overflow:hidden;border-radius:24px;background:radial-gradient(ellipse at 15% 85%,#06323a66,transparent 60%),radial-gradient(ellipse at 90% 15%,#12285566,transparent 60%)}
+.hero>div{position:relative;z-index:1}
+.hero::before,.hero::after{content:"";position:absolute;pointer-events:none;z-index:0;inset:-35% -20%;}
+.hero::before{background:radial-gradient(ellipse at 27% 60%,#0bced63d 0%,#0bced619 24%,transparent 49%),radial-gradient(ellipse at 74% 36%,#477dff45 0%,#477dff1c 23%,transparent 48%);transform:translate3d(-7%,4%,0) rotate(-6deg)}
+.hero::after{background:linear-gradient(118deg,transparent 34%,#20cedb08 40%,#22cadb26 47%,#528bff20 52%,transparent 61%);transform:translate3d(-16%,0,0) rotate(-4deg);opacity:.75}
+@media(prefers-reduced-motion:no-preference){
+ .hero::before{animation:hero-aurora 14s ease-in-out infinite alternate}
+ .hero::after{animation:hero-light-wave 11s ease-in-out infinite alternate}
+}
+@keyframes hero-aurora{0%{transform:translate3d(-7%,4%,0) rotate(-6deg);opacity:.7}50%{opacity:1}100%{transform:translate3d(9%,-4%,0) rotate(5deg);opacity:.8}}
+@keyframes hero-light-wave{from{transform:translate3d(-16%,0,0) rotate(-4deg);opacity:.45}to{transform:translate3d(20%,3%,0) rotate(4deg);opacity:.9}}
+@media(max-width:640px){.hero::before,.hero::after{inset:-20% -35%}.hero{border-radius:18px}}
