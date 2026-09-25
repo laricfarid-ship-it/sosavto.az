@@ -27,3 +27,13 @@
 @media(max-width:1100px){.brand.brand-sa{gap:8px;font-size:1.25rem}.brand-sa .brand-emblem{width:52px;height:26px}}
 @media(max-width:640px){.brand.brand-sa{gap:6px;font-size:1.15rem}.brand-sa .brand-emblem{width:44px;height:23px}.brand-domain{display:none}}
 @media(max-width:360px){.brand.brand-sa{font-size:1rem;gap:4px}.brand-sa .brand-emblem{width:36px;height:20px}.header-inner{gap:8px}}
+/* Brief entrance and deliberate interaction; never loop or move the layout. */
+@media(prefers-reduced-motion:no-preference){
+ .brand-sa .brand-emblem{animation:brand-arrive .65s cubic-bezier(.2,.75,.25,1) both;transition:transform .25s ease}
+ .brand-sa .brand-wordmark{animation:brand-reveal .5s ease .12s both}
+ .brand-sa:focus-visible .brand-emblem{transform:translateX(2px) rotate(-2deg)}
+ .brand-sa:active .brand-emblem{transform:scale(.96)}
+ @media(hover:hover) and (pointer:fine){.brand-sa:hover .brand-emblem{transform:translateX(2px) rotate(-2deg)}}
+}
+@keyframes brand-arrive{from{opacity:0;translate:-8px 0;scale:.94}to{opacity:1;translate:0 0;scale:1}}
+@keyframes brand-reveal{from{opacity:0;translate:0 3px}to{opacity:1;translate:0 0}}
