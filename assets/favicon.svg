@@ -1,1 +1,5 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="9" fill="#06d6e8"/><path d="M7 21V13l3-5h12l3 5v8M8 14h16M10 19h1m10 0h1M9 21v3m14-3v3" stroke="#031521" stroke-width="2.5" fill="none" stroke-linecap="round"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><title>SosAvto</title><rect width="64" height="64" rx="14" fill="#09131D"/><g transform="translate(3 18) scale(.1094)">  <path fill="#16BED2" d="M305 10H172c-34 0-61 12-82 37L57 87c-17 21-21 43-10 61 10 17 29 25 55 25h86l-25 24H70c-17 0-26 5-37 17L8 238h159c26 0 45-8 64-29L363 72c10-11 23-11 31 3l58 99c7 12 15 17 31 17h30L404 30c-9-14-20-20-35-20h-23c-14 0-24 5-33 15L211 119H110c-9 0-13-5-8-12l11-12c4-5 9-7 17-7h105Z"/>
+  <path fill="#16BED2" d="m369 108 65 130h-65c-39 0-56-20-40-52Z"/>
+  <path fill="#FF724D" d="M438 200h37c15 0 24 5 33 18l14 20h-50c-13 0-22-6-28-17l-11-21Z"/>
+  <path fill="#FFF" d="m348 91 14 0-14 17h-14Zm-27 31h17l-18 21h-18Zm-34 37h21l-22 25h-23Z"/>
+</g></svg>
