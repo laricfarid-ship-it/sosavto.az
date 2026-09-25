@@ -19,3 +19,11 @@
 .categories{grid-template-columns:repeat(4,minmax(0,1fr))}
 .plate-number{font-size:clamp(1.4rem,4vw,2rem);font-weight:800;letter-spacing:.06em;background:#f3f6fa;color:#132231;padding:14px;border:3px solid #132231;border-radius:10px;white-space:nowrap}
 @media(max-width:720px){.categories{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+/* SA identity: crisp road emblem and calm upright wordmark. */
+.brand.brand-sa{display:inline-flex;align-items:center;gap:10px;flex-shrink:0;line-height:1;letter-spacing:-.045em;font-weight:700;font-size:1.45rem;color:#f6f3ec}
+.brand-sa .brand-emblem{width:62px;height:30px;object-fit:contain;flex:none}
+.brand-domain{font-size:.62em;letter-spacing:-.015em;color:var(--muted);margin-left:1px}
+@media(max-width:1100px){.brand.brand-sa{gap:8px;font-size:1.25rem}.brand-sa .brand-emblem{width:52px;height:26px}}
+@media(max-width:640px){.brand.brand-sa{gap:6px;font-size:1.15rem}.brand-sa .brand-emblem{width:44px;height:23px}.brand-domain{display:none}}
+@media(max-width:360px){.brand.brand-sa{font-size:1rem;gap:4px}.brand-sa .brand-emblem{width:36px;height:20px}.header-inner{gap:8px}}
