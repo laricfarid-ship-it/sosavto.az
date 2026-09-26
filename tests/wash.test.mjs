@@ -27,3 +27,41 @@ test('expired holds release places without cron and cannot confirm',async()=>{co
 test('closed slots and non-active listings block new holds',async()=>{await call('/slots/'+slot,owner,'PATCH',{capacity:1,blocked:0,closed:true});assert.equal((await post('/hold',a,{...input(),expected_total_cents:2500})).code,409);await call('/slots/'+slot,owner,'PATCH',{capacity:1,blocked:0,closed:false});await query("UPDATE listings SET status='pending' WHERE id=$1",[shop]);assert.equal((await post('/hold',a,{...input(),expected_total_cents:2500})).code,409);assert.equal((await call('/shops')).shops.length,0);await query("UPDATE listings SET status='active' WHERE id=$1",[shop]);});
 test('completion and rating require real participation, received cash is not inferred',async()=>{const r=await post('/hold',a,{...input(),expected_total_cents:2500});assert.equal(r.code,200);const id=r.booking.id;await post('/bookings/'+id+'/confirm',a,{});assert.equal((await post('/bookings/'+id+'/review',a,{rating:5})).code,403);await query("UPDATE wash_slots SET starts_at=now()-interval '1 minute',ends_at=now()+interval '1 hour' WHERE id=$1",[slot]);assert.equal((await post('/bookings/'+id+'/arrive',a,{})).code,403);assert.equal((await post('/bookings/'+id+'/arrive',owner,{})).booking.status,'arrived');assert.equal((await post('/bookings/'+id+'/complete',owner,{})).code,409);assert.equal((await post('/bookings/'+id+'/complete',a,{})).booking.payment_status,'unpaid');assert.equal((await post('/bookings/'+id+'/review',a,{rating:5,comment:'Yaxşı'})).code,200);assert.equal((await post('/bookings/'+id+'/review',b,{rating:1})).code,404);assert.equal((await call('/shops')).shops[0].rating,5);});
 test('zone upload requires admin; geographic math and navigation links',async()=>{const ring=[[49,40],[50,40],[50,41],[49,41],[49,40]];assert.equal((await post('/zones',a,{name:'Test',ring})).code,403);assert.equal((await post('/zones',admin,{name:'Test',ring})).code,200);assert.equal(pointInZone(40.5,49.5,ring),true);assert.equal(pointInZone(42,49.5,ring),false);assert.equal(distanceKm([40,49],[40,49]),0);assert.ok(wazeLinks(40.4,49.8).web.startsWith('https://www.waze.com/ul?'));});
+
+async function listingCall(id,u,method='GET',data){
+ const req=Readable.from(data?[JSON.stringify(data)]:[]);req.url='/api/'+id;req.method=method;req.headers={'content-type':'application/json',origin:process.env.APP_ORIGIN,cookie:u.cookie};let result;const res={statusCode:200,setHeader(){},end(v){result=JSON.parse(v);}};await handler(req,res);return {code:res.statusCode,...result};
+}
+const edited={category:'wash',title:'Yenilənmiş avtoyuma',description:'Avtoyuma xidmətinin yenilənmiş ətraflı təsviri.',price:15,city:'Bakı',phone:'+994501234567',details:{},imageIds:[]};
+test('wash listing edit and status work; deletion retains past bookings and cannot be restored',async()=>{
+ assert.equal((await listingCall('listings/'+shop,owner,'PUT',edited)).code,200);
+ assert.equal((await listingCall('listings/'+shop,owner)).listing.title,edited.title);
+ assert.equal((await listingCall('listings/'+shop,owner,'PATCH',{status:'sold'})).code,200);
+ assert.equal((await listingCall('listings/'+shop,owner,'PATCH',{status:'pending'})).code,200);
+ assert.equal((await listingCall('listings/'+shop,owner,'PUT',{...edited,category:'service'})).code,409);
+ const before=(await call('/bookings',a)).bookings.length;
+ assert.equal((await listingCall('listings/'+shop,b,'DELETE')).code,403);
+ assert.equal((await listingCall('listings/'+shop,owner,'DELETE')).code,200);
+ assert.equal((await listingCall('my-listings',owner)).listings.length,0);
+ assert.equal((await call('/owner',owner)).shops.length,0);
+ assert.equal((await call('/shops')).shops.length,0);
+ assert.equal((await call('/bookings',a)).bookings.length,before);
+ for(const method of ['GET','PATCH','PUT','DELETE'])assert.equal((await listingCall('listings/'+shop,owner,method,method==='GET'?undefined:edited)).code,404);
+ assert.equal((await call('/shops/'+shop,owner,'PUT',{services:prices,cash_enabled:true})).code,404);
+});
+test('linked wash with empty slots deletes cleanly; active reservations prevent destructive actions',async()=>{
+ shop=randomUUID();await query("INSERT INTO listings(id,user_id,category,title,description,price,city,phone,status) VALUES($1,$2,'wash','Test yuma','Test',10,'Bakı','+994501234567','active')",[shop,owner.id]);
+ await call('/shops/'+shop,owner,'PUT',{services:prices,cash_enabled:true});slot=await newSlot(1,5);
+ const held=await post('/hold',a,input());assert.equal(held.code,200,JSON.stringify(held));
+ for(const [method,data] of [['DELETE',{}],['PATCH',{status:'sold'}],['PUT',edited]]){
+  const r=await listingCall('listings/'+shop,owner,method,data);assert.equal(r.code,409);assert.match(r.error,/aktiv rezerv/);
+ }
+ assert.equal((await listingCall('listings/'+shop,owner)).listing.status,'active');
+ await post('/bookings/'+held.booking.id+'/cancel',a,{});
+ assert.equal((await listingCall('listings/'+shop,owner,'DELETE')).code,200);
+ shop=randomUUID();await query("INSERT INTO listings(id,user_id,category,title,description,price,city,phone,status) VALUES($1,$2,'wash','Empty yuma','Test',10,'Bakı','+994501234567','active')",[shop,owner.id]);
+ await call('/shops/'+shop,owner,'PUT',{services:prices,cash_enabled:true});await newSlot(1,6);
+ assert.equal((await listingCall('listings/'+shop,owner,'DELETE')).code,200);
+ assert.equal((await query('SELECT id FROM listings WHERE id=$1',[shop])).rows.length,0);
+ assert.equal((await query('SELECT id FROM wash_shops WHERE id=$1',[shop])).rows.length,0);
+ assert.equal((await query('SELECT id FROM wash_slots WHERE shop_id=$1',[shop])).rows.length,0);
+});

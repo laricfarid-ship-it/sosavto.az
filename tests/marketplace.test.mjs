@@ -72,3 +72,14 @@ test('category-specific listings persist, edit and filter real database rows',as
  assert.equal((await request('/listings',{method:'POST',cookie:login.cookie,data:{...ad,category:'wash',details:{service_type:'Mühərrik təmiri'}}})).status,400);
  assert.equal((await request('/listings?price_min=100&price_max=10')).status,400);
 });
+
+test('ordinary listing delete works without wash tables and removes dependent favorites and reports',async()=>{
+ const login=await request('/login',{method:'POST',data:{identifier:'owner_test',password:'New-password-123'}});
+ const created=await request('/listings',{method:'POST',data:ad,cookie:login.cookie});const id=created.body.id;
+ await request('/admin/moderate',{method:'POST',data:{id,status:'active'},cookie:admin.cookie});
+ await request('/favorites/'+id,{method:'PUT',data:{},cookie:admin.cookie});
+ await request('/reports',{method:'POST',data:{listing_id:id,reason:'Test dependent report'},cookie:admin.cookie});
+ assert.equal((await request('/listings/'+id,{method:'DELETE',cookie:login.cookie})).status,200);
+ for(const table of ['favorites','reports'])assert.equal((await query(`SELECT * FROM ${table} WHERE listing_id=$1`,[id])).rows.length,0);
+ assert.equal((await request('/listings/'+id,{cookie:login.cookie})).status,404);
+});

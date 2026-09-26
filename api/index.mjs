@@ -1,3 +1,4 @@
+import {lockListing,washLinks,requireNoReservations,deleteListing} from '../server/listing-actions.mjs';
 import {washEnabled} from '../server/wash-config.mjs';
 import {randomUUID} from 'node:crypto';
 import bcrypt from 'bcryptjs';
@@ -62,11 +63,11 @@ export default async function handler(req,res){
  await transaction(async c=>{await c.query(`INSERT INTO listings(id,user_id,${columns.join(',')}) VALUES(${Array.from({length:columns.length+2},(_,i)=>'$'+(i+1)).join(',')})`,[id,user.id,...columns.map(k=>v[k])]);await imagesFor(c,user,id,v.imageIds);});return json(res,201,{id,status:'pending'});
  }
  if(path==='/api/my-listings'&&method==='GET'){
- requireUser(user);return json(res,200,{listings:(await query(`SELECT ${projection} FROM listings l WHERE l.user_id=$1 ORDER BY l.created_at DESC`,[user.id])).rows});
+ requireUser(user);return json(res,200,{listings:(await query(`SELECT ${projection} FROM listings l WHERE l.user_id=$1 AND NOT (l.details @> '{"_deleted":true}'::jsonb) ORDER BY l.created_at DESC`,[user.id])).rows});
  }
  const detail=path.match(/^\/api\/listings\/([a-f0-9-]+)$/);
  if(detail){
- const id=uuid(detail[1]);const l=(await query(`SELECT ${projection},u.fullname AS seller FROM listings l JOIN users u ON u.id=l.user_id WHERE l.id=$1`,[id])).rows[0];if(!l)fail(404,'Elan tapılmadı.');
+ const id=uuid(detail[1]);const l=(await query(`SELECT ${projection},u.fullname AS seller FROM listings l JOIN users u ON u.id=l.user_id WHERE l.id=$1`,[id])).rows[0];if(!l||l.details?._deleted)fail(404,'Elan tapılmadı.');
  const owner=user?.id===l.user_id;
  if(method==='GET'){
  if(l.status!=='active'&&!owner&&user?.role!=='admin')fail(404,'Elan tapılmadı.');
@@ -75,12 +76,12 @@ export default async function handler(req,res){
  }
  requireUser(user);if(!owner)fail(403,'Yalnız öz elanınızı dəyişə bilərsiniz.');
  if(method==='PUT'){
- const v=listingInput(await body(req));await transaction(async c=>{await c.query(`UPDATE listings SET ${columns.map((k,i)=>`${k}=$${i+1}`).join(',')},status='pending',rejection_reason='',updated_at=now() WHERE id=$${columns.length+1} AND user_id=$${columns.length+2}`,[...columns.map(k=>v[k]),id,user.id]);await imagesFor(c,user,id,v.imageIds);});return json(res,200,{ok:true,status:'pending'});
+ const v=listingInput(await body(req));await transaction(async c=>{await lockListing(c,id,user);if(await washLinks(c,id)){await requireNoReservations(c,id);if(v.category!=='wash')fail(409,'Rezervasiya sistemi qurulmuş avtoyumanın kateqoriyasını dəyişmək olmaz. Yeni kateqoriya üçün ayrıca elan yaradın.');}await c.query(`UPDATE listings SET ${columns.map((k,i)=>`${k}=$${i+1}`).join(',')},status='pending',rejection_reason='',updated_at=now() WHERE id=$${columns.length+1} AND user_id=$${columns.length+2}`,[...columns.map(k=>v[k]),id,user.id]);await imagesFor(c,user,id,v.imageIds);});return json(res,200,{ok:true,status:'pending'});
  }
  if(method==='PATCH'){
- const b=await body(req);if(!['sold','archived','pending'].includes(b.status))fail(400,'Status düzgün deyil.');await query('UPDATE listings SET status=$1,rejection_reason=\'\',updated_at=now() WHERE id=$2 AND user_id=$3',[b.status,id,user.id]);return json(res,200,{ok:true});
+ const b=await body(req);if(!['sold','archived','pending'].includes(b.status))fail(400,'Status düzgün deyil.');await transaction(async c=>{await lockListing(c,id,user);if(await washLinks(c,id))await requireNoReservations(c,id);await c.query('UPDATE listings SET status=$1,rejection_reason=\'\',updated_at=now() WHERE id=$2 AND user_id=$3',[b.status,id,user.id]);});return json(res,200,{ok:true});
  }
- if(method==='DELETE'){await query('DELETE FROM listings WHERE id=$1 AND user_id=$2',[id,user.id]);return json(res,200,{ok:true});}
+ if(method==='DELETE'){await transaction(c=>deleteListing(c,id,user));return json(res,200,{ok:true});}
  }
  if(path==='/api/favorites'&&method==='GET'){
  requireUser(user);return json(res,200,{listings:(await query(`SELECT ${projection} FROM listings l JOIN favorites f ON f.listing_id=l.id WHERE f.user_id=$1 AND l.status='active' ORDER BY f.created_at DESC`,[user.id])).rows});

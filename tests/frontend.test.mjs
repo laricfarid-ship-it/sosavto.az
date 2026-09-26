@@ -83,3 +83,22 @@ test('editing a service retains its type and hours; details render part codes an
  const p=await load('elan.html?id='+listing.id,null,{['/listings/'+listing.id]:{listing:{...listing,category:'parts',details:{oem:'2630035505',fitment:'Elantra 2017–2020'}}}});
  assert.match(p.doc.querySelector('.specs').textContent,/2630035505/);assert.doesNotMatch(p.doc.querySelector('.specs').textContent,/Yürüş/);p.close();
 });
+
+test('owner delete confirmation sends DELETE, cancellation sends nothing and errors keep the card',async()=>{
+ const responses={'/my-listings':{listings:[listing]},['/listings/'+listing.id]:{error:'Aktiv rezervləri əvvəl tamamlayın.'}};
+ const d=await load('menim-elanlarim.html',user,responses),dialog=d.doc.querySelector('#dialog');dialog.showModal=()=>{};
+ const button=d.doc.querySelector('[data-delete]');
+ let pending=button.onclick();assert.equal(button.disabled,true);dialog.returnValue='cancel';dialog.dispatchEvent(new d.w.Event('close'));await pending;
+ assert.equal(d.calls.some(c=>c.method==='DELETE'),false);assert.equal(button.disabled,false);
+ pending=button.onclick();dialog.returnValue='confirm';dialog.dispatchEvent(new d.w.Event('close'));await pending;
+ assert.equal(d.calls.at(-1).method,'DELETE');assert.match(d.doc.querySelector('#toast').textContent,/Aktiv rezerv/);assert.ok(d.doc.querySelector('.card'));assert.equal(button.disabled,false);
+ responses['/listings/'+listing.id]={ok:true};responses['/my-listings']={listings:[]};
+ pending=button.onclick();dialog.returnValue='confirm';dialog.dispatchEvent(new d.w.Event('close'));await pending;
+ assert.equal(d.doc.querySelector('.card'),null);assert.match(d.doc.querySelector('#toast').textContent,/Elan silindi/);d.close();
+});
+test('owner status action sends PATCH only after confirmation',async()=>{
+ const d=await load('menim-elanlarim.html',user,{'/my-listings':{listings:[listing]},['/listings/'+listing.id]:{ok:true}});
+ assert.equal(d.doc.querySelector('.item-actions a').getAttribute('href'),'elan-ver.html?id='+listing.id);
+ const dialog=d.doc.querySelector('#dialog');dialog.showModal=()=>{};const pending=d.doc.querySelector('[data-status]').onclick();dialog.returnValue='confirm';dialog.dispatchEvent(new d.w.Event('close'));await pending;
+ const patch=d.calls.find(c=>c.method==='PATCH');assert.equal(JSON.parse(patch.body).status,'sold');assert.match(d.doc.querySelector('#toast').textContent,/Status yeniləndi/);d.close();
+});
