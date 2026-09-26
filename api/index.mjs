@@ -1,5 +1,6 @@
 import {randomUUID} from 'node:crypto';
 import bcrypt from 'bcryptjs';
+import {wash} from '../server/wash.mjs';
 import {sos} from '../server/sos.mjs';
 import {query,transaction} from '../server/db.mjs';
 import {HttpError,fail,hash,safeUser,session,createSession,requireUser,requireAdmin,originCheck,rateLimit,body,text,uuid} from '../server/security.mjs';
@@ -17,8 +18,9 @@ export default async function handler(req,res){
  try{
  const url=new URL(req.url,'http://localhost'); const path=url.pathname.replace(/\/$/,'');const method=req.method;
  originCheck(req);
- if(path==='/api/config'&&method==='GET')return json(res,200,{sos:process.env.SOS_ENABLED==='true',ai:!!(process.env.OPENAI_API_KEY&&process.env.OPENAI_MODEL),uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
+ if(path==='/api/config'&&method==='GET')return json(res,200,{wash:process.env.WASH_ENABLED==='true',sos:process.env.SOS_ENABLED==='true',ai:!!(process.env.OPENAI_API_KEY&&process.env.OPENAI_MODEL),uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
  const user=await session(req);
+ if(path.startsWith('/api/wash/'))return json(res,200,await wash(req,user,path,method));
  if(path.startsWith('/api/sos/'))return json(res,200,await sos(req,user,path,method));
  if(path==='/api/me'&&method==='GET')return json(res,200,{user:safeUser(user)});
  if(['/api/register','/api/login'].includes(path)&&method==='POST'){

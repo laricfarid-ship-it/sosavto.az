@@ -76,6 +76,7 @@ async function home(){
  const vehicleSearch=category==='all'||category==='car',partsSearch=category==='parts';
  const specificFilters=category==='parts'?`${select('part_type','Detalın növü',partTypes)}${input('oem','Detal kodu (OEM)','text','Məsələn, 26300-35505','maxlength="80"')}${select('condition','Vəziyyət',['Yeni','İşlənmiş'])}`:category==='insurance'?`${select('insurance_type','Sığorta növü',insuranceTypes)}${input('insurer','Sığorta şirkəti','text','Şirkətin adı','maxlength="80"')}`:category==='plates'?`${input('plate_region','Region kodu','text','10','inputmode="numeric" maxlength="2" pattern="[0-9]{2}"')}${input('plate_letters','Hərflər','text','AA','maxlength="2" pattern="[A-Za-z]{1,2}"')}${input('plate_digits','Son rəqəmlər','text','123','inputmode="numeric" maxlength="3" pattern="[0-9]{1,3}"')}`:'';
 
+ if(params.get("category")==="wash"&&config.wash){location.replace("avtoyuma.html");return;}
  if(["wash","service","detailing"].includes(params.get("category")))return serviceHome();
  main.classList.add('home-page');
  main.innerHTML=`<div class="home-intro"><div class="container"><section class="hero"><div><p class="eyebrow">Azərbaycanın avtomobil platforması</p><h1>Yolun üçün<br><span class="accent">hər şey burada.</span></h1><p>Avtomobilini tap, ehtiyat hissələrini axtar, yaxınlıqdakı ustalarla əlaqə saxla.</p></div><div class="hero-visual"><img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=900&q=85" alt="BMW avtomobili" fetchpriority="high"><div class="hero-caption">AVTOMOBİL · SERVİS · EHTİYAT HİSSƏLƏRİ</div></div></section>
@@ -165,7 +166,8 @@ async function init(){
  const [authState,settings]=await Promise.allSettled([api('/me'),api('/config')]);if(authState.status==='fulfilled')me=authState.value.user;if(settings.status==='fulfilled')config=settings.value;
  header();if(me){try{favorites=new Set((await api('/favorites')).listings.map(l=>l.id));}catch{}}
  const sosPage=async()=>{const {roadside}=await import('./sos.js');await roadside({main,me,config,api,esc,toast,task,mapLibrary});};
- const routes={'sos.html':sosPage,'sos-usta.html':sosPage,'index.html':home,'giris.html':()=>auth(false),'qeydiyyat.html':()=>auth(true),'kabinet.html':profile,'menim-elanlarim.html':()=>collection('my-listings'),'favoriler.html':()=>collection('favorites'),'elan-ver.html':listingForm,'elan.html':detail,'xarita.html':mapPage,'ai.html':assistant,'admin.html':admin,'bildirisler.html':notifications};
+ const washPage=async()=>{const {carwash}=await import('./wash.js');await carwash({main,me,config,api,esc,toast,task});};
+ const routes={'avtoyuma.html':washPage,'avtoyuma-panel.html':washPage,'sos.html':sosPage,'sos-usta.html':sosPage,'index.html':home,'giris.html':()=>auth(false),'qeydiyyat.html':()=>auth(true),'kabinet.html':profile,'menim-elanlarim.html':()=>collection('my-listings'),'favoriler.html':()=>collection('favorites'),'elan-ver.html':listingForm,'elan.html':detail,'xarita.html':mapPage,'ai.html':assistant,'admin.html':admin,'bildirisler.html':notifications};
  await (routes[page]||(()=>{main.innerHTML=empty('Səhifə tapılmadı','Axtardığınız səhifə mövcud deyil.','<a href="index.html" class="btn primary">Ana səhifəyə qayıt</a>');}))();
 }
 init().catch(e=>errorBox(main,e));
