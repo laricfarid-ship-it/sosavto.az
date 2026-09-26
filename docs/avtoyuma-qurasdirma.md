@@ -48,3 +48,11 @@ Tətbiq ediləcək ardıcıllıq:
 `npm test` və `npm run build`. Backend sınaqları: giriş/CSRF/sahiblik, son yerə paralel müraciət, idempotency, qiymət müdaxiləsi, saxlamanın bitməsi, tutum, xidmət qəbzi, ləğv/gəliş/rəy. İnterfeys sınaqları: GPS, zona/məsafə, kartlarda doluluq, SUV/əlavə xidmət cəmi, son yerdən sonra düymənin bağlanması.
 
 Bu mühitin cloud brauzeri localhost-u `ERR_BLOCKED_BY_CLIENT` ilə açmadığı üçün vizual mobil yoxlama hələ tamamlanmayıb. Preview-da real telefonla GPS icazəsi, Waze/WhatsApp keçidləri və mobil görünüş ayrıca yoxlanmalıdır.
+
+## Kart hissəsinin hazırlıq vəziyyəti — 26 sentyabr 2026
+
+İstifadəçinin qərarı: kart qəbulu saytın məzmunu, domen və rəsmi fəaliyyət hazırlığı tamamlandıqdan sonra aktivləşdiriləcək. Hazırda merchant açmaq və ya canlı ödəniş başlatmaq lazım deyil.
+
+Müştəri formasında nağd və bağlı “Kartla ödəniş — tezliklə” seçimi var. Sahib panelində kartın bağlı vəziyyəti göstərilir. Qəbzdə rezerv statusundan ayrı ödəniş statusu göstərilir. `assets/wash-payment.js` ödənilməmiş, ödənilmiş və geri qaytarma vəziyyətlərinin yazılarını saxlayır. Bunlar vəziyyətin göstərilməsidir; ödəniş/refund əməliyyatı həyata keçirmir.
+
+`server/wash-payments.mjs` kartın əlçatanlıq qaydasını mərkəzləşdirir. `GET /api/wash/payment-options` kartı bağlı qaytarır. Təkcə mühit dəyişəni yazmaq kartı açmır; real adapter, merchant bağlantısı və sınaqlar əlavə edilməlidir. Formada kart nömrəsi/CVV sahəsi yoxdur.
