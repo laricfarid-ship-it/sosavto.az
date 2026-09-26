@@ -1,6 +1,6 @@
 # Avtoyuma rezervasiyası — quraşdırma və qalan işlər
 
-Bu dəyişiklik `WASH_ENABLED=true` olmayanda əsas saytdakı hazırkı avtoyuma elanlarını dəyişmir. Yeni modul hələ əsas saytda aktivləşdirilməyib.
+Bu dəyişiklik `WASH_ENABLED=true` olmayanda əsas saytdakı hazırkı avtoyuma elanlarını dəyişmir. 26 sentyabr 2026 tarixində istifadəçi əsas sayta yayımı təsdiqlədi. Production yayımında modul ilkin olaraq açıqdır; WASH_ENABLED=false onu bağlayır.
 
 ## Hazır olan hissə
 
@@ -56,3 +56,7 @@ Bu mühitin cloud brauzeri localhost-u `ERR_BLOCKED_BY_CLIENT` ilə açmadığı
 Müştəri formasında nağd və bağlı “Kartla ödəniş — tezliklə” seçimi var. Sahib panelində kartın bağlı vəziyyəti göstərilir. Qəbzdə rezerv statusundan ayrı ödəniş statusu göstərilir. `assets/wash-payment.js` ödənilməmiş, ödənilmiş və geri qaytarma vəziyyətlərinin yazılarını saxlayır. Bunlar vəziyyətin göstərilməsidir; ödəniş/refund əməliyyatı həyata keçirmir.
 
 `server/wash-payments.mjs` kartın əlçatanlıq qaydasını mərkəzləşdirir. `GET /api/wash/payment-options` kartı bağlı qaytarır. Təkcə mühit dəyişəni yazmaq kartı açmır; real adapter, merchant bağlantısı və sınaqlar əlavə edilməlidir. Formada kart nömrəsi/CVV sahəsi yoxdur.
+
+## Production yayımı
+
+İstifadəçinin açıq göstərişi ilə əsas sayta yayım hazırlanıb. Vercel production build mövcud DATABASE_URL vasitəsilə yalnız əlavə wash cədvəllərini yaradır; xəta build-i dayandırır və köhnə deployment qalır. Migration tranzaksiyası 5 saniyə lock və 20 saniyə statement timeout istifadə edir. Production üçün default aktivdir, WASH_ENABLED=false təcili bağlama seçimidir. Preview avtomatik açılmır. Kart ödənişi bütün mühitlərdə bağlı qalır. Menyuda Avtoyuma keçidi var.

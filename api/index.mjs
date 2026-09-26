@@ -1,3 +1,4 @@
+import {washEnabled} from '../server/wash-config.mjs';
 import {randomUUID} from 'node:crypto';
 import bcrypt from 'bcryptjs';
 import {wash} from '../server/wash.mjs';
@@ -18,7 +19,7 @@ export default async function handler(req,res){
  try{
  const url=new URL(req.url,'http://localhost'); const path=url.pathname.replace(/\/$/,'');const method=req.method;
  originCheck(req);
- if(path==='/api/config'&&method==='GET')return json(res,200,{wash:process.env.WASH_ENABLED==='true',sos:process.env.SOS_ENABLED==='true',ai:!!(process.env.OPENAI_API_KEY&&process.env.OPENAI_MODEL),uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
+ if(path==='/api/config'&&method==='GET')return json(res,200,{wash:washEnabled(),sos:process.env.SOS_ENABLED==='true',ai:!!(process.env.OPENAI_API_KEY&&process.env.OPENAI_MODEL),uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
  const user=await session(req);
  if(path.startsWith('/api/wash/'))return json(res,200,await wash(req,user,path,method));
  if(path.startsWith('/api/sos/'))return json(res,200,await sos(req,user,path,method));

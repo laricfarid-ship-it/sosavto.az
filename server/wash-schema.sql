@@ -1,4 +1,6 @@
 BEGIN;
+SET LOCAL lock_timeout = '5s';
+SET LOCAL statement_timeout = '20s';
 SET LOCAL search_path TO public;
 CREATE TABLE IF NOT EXISTS wash_shops (
  id uuid PRIMARY KEY REFERENCES listings(id), owner_id uuid NOT NULL REFERENCES users(id),

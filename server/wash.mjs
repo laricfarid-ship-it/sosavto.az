@@ -1,3 +1,4 @@
+import {washEnabled} from './wash-config.mjs';
 import {washPaymentOptions,requireCardCheckout} from './wash-payments.mjs';
 import {randomUUID} from 'node:crypto';
 import {query,transaction} from './db.mjs';
@@ -13,7 +14,7 @@ async function slotView(c,id){return (await c.query(`SELECT s.*,greatest(0,s.cap
 async function bookingView(c,id,user){const b=(await c.query(`SELECT b.*,s.shop_id,s.starts_at,s.ends_at,w.owner_id FROM wash_bookings b JOIN wash_slots s ON s.id=b.slot_id JOIN wash_shops w ON w.id=s.shop_id WHERE b.id=$1 AND (b.customer_id=$2 OR w.owner_id=$2)`,[id,user.id])).rows[0];if(!b)fail(404,'Rezerv tapılmadı.');if(b.status==='held'&&new Date(b.expires_at)<=new Date())b.status='expired';return b;}
 async function event(c,id,user,action){await c.query('INSERT INTO wash_events(id,booking_id,actor_id,action) VALUES($1,$2,$3,$4)',[randomUUID(),id,user.id,action]);}
 export async function wash(req,user,path,method){
- if(process.env.WASH_ENABLED!=='true')fail(404,'Avtoyuma rezervasiyası hələ aktiv deyil.');
+ if(!washEnabled())fail(404,'Avtoyuma rezervasiyası hələ aktiv deyil.');
  const url=new URL(req.url,'http://localhost'),base='/api/wash';
  if(path===base+'/payment-options'&&method==='GET')return washPaymentOptions();
  if(path===base+'/zones'&&method==='GET')return {zones:(await query('SELECT id,name,ring FROM wash_zones ORDER BY name')).rows};

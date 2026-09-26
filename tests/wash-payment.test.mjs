@@ -13,3 +13,12 @@ test('booking completion is not rendered as a successful payment',()=>{
  assert.equal(paymentLabel({payment_status:'refund_pending'}),'Geri qaytarılma gözlənilir');
  assert.equal(paymentLabel({payment_status:'refunded'}),'Məbləğ geri qaytarılıb');
 });
+
+import {washEnabled} from '../server/wash-config.mjs';
+test('production rollout defaults on; explicit disable and isolated preview remain off',()=>{
+ assert.equal(washEnabled({VERCEL_ENV:'production'}),true);
+ assert.equal(washEnabled({VERCEL_ENV:'production',WASH_ENABLED:'false'}),false);
+ assert.equal(washEnabled({VERCEL_ENV:'preview'}),false);
+ assert.equal(washEnabled({}),false);
+ assert.equal(washEnabled({WASH_ENABLED:'true'}),true);
+});
