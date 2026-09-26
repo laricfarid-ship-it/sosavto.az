@@ -7,7 +7,7 @@ import * as shared from '../assets/wash-shared.js';
 const source=(await readFile(new URL('../assets/wash.js',import.meta.url),'utf8')).replace(/^import .*;\n/,'const {washServices,vehicleSizes,distanceKm,pointInZone,wazeLinks,washMoney,bakuTime}=shared;\n').replace("import {paymentLabel} from './wash-payment.js';",'').replace('export async function carwash','async function carwash')+'\nreturn carwash(args);';
 const shop={id:'shop',title:'Yuma <img src=x onerror=alert(1)>',phone:'+994501234567',address:'Test küçəsi',latitude:40.4,longitude:49.8,services:{exterior:{standard:1000,suv:1500,minutes:20},interior:{standard:500,suv:700,minutes:15}},cash_enabled:true,next_start:'2026-10-01T10:00:00+04:00',next_available:1};
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-async function setup(){
+async function setup(bookings=[]){
  const dom=new JSDOM('<main></main>',{url:'https://sosavto.test/avtoyuma.html',pretendToBeVisual:true}),w=dom.window;
  w.HTMLElement.prototype.scrollIntoView=function(){};
  let gps,clock,available=1,holds=0;const errors=[];
@@ -15,7 +15,8 @@ async function setup(){
  const args={main:w.document.querySelector('main'),me:{id:'customer',phone:'+994501234567'},config:{wash:true},esc,toast:t=>errors.push(t),task:async(b,fn)=>{if(b)b.disabled=true;try{return await fn();}catch(e){errors.push(e.message);}finally{if(b)b.disabled=false;}},api:async(path,method,data)=>{
  if(path==='/wash/shops')return {shops:[{...shop,next_available:available,next_start:available?shop.next_start:null}]};
  if(path==='/wash/zones')return {zones:[{name:'Test zona',ring:[[49,40],[50,40],[50,41],[49,41],[49,40]]}]};
- if(path==='/wash/bookings')return {bookings:[]};
+ if(path==='/wash/bookings')return {bookings};
+ if(path==='/wash/bookings/book/confirm'){bookings[0].status='confirmed';return {booking:bookings[0]};}
  if(path==='/wash/shops/shop/slots')return {slots:[{id:'slot',starts_at:shop.next_start,ends_at:'2026-10-01T11:00:00+04:00',available,closed:false}]};
  if(path==='/wash/hold'){holds++;assert.equal(data.expected_total_cents,2200);available=0;return {booking:{id:'book'}};}
  throw Error('Unexpected '+path);
@@ -27,3 +28,15 @@ async function setup(){
 }
 test('cards escape names, expose Waze/call/WhatsApp, and live GPS updates zone and distance',async()=>{const d=await setup();assert.equal(d.doc.querySelectorAll('img').length,0);assert.ok(d.doc.querySelector('a[href^="waze://"]'));assert.ok(d.doc.querySelector('a[href^="tel:"]'));assert.ok(d.doc.querySelector('a[href^="https://wa.me/"]'));d.doc.querySelector('#wash-gps').click();d.gps({coords:{latitude:40.4,longitude:49.8,accuracy:10}});assert.match(d.doc.querySelector('#wash-location').textContent,/Test zona/);assert.match(d.doc.querySelector('#wash-cards').textContent,/0.0 km/);d.setAvailable(0);await d.tick();assert.equal(d.doc.querySelector('[data-shop]').disabled,true);d.close();});
 test('size/extras price updates and a successful last-slot hold leaves reserve disabled',async()=>{const d=await setup();d.doc.querySelector('[data-shop]').click();await d.flush();const f=d.doc.querySelector('#wash-reserve-form');assert.equal(f.querySelector('[value=card]').disabled,true);assert.equal(f.elements.method.value,'cash');f.elements.size.value='suv';f.querySelector('[value=interior]').checked=true;f.querySelector('#wash-slot').value='slot';f.dispatchEvent(new d.w.Event('change'));assert.match(d.doc.querySelector('#wash-total').textContent,/22.00/);assert.equal(d.doc.querySelector('#wash-reserve').disabled,false);f.dispatchEvent(new d.w.Event('submit',{cancelable:true}));await d.flush();await d.flush();assert.equal(d.holds(),1);assert.equal(d.doc.querySelector('#wash-reserve').disabled,true);assert.equal(d.errors.filter(x=>x.includes('Unexpected')).length,0);d.close();});
+
+test('selected shop and time are explicit, sold-out state clears the selected slot',async()=>{
+ const d=await setup();assert.ok(d.doc.querySelector('.wash-status.is-open'));d.doc.querySelector('[data-shop]').click();await d.flush();
+ assert.ok(d.doc.querySelector('.wash-shop.is-selected'));const time=d.doc.querySelector('[data-time]');time.click();
+ assert.equal(d.doc.querySelector('[data-time]').getAttribute('aria-pressed'),'true');assert.equal(d.doc.querySelector('#wash-slot').value,'slot');
+ d.setAvailable(0);await d.tick();assert.ok(d.doc.querySelector('.wash-status.is-full'));assert.equal(d.doc.querySelector('[data-time]').disabled,true);assert.equal(d.doc.querySelector('#wash-reserve').disabled,true);d.close();
+});
+test('confirmation tick is shown only after a real confirm API response',async()=>{
+ const b={id:'book',status:'held',method:'cash',payment_status:'unpaid',customer_id:'customer',owner_id:'owner',starts_at:shop.next_start,ends_at:'2026-10-01T11:00:00+04:00',total_cents:1000,snapshot:{shop_name:'Test',address:'Test',size_label:'Kiçik',items:[{name:'Xarici yuma',cents:1000}],payment_label:'Nağd',cancellation:'Başlamadan əvvəl ləğv'}};
+ const d=await setup([b]);assert.equal(d.doc.querySelector('#wash-success').hidden,true);d.doc.querySelector('[data-action=confirm]').click();await d.flush();
+ assert.equal(d.doc.querySelector('#wash-success').hidden,false);assert.match(d.doc.querySelector('#wash-success').textContent,/Rezerviniz təsdiqləndi/);assert.match(d.doc.querySelector('.wash-payment-status').textContent,/təsdiqlənməyib/);d.close();
+});
