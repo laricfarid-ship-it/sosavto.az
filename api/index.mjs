@@ -5,7 +5,7 @@ import bcrypt from 'bcryptjs';
 import {wash} from '../server/wash.mjs';
 import {sos} from '../server/sos.mjs';
 import {query,transaction} from '../server/db.mjs';
-import {HttpError,fail,hash,safeUser,session,createSession,requireUser,requireAdmin,originCheck,rateLimit,body,text,uuid} from '../server/security.mjs';
+import {HttpError,fail,hash,safeUser,session,createSession,requireUser,requireAdmin,originCheck,rateLimit,clientAddress,body,text,uuid} from '../server/security.mjs';
 import {listingInput,columns,projection,search} from '../server/listings.mjs';
 import {upload} from '../server/uploads.mjs';
 const json=(res,status,data)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(data));};
@@ -21,15 +21,20 @@ export default async function handler(req,res){
  const url=new URL(req.url,'http://localhost'); const path=url.pathname.replace(/\/$/,'');const method=req.method;
  originCheck(req);
  if(path==='/api/config'&&method==='GET')return json(res,200,{wash:washEnabled(),sos:process.env.SOS_ENABLED==='true',ai:!!(process.env.OPENAI_API_KEY&&process.env.OPENAI_MODEL),uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
+ const address=clientAddress(req);
+ await rateLimit(`api:ip:${address}`,300,60);
  const user=await session(req);
+ if(user&&!['GET','HEAD','OPTIONS'].includes(method))await rateLimit(`write:${user.id}`,120,60);
  if(path.startsWith('/api/wash/'))return json(res,200,await wash(req,user,path,method));
  if(path.startsWith('/api/sos/'))return json(res,200,await sos(req,user,path,method));
  if(path==='/api/me'&&method==='GET')return json(res,200,{user:safeUser(user)});
  if(['/api/register','/api/login'].includes(path)&&method==='POST'){
+ await rateLimit(`auth:ip:${address}`,60,900);
+ if(path==='/api/register')await rateLimit(`register:ip:${address}`,10,3600);
+ // Bound rotating-identifier traffic before creating per-identifier buckets.
+ await rateLimit('auth:global',1000,900);
  const b=await body(req);const identifier=text(b.identifier||b.email||'','Email və ya istifadəçi adı',3,200).toLowerCase();
  await rateLimit(`auth:${identifier}`,10,900);
- // Global database-backed throttle is shared across serverless instances; no spoofable client IP is trusted.
- await rateLimit('auth:global',1000,900);
  const password=text(b.password,'Şifrə',10,72);if(Buffer.byteLength(password)>72)fail(400,'Şifrə 72 baytdan uzun ola bilməz.');
  if(path==='/api/register'){
  const email=identifier;if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))fail(400,'Email ünvanını düzgün yazın.');
@@ -134,6 +139,7 @@ export default async function handler(req,res){
  fail(404,'Səhifə tapılmadı.');
  }catch(e){
  const status=e instanceof HttpError?e.status:503;
+ if(status===429)res.setHeader('Retry-After',String(e.retryAfter||60));
  if(!(e instanceof HttpError))console.error(JSON.stringify({event:'api_error',path:req.url?.split('?')[0],code:e.code||e.name}));
  json(res,status,{error:e instanceof HttpError?e.message:'Xidmət hazırda əlçatan deyil. Bir qədər sonra yenidən sınayın.'});
  }

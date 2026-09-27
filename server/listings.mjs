@@ -36,5 +36,5 @@ export function search(input){
  for(const [k,pos,len,pattern]of [['plate_region',1,2,/^\d{2}$/],['plate_letters',4,2,/^[A-Z]{1,2}$/],['plate_digits',7,3,/^\d{1,3}$/]])if(params.get(k)){const v=text(params.get(k),k,1,len).toUpperCase();if(!pattern.test(v))fail(400,'Nömrə filtrini düzgün yazın.');add(`substring(l.details->>'plate_number' from ${pos} for ${len}) LIKE ?`,v+'%');}
  for(const k of ['credit','barter'])if(params.get(k)==='true')where.push(`l.details->>'${k}'='true'`);
  const orders={newest:'l.created_at DESC',price_asc:'l.price ASC,l.created_at DESC',price_desc:'l.price DESC,l.created_at DESC'};
- return {where:where.join(' AND '),args,order:orders[params.get('sort')]||orders.newest,page:Math.max(1,Math.min(10000,Number(params.get('page'))||1))};
+ return {where:where.join(' AND '),args,order:Object.hasOwn(orders,params.get('sort'))?orders[params.get('sort')]:orders.newest,page:Math.floor(Math.max(1,Math.min(10000,Number(params.get('page'))||1)))};
 }

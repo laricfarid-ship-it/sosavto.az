@@ -2,7 +2,7 @@ name: Marketplace checks
 on:
   pull_request:
   push:
-    branches: [main, 'feat/**']
+    branches: [main, 'feat/**', 'fix/**']
 permissions:
   contents: read
 jobs:
@@ -15,5 +15,6 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm audit --omit=dev --audit-level=high
       - run: npm test
       - run: npm run build
