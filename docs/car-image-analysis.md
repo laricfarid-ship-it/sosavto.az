@@ -95,8 +95,20 @@ Provider responses in these tests are MOCKED; they do not measure recognition.
 The local browser fixture is `node tests/car-analysis-browser-server.mjs`, bound
 only to 127.0.0.1:4174, with an in-memory database and explicitly synthetic provider
 answers. It refuses production/VERCEL environments and is never built into public
-assets. Development agent-browser failed to start; the Chromium download was
-invalid. No real-browser visual/compression or end-to-end pass is claimed.
+assets. On 2026-09-29, Chromium 153 browser checks passed at 1280 px and 390 px
+using Playwright against this fixture. The agent-browser daemon could not start;
+the browser binary was obtained separately through @sparticuz/chromium.
+The real file chooser, FileReader/canvas compression, duplicate rejection,
+three-photo + consent gate, review-before-apply, preservation of intervening edits,
+three gallery uploads and cached result reuse were checked. No page exceptions
+or horizontal overflow were detected. These are synthetic-image/provider UI
+checks, NOT real recognition accuracy or physical-phone validation.
+
+Run `node tests/car-analysis-browser.mjs` with Playwright installed, or supply
+`PLAYWRIGHT_MODULE` (module path) and `BROWSER_EXECUTABLE` (Chromium binary).
+The script starts and stops its own isolated fixture. It makes no paid calls.
+Selected filenames are now shown explicitly beside Azerbaijani selection buttons;
+the misleading native empty-file caption is no longer displayed.
 
 Before release, verify on desktop and an actual phone:
 
@@ -113,8 +125,24 @@ Before release, verify on desktop and an actual phone:
 - Inspect the deployed client/network for secret leakage and verify no cost
   occurs on GET, disabled feature, invalid inputs or duplicate successful requests.
 
-Vercel connector currently returned no authorized teams. Live model credentials,
-paid-call authorization, real test photos and browser verification remain open.
+Vercel access was restored and the existing PR preview was READY on 2026-09-29.
+Paid-call authorization, live credentials/model configuration, isolated preview
+database setup, genuine-photo evaluation and physical-phone checks remain open.
+Keep the PR draft, keep paid use OFF and do not merge before real-photo acceptance.
+
+## Pilot cost estimate (not spending approval)
+
+The current adapter requires Anthropic Messages API and a server-only
+`ANTHROPIC_API_KEY`. Candidate model: `claude-sonnet-4-6`. Official pricing checked
+on 2026-09-29: $3 per million input tokens and $15 per million output tokens.
+An illustrative 6,000-input/800-output-token request costs $0.030;
+6,000 input plus the configured 1,600 output maximum costs $0.042.
+Allow approximately $0.02–$0.05 per three-photo analysis, or $0.40–$1.00
+for 20 analyses, pending measured usage. This is an estimate, not a billing cap;
+image sizes, schema/prompt overhead and output length affect actual usage.
+Provider funding minimums, taxes, hosting and storage are separate.
+No key, billing change, environment activation or real API request was made.
+Pricing reference: https://platform.claude.com/docs/en/about-claude/pricing
 
 Official API references:
 - https://platform.claude.com/docs/en/build-with-claude/vision
