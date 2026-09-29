@@ -1,3 +1,4 @@
+import {assistantConfig,assistantAnswer} from '../server/assistant.mjs';
 import {lockListing,washLinks,requireNoReservations,deleteListing} from '../server/listing-actions.mjs';
 import {washEnabled} from '../server/wash-config.mjs';
 import {randomUUID} from 'node:crypto';
@@ -20,7 +21,7 @@ export default async function handler(req,res){
  try{
  const url=new URL(req.url,'http://localhost'); const path=url.pathname.replace(/\/$/,'');const method=req.method;
  originCheck(req);
- if(path==='/api/config'&&method==='GET')return json(res,200,{wash:washEnabled(),sos:process.env.SOS_ENABLED==='true',ai:!!(process.env.OPENAI_API_KEY&&process.env.OPENAI_MODEL),uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
+ if(path==='/api/config'&&method==='GET')return json(res,200,{wash:washEnabled(),sos:process.env.SOS_ENABLED==='true',ai:assistantConfig().enabled,aiProvider:assistantConfig().provider,uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
  const address=clientAddress(req);
  await rateLimit(`api:ip:${address}`,300,60);
  const user=await session(req);
@@ -131,10 +132,12 @@ export default async function handler(req,res){
  }
  }
  if(path==='/api/assistant'&&method==='POST'){
- requireUser(user);if(!process.env.OPENAI_API_KEY||!process.env.OPENAI_MODEL)fail(503,'AI köməkçisi hələ aktivləşdirilməyib. Axtarış filtrlərindən istifadə edə bilərsiniz.');
+ requireUser(user);if(!assistantConfig().enabled)fail(503,'AI köməkçisi hələ aktivləşdirilməyib. Axtarış filtrlərindən istifadə edə bilərsiniz.');
+ const b=await body(req);const input=text(b.message,'Mesaj',3,1500);
+ if(assistantConfig().provider==='gemini'&&b.consent!==true)fail(400,'Google Gemini üçün razılıq tələb olunur.');
  await rateLimit(`ai:${user.id}`,20,86400);await rateLimit('ai:global',200,86400);
- const b=await body(req);const input=text(b.message,'Mesaj',3,1500);const response=await fetch('https://api.openai.com/v1/responses',{method:'POST',headers:{Authorization:`Bearer ${process.env.OPENAI_API_KEY}`,'Content-Type':'application/json'},signal:AbortSignal.timeout(20000),body:JSON.stringify({model:process.env.OPENAI_MODEL,store:false,max_output_tokens:700,instructions:'Sən SosAvto.az Azərbaycan avtomobil platformasının köməkçisisən. Azərbaycan dilində qısa cavab ver. Yalnız avtomobil, ehtiyat hissələri və xidmətlər barədə kömək et. Real elanlara, qiymət bazasına və hesablara çıxışın yoxdur; bunları uydurma. İstifadəçi verdiyi faktlarla elan təsviri hazırlaya bilərsən, məlum olmayan vəziyyət və xüsusiyyətləri uydurma. Təcili mexaniki təhlükədə peşəkar servisi tövsiyə et. Heç bir əməliyyat etdiyini demə.',input})});
- if(!response.ok)fail(502,'AI xidməti hazırda cavab vermir. Sonra yenidən sınayın.');const data=await response.json();const answer=(data.output||[]).flatMap(x=>x.content||[]).filter(x=>x.type==='output_text').map(x=>x.text).join('\n');if(!answer)fail(502,'Cavab alınmadı.');return json(res,200,{answer});
+ await rateLimit('ai:minute',5,60);
+ return json(res,200,await assistantAnswer(input,{consent:b.consent}));
  }
  fail(404,'Səhifə tapılmadı.');
  }catch(e){

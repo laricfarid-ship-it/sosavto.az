@@ -19,9 +19,16 @@ export const requireAdmin=u=>{requireUser(u);if(u.role!=='admin')fail(403,'Bu ə
 export function originCheck(req){
  if(['GET','HEAD','OPTIONS'].includes(req.method))return;
  const origin=req.headers.origin;
- const allowed=process.env.APP_ORIGIN;
- if(!allowed)fail(503,'Sayt ünvanı hələ konfiqurasiya edilməyib.');
- if(origin!==new URL(allowed).origin)fail(403,'Sorğunun mənbəyi təsdiqlənmədi.');
+ const origins=[];
+ if(process.env.APP_ORIGIN)origins.push(new URL(process.env.APP_ORIGIN).origin);
+ // Trust only platform-provided deployment hosts, never request Host headers.
+ if(process.env.VERCEL==='1'&&process.env.VERCEL_ENV==='preview'){
+  for(const host of [process.env.VERCEL_URL,process.env.VERCEL_BRANCH_URL]){
+   if(host&&/^[a-z0-9-]+\.vercel\.app$/.test(host))origins.push('https://'+host);
+  }
+ }
+ if(!origins.length)fail(503,'Sayt ünvanı hələ konfiqurasiya edilməyib.');
+ if(!origins.includes(origin))fail(403,'Sorğunun mənbəyi təsdiqlənmədi.');
  if(!String(req.headers['content-type']||'').startsWith('application/json'))fail(415,'JSON sorğusu tələb olunur.');
 }
 export async function rateLimit(key,limit,seconds){
