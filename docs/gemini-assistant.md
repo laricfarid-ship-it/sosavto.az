@@ -10,7 +10,7 @@ tools, attachments, automatic model fallback or request retry. The assistant has
 no access to listings/accounts and does not retain conversation context.
 
 Preview chooses Gemini when GEMINI_API_KEY exists. The fixed pilot model is
-`gemini-2.5-flash-lite` (standard free-tier input/output listed on official pricing
+`gemini-3.1-flash-lite` (standard free-tier input/output listed on official pricing
 on 2026-09-30). Production does NOT auto-enable from this key: AI_PROVIDER=gemini
 and a production key would be required after review. AI_ENABLED=false disables
 both providers. Existing explicitly configured OpenAI behavior remains available,
@@ -40,3 +40,8 @@ creation or production DB mutation is part of verification.
 References:
 - https://ai.google.dev/api/generate-content
 - https://ai.google.dev/gemini-api/docs/pricing
+
+2026-09-30: live owner test returned MODEL_UNAVAILABLE for 2.5 Flash-Lite.
+Switched the fixed model to stable 3.1 Flash-Lite after verifying its official
+standard free-tier text input/output pricing. No fallback or billing change.
+Live response with the replacement model still requires verification.

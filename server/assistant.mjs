@@ -4,7 +4,7 @@ export function assistantConfig(env=process.env){
  if(env.AI_ENABLED==='false')return {enabled:false,provider:null};
  // The owner authorized this key for Preview only. Production needs explicit opt-in.
  const provider=env.AI_PROVIDER||(env.GEMINI_API_KEY&&env.VERCEL_ENV==='preview'?'gemini':'openai');
- if(provider==='gemini')return {enabled:!!env.GEMINI_API_KEY,provider:'gemini',model:'gemini-2.5-flash-lite'};
+ if(provider==='gemini')return {enabled:!!env.GEMINI_API_KEY,provider:'gemini',model:'gemini-3.1-flash-lite'};
  if(provider==='openai')return {enabled:!!(env.OPENAI_API_KEY&&env.OPENAI_MODEL),provider:'openai',model:env.OPENAI_MODEL};
  return {enabled:false,provider:null};
 }
