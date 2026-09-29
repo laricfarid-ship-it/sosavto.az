@@ -11,8 +11,8 @@ no access to listings/accounts and does not retain conversation context.
 
 Preview chooses Gemini when GEMINI_API_KEY exists. The fixed pilot model is
 `gemini-3.1-flash-lite` (standard free-tier input/output listed on official pricing
-on 2026-09-30). Production does NOT auto-enable from this key: AI_PROVIDER=gemini
-and a production key would be required after review. AI_ENABLED=false disables
+on 2026-09-30). The owner approved production rollout after a successful live response on
+2026-09-30. Gemini requires GEMINI_API_KEY in each target environment. AI_ENABLED=false disables
 both providers. Existing explicitly configured OpenAI behavior remains available,
 but errors from Gemini never fall back to it.
 
@@ -45,3 +45,7 @@ References:
 Switched the fixed model to stable 3.1 Flash-Lite after verifying its official
 standard free-tier text input/output pricing. No fallback or billing change.
 Live response with the replacement model still requires verification.
+
+Production approval: only signed-in active accounts may send assistant requests.
+Guest UI is disabled and direct unauthenticated API calls return 401 without
+contacting Gemini. Photo-analysis PR #9 remains paused and excluded.

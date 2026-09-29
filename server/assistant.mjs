@@ -2,8 +2,8 @@ import {fail} from './security.mjs';
 const instructions='Sən SosAvto.az Azərbaycan avtomobil platformasının köməkçisisən. Azərbaycan dilində qısa və aydın cavab ver. Yalnız avtomobil, ehtiyat hissələri və xidmətlər barədə kömək et. Real elanlara, qiymət bazasına və hesablara çıxışın yoxdur; bunları uydurma. İstifadəçi verdiyi faktlarla elan təsviri hazırlaya bilərsən, məlum olmayan vəziyyət və xüsusiyyətləri uydurma. Təcili mexaniki təhlükədə peşəkar servisi tövsiyə et. Heç bir əməliyyat etdiyini demə.';
 export function assistantConfig(env=process.env){
  if(env.AI_ENABLED==='false')return {enabled:false,provider:null};
- // The owner authorized this key for Preview only. Production needs explicit opt-in.
- const provider=env.AI_PROVIDER||(env.GEMINI_API_KEY&&env.VERCEL_ENV==='preview'?'gemini':'openai');
+ // Owner approved production rollout; credentials stay environment-scoped.
+ const provider=env.AI_PROVIDER||(env.GEMINI_API_KEY?'gemini':'openai');
  if(provider==='gemini')return {enabled:!!env.GEMINI_API_KEY,provider:'gemini',model:'gemini-3.1-flash-lite'};
  if(provider==='openai')return {enabled:!!(env.OPENAI_API_KEY&&env.OPENAI_MODEL),provider:'openai',model:env.OPENAI_MODEL};
  return {enabled:false,provider:null};
