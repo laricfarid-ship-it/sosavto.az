@@ -12,7 +12,8 @@
     "check": "node scripts/check.mjs",
     "build": "node scripts/check.mjs && node scripts/build.mjs",
     "migrate:sos": "node server/sos-migrate.mjs",
-    "migrate:wash": "node server/wash-migrate.mjs"
+    "migrate:wash": "node server/wash-migrate.mjs",
+    "migrate:car-analysis": "node server/car-analysis-migrate.mjs"
   },
   "engines": {
     "node": ">=22"
