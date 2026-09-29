@@ -21,7 +21,21 @@ export async function assistantAnswer(input,{env=process.env,request=fetch,conse
  }catch{fail(503,'AI ilə əlaqə alınmadı. Bir qədər sonra yenidən sınayın.');}
  // Never retry or switch providers/models automatically. Never return provider errors/secrets.
  if(response.status===429)fail(429,'AI sorğu limiti bitib. Bir qədər sonra yenidən sınayın. Ödənişli xidmətə keçid edilmir.');
- if(!response.ok)fail(502,'AI xidməti hazırda cavab vermir. Sonra yenidən sınayın.');
+ if(!response.ok){
+  let error;try{error=(await response.json())?.error;}catch{}
+  const message=typeof error?.message==='string'?error.message:'';
+  const reasons=new Set((Array.isArray(error?.details)?error.details:[]).map(d=>d?.reason));
+  let reason='UPSTREAM_ERROR',notice='AI xidməti hazırda cavab vermir. Sonra yenidən sınayın.';
+  if(reasons.has('API_KEY_INVALID')||/api key not valid|api key expired|api key.*leaked/i.test(message)){reason='KEY_INVALID';notice='Gemini API açarı Google tərəfindən qəbul edilmədi. Açarın ayarını yoxlamaq lazımdır.';}
+  else if(/user location is not supported|not available in your country|region.*not supported/i.test(message)){reason='REGION_UNSUPPORTED';notice='Gemini bu server bölgəsi üçün əlçatan deyil. Ödəniş aktivləşdirilməyib.';}
+  else if(/free tier.*not available|billing.*required|enable billing/i.test(message)){reason='FREE_TIER_UNAVAILABLE';notice='Google bu layihə üçün pulsuz istifadəni qəbul etmir. Ödəniş aktivləşdirilməyib.';}
+  else if(response.status===404){reason='MODEL_UNAVAILABLE';notice='Seçilmiş Gemini modeli bu API layihəsində əlçatan deyil.';}
+  else if(response.status===401||response.status===403){reason='ACCESS_DENIED';notice='Google Gemini-yə giriş icazəsi vermədi. API açarının məhdudiyyətlərini yoxlamaq lazımdır.';}
+  else if(response.status===400){reason='REQUEST_REJECTED';notice='Google Gemini sorğunu qəbul etmədi. Bağlantı ayarı yoxlanmalıdır.';}
+  // Never log raw provider errors, prompts, credentials or user data.
+  console.warn(JSON.stringify({event:'assistant_provider_error',provider:c.provider,status:response.status,reason}));
+  fail(502,notice);
+ }
  try{data=await response.json();}catch{fail(502,'AI cavabı oxunmadı.');}
  let answer;
  if(giniBlocked(data,gemini))fail(422,'Bu suala cavab hazırlamaq mümkün olmadı. Sualı başqa cür yazın.');

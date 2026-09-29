@@ -9,3 +9,17 @@ test('quota never retries, leaks secrets or falls back to OpenAI',async()=>{let 
 test('safety block and empty replies are honest errors',async()=>{for(const data of [{promptFeedback:{blockReason:'SAFETY'}},{candidates:[]}])await assert.rejects(assistantAnswer('Salam',{env,consent:true,request:async()=>reply(data)}),e=>[422,502].includes(e.status));});
 test('network and provider failures do not expose error body',async()=>{await assert.rejects(assistantAnswer('Salam',{env,consent:true,request:async()=>{throw Error('test-secret');}}),e=>e.status===503&&!e.message.includes('test-secret'));await assert.rejects(assistantAnswer('Salam',{env,consent:true,request:async()=>reply({},403)}),e=>e.status===502);});
 test('existing explicitly selected OpenAI remains functional',async()=>{const r=await assistantAnswer('Salam',{env:{AI_PROVIDER:'openai',OPENAI_API_KEY:'test',OPENAI_MODEL:'test'},request:async url=>{assert.equal(url,'https://api.openai.com/v1/responses');return reply({output:[{content:[{type:'output_text',text:'Cavab'}]}]});}});assert.equal(r.answer,'Cavab');});
+test('provider diagnostics classify failures without leaking raw error or credentials',async()=>{
+ const original=console.warn,logs=[];console.warn=x=>logs.push(x);
+ try{
+ for(const [status,error,reason] of [
+ [400,{message:'API key not valid test-secret'},'KEY_INVALID'],
+ [400,{message:'User location is not supported test-secret'},'REGION_UNSUPPORTED'],
+ [404,{message:'test-secret'},'MODEL_UNAVAILABLE'],
+ [403,{message:'test-secret'},'ACCESS_DENIED']]){
+ await assert.rejects(assistantAnswer('private prompt',{env,consent:true,request:async()=>reply({error},status)}),e=>e.status===502&&!e.message.includes('test-secret'));
+ assert.equal(JSON.parse(logs.at(-1)).reason,reason);
+ }
+ assert.equal(logs.some(x=>x.includes('test-secret')||x.includes('private prompt')),false);
+ }finally{console.warn=original;}
+});
