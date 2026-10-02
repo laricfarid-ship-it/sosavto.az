@@ -11,16 +11,18 @@ const server=http.createServer(async(req,res)=>{const path=new URL(req.url,proce
 await new Promise(r=>server.listen(4176,'127.0.0.1',r));let browser;
 try{const {chromium}=await import(process.env.PLAYWRIGHT_MODULE||'playwright');browser=await chromium.launch({headless:true,executablePath:process.env.BROWSER_EXECUTABLE,args:['--no-sandbox','--disable-gpu','--no-proxy-server']});
 for(const width of [390,1280]){
- const page=await browser.newPage({viewport:{width,height:850}});const errors=[];page.on('pageerror',e=>errors.push(e.message));
+ const page=await browser.newPage({viewport:{width,height:850}}),errors=[];page.on('pageerror',e=>errors.push(e.message));
  await page.goto('http://localhost:4176/login');await page.goto('http://localhost:4176/elan-ver.html');
- const brand=page.locator('[name=brand]');await brand.waitFor();
- for(const [b,m] of [['Lada','2107'],['Denza','D9'],['Aito','M9'],['Fiat','Panda'],['Tofaş','Şahin'],['Cadillac','Escalade']]){
-  await brand.fill(b);await brand.dispatchEvent('change');assert.ok(await page.locator('#model-options option').evaluateAll((els,m)=>els.some(e=>e.value===m),m),b+' '+m);
- }
- await brand.fill('Li Auto');await brand.dispatchEvent('change');assert.equal(await brand.inputValue(),'LiXiang (Lixiang)');
- await brand.fill('Retro Test');await brand.dispatchEvent('change');await page.locator('[name=model]').fill('Custom 1890');await page.locator('[name=year]').fill('1890');assert.equal(await page.locator('[name=year]').evaluate(e=>e.checkValidity()),true);
- await page.goto('http://localhost:4176/index.html?category=car&model=2107&brand=Lada');await page.locator('#search [name=brand]').waitFor();assert.equal(await page.locator('#search [name=model]').inputValue(),'2107');
- await page.locator('#search [name=brand]').fill('Retro Test');await page.locator('#search [name=brand]').dispatchEvent('change');await page.locator('#search [name=model]').fill('Custom 1890');
- assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);assert.deepEqual(errors,[]);console.log('PASS catalogue create/search/custom/retro '+width+'px');await page.close();
+ const brand=page.locator('select[name=brand]'),model=page.locator('select[name=model]');await brand.waitFor();
+ assert.equal(await brand.locator('option').nth(1).getAttribute('value'),'__other__');
+ for(const [b,m] of [['Lada','2107'],['Denza','D9'],['Aito','M9'],['Fiat','Panda'],['Tofaş','Şahin'],['Cadillac','Escalade']]){await brand.selectOption(b);await model.selectOption(m);assert.equal(await model.inputValue(),m);}
+ await brand.selectOption('LiXiang (Lixiang)');await model.selectOption('L7');assert.equal(await page.locator('[data-custom=brand]').isHidden(),true);
+ await brand.selectOption('__other__');await page.locator('[data-custom=brand]').fill('Retro Test');await page.locator('[data-custom=brand]').dispatchEvent('change');await model.selectOption('__other__');await page.locator('[data-custom=model]').fill('Custom 1890');
+ await page.locator('[name=category]').selectOption('parts');assert.equal(await page.locator('[data-custom=model]').isDisabled(),false);
+ await page.locator('[name=category]').selectOption('car');await page.locator('[name=year]').fill('1890');assert.equal(await page.locator('[name=year]').evaluate(e=>e.checkValidity()),true);
+ await page.goto('http://localhost:4176/index.html?category=car&model=2107&brand=Lada');await page.locator('#search select[name=brand]').waitFor();assert.equal(await page.locator('#search [name=model]').inputValue(),'2107');
+ await page.locator('#search [name=brand]').selectOption('__other__');await page.locator('[data-custom=brand]').fill('Retro Test');await page.locator('[data-custom=brand]').dispatchEvent('change');await page.locator('#search [name=model]').selectOption('__other__');await page.locator('[data-custom=model]').fill('Custom 1890');
+ await page.locator('#search button[type=submit]').click();await page.waitForURL(/brand=Retro/);assert.equal(new URL(page.url()).searchParams.get('model'),'Custom 1890');await page.locator('[data-custom=model]').waitFor();assert.equal(await page.locator('[data-custom=model]').inputValue(),'Custom 1890');
+ assert.equal(await page.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);assert.deepEqual(errors,[]);console.log('PASS native lists, Other, category toggle, custom URL restore '+width+'px');await page.close();
 }
 }finally{await browser?.close();server.close();}
