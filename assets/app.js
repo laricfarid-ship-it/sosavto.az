@@ -1,3 +1,4 @@
+import {mountDemoListings} from './demo-listings.js';
 import {cars} from './cars.js';
 import {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys} from './catalog.js';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
@@ -187,5 +188,6 @@ async function init(){
  const washPage=async()=>{const {carwash}=await import('./wash.js');await carwash({main,me,config,api,esc,toast,task});};
  const routes={'avtoyuma.html':washPage,'avtoyuma-panel.html':washPage,'sos.html':sosPage,'sos-usta.html':sosPage,'index.html':home,'giris.html':()=>auth(false),'qeydiyyat.html':()=>auth(true),'kabinet.html':profile,'menim-elanlarim.html':()=>collection('my-listings'),'favoriler.html':()=>collection('favorites'),'elan-ver.html':listingForm,'elan.html':detail,'xarita.html':mapPage,'ai.html':assistant,'admin.html':admin,'bildirisler.html':notifications};
  await (routes[page]||(()=>{main.innerHTML=empty('Səhifə tapılmadı','Axtardığınız səhifə mövcud deyil.','<a href="index.html" class="btn primary">Ana səhifəyə qayıt</a>');}))();
+ mountDemoListings({main,page,params,esc,money});
 }
 init().catch(e=>errorBox(main,e));
