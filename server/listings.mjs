@@ -8,12 +8,13 @@ export function listingInput(b){
  if((v.latitude===null)!==(v.longitude===null))fail(400,'Xəritə koordinatlarını birlikdə daxil edin.');
  if(v.category==='car'&&(!v.brand||!v.model||!Number.isInteger(v.year)||v.mileage===null||!Number.isInteger(v.mileage)))fail(400,'Avtomobil üçün marka, model, il və yürüşü doldurun.');
  const details={};
- for(const k of detailFields[v.category])details[k]=['credit','barter'].includes(k)?b.details?.[k]===true:text(b.details?.[k]||'',k,0,k==='fitment'?250:80);
+ for(const k of detailFields[v.category])details[k]=['credit','barter','map_visible'].includes(k)?b.details?.[k]===true:text(b.details?.[k]||'',k,0,k==='fitment'?250:80);
  if(!['car','parts'].includes(v.category)){v.brand='';v.model='';}
  if(v.category!=='car'){v.year=null;v.mileage=null;}
  for(const [k,values]of [['part_type',partTypes],['insurance_type',insuranceTypes],['service_type',serviceTypes[v.category]],['condition',['Yeni','İşlənmiş']]])if(details[k]&&values&&!values.includes(details[k]))fail(400,'Seçilən növ kateqoriyaya uyğun deyil.');
  if(details.oem)details.oem=normalizeCode(details.oem);
  if(v.category==='plates'){details.plate_number=normalizePlate(details.plate_number);if(!/^\d{2}-[A-Z]{2}-\d{3}$/.test(details.plate_number))fail(400,'Nömrəni 10-AA-123 formatında yazın.');}
+ if(details.map_visible&&(!v.address||v.latitude===null||v.longitude===null))fail(400,'Mağazanı xəritədə göstərmək üçün ünvanı yazın və xəritədə nöqtə seçin.');
  v.details=JSON.stringify(details);
  if(!Array.isArray(b.imageIds)||b.imageIds.length>8||new Set(b.imageIds).size!==b.imageIds.length)fail(400,'Maksimum 8 fərqli şəkil seçin.');
  v.imageIds=b.imageIds.map(uuid);return v;
