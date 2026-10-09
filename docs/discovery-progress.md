@@ -61,7 +61,7 @@ yaxşılaşdırılması, 2–3 avtomobilin müqayisəsi.
 - Brauzer yoxlamasını təkrar icra etmək üçün Playwright və Chromium tələb olunur:
   `PLAYWRIGHT_MODULE=/path/to/playwright/index.mjs BROWSER_EXECUTABLE=/path/to/chromium node tests/discovery-browser.mjs`
 
-## Göndəriş bloku — növbəti addım
+## Əvvəlki göndəriş bloku — arxiv (həll edilib)
 
 GitHub-a push avtomatik təsdiq yoxlaması tərəfindən iki dəfə rədd edildi.
 Birinci səbəb xarici ünvanın doğrulanmaması idi. Sonra GitHub connector ilə
@@ -89,3 +89,17 @@ oxu. Tamamlanmış işi yenidən başlama. Açıq AI/şifrə draft PR-ləri bu i
 sınaq budağında göndərilməsinə açıq icazə verdi. Əvvəlki icazə bloku aradan
 qalxıb. Terminal git push giriş məlumatı olmadığı üçün işləmədi; qoşulmuş
 GitHub API vasitəsilə göndəriş davam edir. Production merge icazəsi deyil.
+
+## Cari status — 2026-10-10, Bakı vaxtı
+
+- İcazədən sonra dəyişikliklər GitHub-a uğurla göndərilib.
+- Budaq: `feat/discovery-comparison`; tətbiq commit: `09b52a2f295e04f3e8806da8198b254f14b2ee07`.
+- PR #11 (draft): https://github.com/laricfarid-ship-it/sosavto.az/pull/11
+- Preview READY: https://sosavto-r5htneagj-laricfarid-ship-it.vercel.app
+- Vercel deployment: `dpl_8W1c3KNfiviaAGQGTpUS1kpjyNbx`.
+- Yoxlanmış yerli və GitHub tree SHA eynidir: `23022ab13825e89ec441636581d1fc2c4e339989`.
+- Qorunmuş preview-də autentifikasiyalı HTTP yoxlaması: `/`, `/muqayise.html`, `/api/listings?category=car` — hamısı 200.
+- Elan API-si 0 aktiv avtomobil qaytardı. Preview-də real elanlarla müqayisə hələ sınanmayıb; lokal brauzer testləri ayrıca test bazası ilə keçib.
+- Preview Vercel giriş qorumasındadır. Müvəqqəti baxış linkinin müddəti bitərsə təzəsini yarat; giriş qorumasını söndürmə.
+- Əsas sayta merge/promotion edilməyib. Növbəti addım istifadəçinin görünüşə baxması və yerləşdirilmiş versiyada real elanlarla qəbul yoxlamasıdır.
+- Köhnə ZIP paketi ilkin bərpa ehtiyatıdır. Cari mənbə GitHub-dakı bu budaq və PR #11-dir; ZIP-i təkrar tətbiq etmə.
