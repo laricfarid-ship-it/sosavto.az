@@ -196,9 +196,9 @@ export function mountDemoListings({main,page,params,esc,money}){
  // Samples are a visual showcase, never search results or bookable inventory.
  if([...params.keys()].some(k=>!['category','sort'].includes(k)))return;
  const rows=demoListings.filter(x=>category==='all'||x.category===category);if(!rows.length)return;
- const section=document.createElement('section');section.id='demo-listings';section.style.margin='28px 0';
+ const section=document.createElement('section');section.id='demo-listings';section.style.margin='28px auto';
  section.innerHTML=`<div class="section-head"><h2>Nümunə elanlar</h2><span class="badge">Müvəqqəti görünüş</span></div><p class="notice">Bu elanlar yalnız saytın görünüşünü yoxlamaq üçündür. Şəkillər illüstrasiyadır, qiymətlər nümunədir. Satış, zəng və rezervasiya edilmir.</p><div class="grid">${rows.map(x=>`<article class="card"><a href="#${x.id}" data-demo="${x.id}"><div class="card-photo"><img src="${x.image}" alt="${esc(x.title)} — nümunə illüstrasiya" loading="lazy"></div><div class="card-content"><span class="badge">Nümunə elan</span><h3>${esc(x.title)}</h3><div class="price">${money(x.price)}</div><p class="muted">${esc(x.info)}</p><div class="card-meta">${esc(x.city)} · Demo</div></div></a></article>`).join('')}</div>`;
  const anchor=main.querySelector('#results')?.parentElement?.querySelector('.section-head')||main.querySelector('.service-layout');
- if(anchor)anchor.before(section);else main.append(section);
+ if(main.querySelector('#results .card'))main.querySelector('#results').parentElement.after(section);else if(anchor)anchor.before(section);else main.append(section);
  section.querySelectorAll('[data-demo]').forEach(a=>a.onclick=e=>{e.preventDefault();const x=rows.find(r=>r.id===a.dataset.demo),d=document.querySelector('#dialog');d.innerHTML=`<form method="dialog"><span class="badge">Nümunə elan</span><h2>${esc(x.title)}</h2><img src="${x.image}" alt="Nümunə illüstrasiya" style="width:100%;border-radius:14px"><p class="price">${money(x.price)}</p><p>${esc(x.info)} · ${esc(x.city)}</p><p class="notice">Yalnız görünüş üçündür. Bu elan üzrə satış, əlaqə və rezervasiya yoxdur.</p><button class="btn primary" value="close">Bağla</button></form>`;d.showModal();});
 }
