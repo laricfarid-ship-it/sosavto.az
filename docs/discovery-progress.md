@@ -115,3 +115,11 @@ GitHub API vasitəsilə göndəriş davam edir. Production merge icazəsi deyil.
 - Tam test dəsti: 100/100; kalkulyator və frontend hədəf testləri: 25/25 keçdi.
 - Yeni provayder, ödəniş, verilənlər bazası və production dəyişikliyi yoxdur.
 - Yayım hədəfi eyni `feat/discovery-comparison` sınaq budağı / PR #11-dir.
+
+## 2026-10-10 — BMW giriş görünüşü
+
+- İstifadəçinin istəyi ilə avtomobil/bütün elanlar girişində mövcud BMW fotosu geri qaytarıldı.
+- Orta ölçülü ikisütunlu banner, mobil ekranda yığcam foto fonu və oxunaqlı mətn.
+- Axtarış və kateqoriyalar qorundu; kuzov ikonları 44px hündürlüklü yığcam seçimlərdir.
+- Digər kateqoriyaların başlıqları qorundu. Yeni provayder, ödəniş və production dəyişikliyi yoxdur.
+- Build və 22 frontend testi keçdi. Sınaq budağı: feat/discovery-comparison.
