@@ -18,6 +18,6 @@ for(const c of ['car','parts','insurance','plates','service','detailing']){
  console.log('PASS demo category '+c);
 }
 await page.goto('http://localhost:4176/avtoyuma.html');await page.locator('#demo-listings').waitFor();assert.equal(await page.locator('#demo-listings .card').count(),3);
-await page.goto('http://localhost:4176/index.html');await page.locator('#demo-listings').waitFor();assert.equal(await page.locator('#demo-listings .card').count(),21);await page.locator('#demo-listings').screenshot({path:'/tmp/demo-cards.png'});
+await page.goto('http://localhost:4176/index.html?category=all');await page.locator('#demo-listings').waitFor();assert.equal(await page.locator('#demo-listings .card').count(),21);await page.locator('#demo-listings').screenshot({path:'/tmp/demo-cards.png'});
 await page.goto('http://localhost:4176/index.html?category=car&brand=BMW');await page.locator('#results').waitFor();assert.equal(await page.locator('#demo-listings').count(),0);console.log('PASS wash, all 21 cards, filtered search excludes samples');
 }finally{await browser?.close();server.close();}
