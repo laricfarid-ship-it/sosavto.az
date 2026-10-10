@@ -4,16 +4,17 @@ import {readFile} from 'node:fs/promises';
 import {JSDOM} from 'jsdom';
 import {cars} from '../assets/cars.js';
 import * as catalog from '../assets/catalog.js';
+import * as credit from '../assets/credit.js';
 import * as discovery from '../assets/discovery.js';
-const source=(await readFile(new URL('../assets/app.js',import.meta.url),'utf8')).replace("import {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights} from './discovery.js';",'const {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights}=discovery;').replace("import {mountDemoListings} from './demo-listings.js';",'const mountDemoListings=()=>{};').replace("import {groupMapListings,mapKinds} from './service-map.js';",'').replace("import {cars} from './cars.js';",'').replace("import {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys} from './catalog.js';",'const {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys}=catalog;').replace('init().catch(e=>errorBox(main,e));','return init();');
+const source=(await readFile(new URL('../assets/app.js',import.meta.url),'utf8')).replace("import {creditMarkup,mountCredit} from './credit.js';",'const {creditMarkup,mountCredit}=credit;').replace("import {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights} from './discovery.js';",'const {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights}=discovery;').replace("import {mountDemoListings} from './demo-listings.js';",'const mountDemoListings=()=>{};').replace("import {groupMapListings,mapKinds} from './service-map.js';",'').replace("import {cars} from './cars.js';",'').replace("import {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys} from './catalog.js';",'const {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys}=catalog;').replace('init().catch(e=>errorBox(main,e));','return init();');
 const user={id:'11111111-1111-4111-8111-111111111111',fullname:'Test Owner',username:'owner',email:'owner@example.test',phone:'',role:'user'};
 const listing={id:'22222222-2222-4222-8222-222222222222',user_id:user.id,title:'BMW <script>alert(1)</script>',category:'car',description:'Test avtomobil haqqında ətraflı məlumat.',brand:'BMW',model:'5 Series',year:2018,mileage:90000,city:'Bakı',phone:'+994501234567',price:23000,status:'active',views:4,favorite_count:1,images:[],details:{},created_at:new Date().toISOString(),seller:'Test Owner'};
 async function load(path,me=null,responses={}){
  const dom=new JSDOM('<html><head><meta name="description" content=""></head><body><header id="header"></header><main id="main"></main><footer id="footer"></footer><dialog id="dialog"></dialog><div id="toast"></div></body></html>',{url:'https://sosavto.test/'+path});
  const w=dom.window;const calls=[];const fetch=async(url,options={})=>{calls.push({url,...options});const path=url.replace('/api','');const result=responses[path]||({'/me':{user:me},'/config':{ai:false,uploads:false},'/favorites':{listings:[]},'/my-listings':{listings:[]},'/listings?category=car':{listings:[],total:0,page:1,pages:0}}[path]);if(!result)throw Error('Unexpected API request: '+path);return {ok:!result.error,status:result.error?503:200,json:async()=>result};};
  w.L={map:()=>({setView(){return this;},on(event,handler){w.mapHandlers??={};w.mapHandlers[event]=handler;},removeLayer(){},fitBounds(){},invalidateSize(){}}),tileLayer:()=>({addTo(){}}),marker:()=>({addTo(){return this;},bindPopup(){return this;},getLatLng(){return [40,49];},openPopup(){}})};
- const run=new Function('window','document','location','navigator','localStorage','sessionStorage','fetch','FormData','cars','catalog','discovery','setTimeout','clearTimeout',source);
- await run(w,w.document,w.location,w.navigator,w.localStorage,w.sessionStorage,fetch,w.FormData,cars,catalog,discovery,()=>0,()=>{});return {w,doc:w.document,calls,close:()=>dom.window.close()};
+ const run=new Function('window','document','location','navigator','localStorage','sessionStorage','fetch','FormData','cars','catalog','discovery','credit','setTimeout','clearTimeout',source);
+ await run(w,w.document,w.location,w.navigator,w.localStorage,w.sessionStorage,fetch,w.FormData,cars,catalog,discovery,credit,()=>0,()=>{});return {w,doc:w.document,calls,close:()=>dom.window.close()};
 }
 test('home builds dependent model filter from URL regardless of query parameter order',async()=>{
  const path='index.html?model=Elantra&brand=Hyundai&year_min=2018';const d=await load(path,null,{'/listings?model=Elantra&brand=Hyundai&year_min=2018&category=car':{listings:[],total:0,page:1,pages:0}});
@@ -134,4 +135,15 @@ test('gallery supports keyboard, arrows and thumbnail state; missing specs stay 
  assert.match(d.doc.querySelector('.vehicle-highlights').textContent,/Qeyd edilməyib/);
  d.doc.querySelector('#gallery-next').click();assert.equal(d.doc.querySelector('#gallery-main').src,'https://example.test/two.jpg');assert.equal(d.doc.querySelector('[data-gallery="1"]').getAttribute('aria-pressed'),'true');
  d.doc.querySelector('.gallery-stage').dispatchEvent(new d.w.KeyboardEvent('keydown',{key:'ArrowRight'}));assert.equal(d.doc.querySelector('#gallery-count').textContent,'1 / 2');d.close();
+});
+
+test('credit calculator uses listing price, updates estimates and clears stale results',async()=>{
+ const d=await load('elan.html?id='+listing.id,null,{['/listings/'+listing.id]:{listing}}),f=d.doc.querySelector('#credit-form');
+ assert.equal(f.elements.price.value,'23000');assert.equal(d.doc.querySelector('#credit-result').hidden,true);
+ f.elements.annualRate.value='0';f.elements.months.value='20';f.elements.downPayment.value='3000';f.dispatchEvent(new d.w.Event('input'));
+ assert.equal(d.doc.querySelector('#credit-result').hidden,false);assert.match(d.doc.querySelector('.credit-monthly strong').textContent,/1[.\s]?000/);
+ f.elements.downPayment.value='24000';f.dispatchEvent(new d.w.Event('input'));assert.equal(d.doc.querySelector('#credit-result').hidden,true);assert.match(d.doc.querySelector('#credit-error').textContent,/İlkin/);
+ f.elements.annualRate.value='';f.dispatchEvent(new d.w.Event('submit',{cancelable:true}));assert.match(d.doc.querySelector('#credit-error').textContent,/doldurun/);d.close();
+ const service=await load('elan.html?id='+listing.id,null,{['/listings/'+listing.id]:{listing:{...listing,category:'wash'}}});assert.equal(service.doc.querySelector('#credit-form'),null);service.close();
+ const standalone=await load('kredit.html');assert.ok(standalone.doc.querySelector('#credit-form'));standalone.close();
 });

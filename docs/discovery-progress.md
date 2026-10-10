@@ -103,3 +103,15 @@ GitHub API vasitəsilə göndəriş davam edir. Production merge icazəsi deyil.
 - Preview Vercel giriş qorumasındadır. Müvəqqəti baxış linkinin müddəti bitərsə təzəsini yarat; giriş qorumasını söndürmə.
 - Əsas sayta merge/promotion edilməyib. Növbəti addım istifadəçinin görünüşə baxması və yerləşdirilmiş versiyada real elanlarla qəbul yoxlamasıdır.
 - Köhnə ZIP paketi ilkin bərpa ehtiyatıdır. Cari mənbə GitHub-dakı bu budaq və PR #11-dir; ZIP-i təkrar tətbiq etmə.
+
+## 2026-10-10 — kredit kalkulyatoru
+
+- İstifadəçinin “Et onuda” tapşırığı ilə ikinci mərhələnin kredit kalkulyatoru əlavə edildi.
+- Avtomobil elanında qiymət avtomatik daxil edilir; ayrıca `kredit.html` səhifəsi və footer keçidi var.
+- İlkin ödəniş, 1–120 ay müddət, istifadəçinin daxil etdiyi 0–100% illik faiz.
+- Bərabər aylıq ödəniş, kredit məbləği, ümumi faiz, kredit üzrə cəm və ilkin ödəniş daxil cəm.
+- Boş/səhv dəyərlərdə əvvəlki nəticə gizlənir; 0% və tam ilkin ödəniş dəstəklənir.
+- Komissiya və sığorta daxil deyil; bank təklifi və kreditə uyğunluq təsdiqi sayılmır.
+- Tam test dəsti: 100/100; kalkulyator və frontend hədəf testləri: 25/25 keçdi.
+- Yeni provayder, ödəniş, verilənlər bazası və production dəyişikliyi yoxdur.
+- Yayım hədəfi eyni `feat/discovery-comparison` sınaq budağı / PR #11-dir.
