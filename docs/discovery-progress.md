@@ -123,3 +123,11 @@ GitHub API vasitəsilə göndəriş davam edir. Production merge icazəsi deyil.
 - Axtarış və kateqoriyalar qorundu; kuzov ikonları 44px hündürlüklü yığcam seçimlərdir.
 - Digər kateqoriyaların başlıqları qorundu. Yeni provayder, ödəniş və production dəyişikliyi yoxdur.
 - Build və 22 frontend testi keçdi. Sınaq budağı: feat/discovery-comparison.
+
+## 2026-10-10 — menyu və SOS qısa keçidi
+
+- İstifadəçinin tapşırığı: yuxarıdakı təkrar Avtoyuma keçidi çıxarıldı; ana səhifədəki kateqoriya saxlandı.
+- SOS yuxarı menyudan sağ altdakı 56px (mobil 52px) dairəvi düyməyə keçirildi.
+- Düymə SOS aktiv olanda bütün səhifələrdə görünür; müqayisə paneli açıq olanda yuxarı çəkilir.
+- Yalnız sos.html səhifəsini açır, avtomatik sifariş göndərmir. SOS xidmət ayarları və backend dəyişməyib.
+- Eyni sınaq budağında saxlanır; production merge edilməyib.
