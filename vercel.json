@@ -3,6 +3,14 @@
     {
       "source": "/api/:path*",
       "destination": "/api/index"
+    },
+    {
+      "source": "/sitemap.xml",
+      "destination": "/api/index"
+    },
+    {
+      "source": "/elan",
+      "destination": "/api/index"
     }
   ],
   "functions": {

@@ -6,7 +6,7 @@ const root=process.cwd(),port=Number(process.env.PORT||4173);
 const types={'.html':'text/html; charset=utf-8','.css':'text/css','.js':'application/javascript','.svg':'image/svg+xml','.webp':'image/webp','.png':'image/png','.txt':'text/plain'};
 http.createServer(async(req,res)=>{
  const path=new URL(req.url,'http://localhost').pathname;
- if(path.startsWith('/api/'))return handler(req,res);
+ if(path.startsWith('/api/')||path==='/sitemap.xml'||path==='/elan')return handler(req,res);
  let file;if(/^\/media\/[a-f0-9-]+\.webp$/.test(path))file=resolve(root,'.data/uploads',path.split('/').pop());
  else if(path==='/'||/^\/[a-z0-9-]+\.html$/.test(path)||/^\/assets\/[a-z0-9.-]+$/.test(path)||path==='/robots.txt')file=resolve(root,'.'+(path==='/'?'/index.html':path));
  if(!file){res.writeHead(404);return res.end('Not found');}
