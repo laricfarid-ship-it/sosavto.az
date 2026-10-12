@@ -116,3 +116,11 @@ test('favorite price drops notify only on approved publication, once, and stop a
 test('public histogram endpoint returns aggregate prices without applying selected price limits',async()=>{
  const r=await request('/price-histogram?category=car&price_min=999999999');assert.equal(r.status,200);assert.ok(r.body.total>0);assert.equal(r.body.bins.reduce((s,b)=>s+b.count,0),r.body.total);assert.equal('listings' in r.body,false);
 });
+
+test('listing projection returns bounded ordered photo URLs for card galleries',async()=>{
+ const {projection}=await import('../server/listings.mjs');
+ const id='00000000-0000-4000-8000-000000000099';
+ await query("INSERT INTO listings(id,user_id,title,description,price,city,category,phone,status) VALUES($1,$2,'Gallery listing','Gallery integration test',10,'Bakı','parts','0501234567','active')",[id,owner.body.user.id]);
+ for(let i=0;i<9;i++)await query('INSERT INTO images(id,user_id,listing_id,url,sort_order) VALUES($1,$2,$3,$4,$5)',[`00000000-0000-4000-8000-${String(100+i).padStart(12,'0')}`,owner.body.user.id,id,`https://example.test/${i}.webp`,8-i]);
+ const row=(await query(`SELECT ${projection} FROM listings l WHERE l.id=$1`,[id])).rows[0];assert.equal(row.card_images.length,8);assert.equal(row.card_images[0],'https://example.test/8.webp');assert.equal(row.card_images[7],'https://example.test/1.webp');
+});

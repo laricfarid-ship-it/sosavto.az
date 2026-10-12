@@ -1,3 +1,4 @@
+import {cardGalleryMarkup,mountCardGalleries} from '../assets/card-gallery.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {readFile} from 'node:fs/promises';
@@ -7,15 +8,15 @@ import * as catalog from '../assets/catalog.js';
 import {mountBrandPicker} from '../assets/brand-picker.js';
 import * as credit from '../assets/credit.js';
 import * as discovery from '../assets/discovery.js';
-const source=(await readFile(new URL('../assets/app.js',import.meta.url),'utf8')).replace("import {mountPriceHistogram} from './price-histogram.js';",'const mountPriceHistogram=()=>{};').replace("import {mountBrandPicker} from './brand-picker.js';",'').replace("import {creditMarkup,mountCredit} from './credit.js';",'const {creditMarkup,mountCredit}=credit;').replace("import {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights} from './discovery.js';",'const {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights}=discovery;').replace("import {mountDemoListings} from './demo-listings.js';",'const mountDemoListings=()=>{};').replace("import {groupMapListings,mapKinds} from './service-map.js';",'').replace("import {cars} from './cars.js';",'').replace("import {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys} from './catalog.js';",'const {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys}=catalog;').replace('init().catch(e=>errorBox(main,e));','return init();');
+const source=(await readFile(new URL('../assets/app.js',import.meta.url),'utf8')).replace("import {cardGalleryMarkup,mountCardGalleries} from './card-gallery.js';",'').replace("import {mountPriceHistogram} from './price-histogram.js';",'const mountPriceHistogram=()=>{};').replace("import {mountBrandPicker} from './brand-picker.js';",'').replace("import {creditMarkup,mountCredit} from './credit.js';",'const {creditMarkup,mountCredit}=credit;').replace("import {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights} from './discovery.js';",'const {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights}=discovery;').replace("import {mountDemoListings} from './demo-listings.js';",'const mountDemoListings=()=>{};').replace("import {groupMapListings,mapKinds} from './service-map.js';",'').replace("import {cars} from './cars.js';",'').replace("import {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys} from './catalog.js';",'const {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys}=catalog;').replace('init().catch(e=>errorBox(main,e));','return init();');
 const user={id:'11111111-1111-4111-8111-111111111111',fullname:'Test Owner',username:'owner',email:'owner@example.test',phone:'',role:'user'};
 const listing={id:'22222222-2222-4222-8222-222222222222',user_id:user.id,title:'BMW <script>alert(1)</script>',category:'car',description:'Test avtomobil haqqında ətraflı məlumat.',brand:'BMW',model:'5 Series',year:2018,mileage:90000,city:'Bakı',phone:'+994501234567',price:23000,status:'active',views:4,favorite_count:1,images:[],details:{},created_at:new Date().toISOString(),seller:'Test Owner'};
 async function load(path,me=null,responses={}){
  const dom=new JSDOM('<html><head><meta name="description" content=""></head><body><header id="header"></header><main id="main"></main><footer id="footer"></footer><dialog id="dialog"></dialog><div id="toast"></div></body></html>',{url:'https://sosavto.test/'+path});
  const w=dom.window;const calls=[];const fetch=async(url,options={})=>{calls.push({url,...options});const path=url.replace('/api','');const result=responses[path]||({'/me':{user:me},'/config':{ai:false,uploads:false},'/favorites':{listings:[]},'/my-listings':{listings:[]},'/listings?category=car':{listings:[],total:0,page:1,pages:0}}[path]);if(!result)throw Error('Unexpected API request: '+path);return {ok:!result.error,status:result.error?503:200,json:async()=>result};};
  w.L={map:()=>({setView(){return this;},on(event,handler){w.mapHandlers??={};w.mapHandlers[event]=handler;},removeLayer(){},fitBounds(){},invalidateSize(){}}),tileLayer:()=>({addTo(){}}),marker:()=>({addTo(){return this;},bindPopup(){return this;},getLatLng(){return [40,49];},openPopup(){}})};
- const run=new Function('window','document','location','navigator','localStorage','sessionStorage','fetch','FormData','cars','catalog','discovery','credit','mountBrandPicker','setTimeout','clearTimeout',source);
- await run(w,w.document,w.location,w.navigator,w.localStorage,w.sessionStorage,fetch,w.FormData,cars,catalog,discovery,credit,mountBrandPicker,()=>0,()=>{});return {w,doc:w.document,calls,close:()=>dom.window.close()};
+ const run=new Function('window','document','location','navigator','localStorage','sessionStorage','fetch','FormData','cars','catalog','discovery','credit','mountBrandPicker','cardGalleryMarkup','mountCardGalleries','setTimeout','clearTimeout',source);
+ await run(w,w.document,w.location,w.navigator,w.localStorage,w.sessionStorage,fetch,w.FormData,cars,catalog,discovery,credit,mountBrandPicker,cardGalleryMarkup,mountCardGalleries,()=>0,()=>{});return {w,doc:w.document,calls,close:()=>dom.window.close()};
 }
 test('home builds dependent model filter from URL regardless of query parameter order',async()=>{
  const path='index.html?model=Elantra&brand=Hyundai&year_min=2018';const d=await load(path,null,{'/listings?model=Elantra&brand=Hyundai&year_min=2018&category=car':{listings:[],total:0,page:1,pages:0}});
@@ -147,4 +148,24 @@ test('credit calculator uses listing price, updates estimates and clears stale r
  f.elements.annualRate.value='';f.dispatchEvent(new d.w.Event('submit',{cancelable:true}));assert.match(d.doc.querySelector('#credit-error').textContent,/doldurun/);d.close();
  const service=await load('elan.html?id='+listing.id,null,{['/listings/'+listing.id]:{listing:{...listing,category:'wash'}}});assert.equal(service.doc.querySelector('#credit-form'),null);service.close();
  const standalone=await load('kredit.html');assert.ok(standalone.doc.querySelector('#credit-form'));standalone.close();
+});
+
+test('listing cards show ordered photo carousel, keep navigation and suppress swipe clicks',async()=>{
+ const photos=['https://example.test/a.webp','https://example.test/b.webp','https://example.test/c.webp'];
+ const d=await load('index.html',null,{'/listings?category=car':{listings:[{...listing,image:photos[0],card_images:photos}],total:1,page:1,pages:1}});
+ try{
+ const track=d.doc.querySelector('.card-photo-track');assert.ok(track);assert.deepEqual([...track.querySelectorAll('img')].map(i=>i.src),photos);
+ assert.equal(track.children[0].getAttribute('href'),'/elan?id='+listing.id);assert.equal(track.children[1].tabIndex,-1);
+ Object.defineProperty(track,'clientWidth',{value:300});track.scrollTo=({left})=>{track.scrollLeft=left;track.dispatchEvent(new d.w.Event('scroll'));};
+ assert.ok(d.doc.querySelector('.card-photo-prev').disabled);d.doc.querySelector('.card-photo-next').click();assert.equal(d.doc.querySelector('.card-photo-count').textContent,'2 / 3');assert.equal(track.children[1].tabIndex,0);
+ track.dispatchEvent(new d.w.KeyboardEvent('keydown',{key:'End',bubbles:true}));assert.ok(d.doc.querySelector('.card-photo-next').disabled);
+ track.dispatchEvent(new d.w.KeyboardEvent('keydown',{key:'Home',bubbles:true}));assert.equal(d.doc.querySelector('.card-photo-count').textContent,'1 / 3');
+ track.dispatchEvent(new d.w.MouseEvent('pointerdown',{clientX:200,clientY:10,bubbles:true}));track.dispatchEvent(new d.w.MouseEvent('pointermove',{clientX:80,clientY:14,bubbles:true}));track.dispatchEvent(new d.w.MouseEvent('pointerup',{bubbles:true}));
+ const click=new d.w.MouseEvent('click',{bubbles:true,cancelable:true});track.children[0].dispatchEvent(click);assert.ok(click.defaultPrevented);
+ assert.equal(d.doc.querySelectorAll('.card-gallery script').length,0);assert.equal(d.doc.querySelectorAll('[data-fav]').length,1);
+ }finally{d.close();}
+});
+test('single-photo and registration-plate cards do not show carousel controls',async()=>{
+ const d=await load('index.html',null,{'/listings?category=car':{listings:[{...listing,image:'https://example.test/a.webp',card_images:['https://example.test/a.webp']},{...listing,category:'plates',details:{plate_number:'10-AA-123'},card_images:['https://example.test/a.webp','https://example.test/b.webp']}],total:2,page:1,pages:1}});
+ assert.equal(d.doc.querySelectorAll('.card-gallery').length,0);assert.equal(d.doc.querySelector('.plate-number').textContent,'10-AA-123');d.close();
 });
