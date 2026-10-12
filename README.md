@@ -67,7 +67,7 @@ Bu testlər canlı PostgreSQL/S3/OpenAI/Vercel inteqrasiyası və real browser v
 PDF planındakı sonrakı mərhələlər bu dəyişiklikdə tamamlanmış hesab olunmur:
 
 - Email/telefon təsdiqi, parol sıfırlama üçün email/SMS provider və admin üçün 2FA.
-- Sitemap, serverdən render olunan elan metadata-sı/structured data və insan oxuyan SEO URL-ləri.
+- Kateqoriya/axtarış səhifələri üçün serverdən render və insan oxuyan SEO URL-ləri (elan səhifəsi və sitemap üçün aşağıdakı SEO bölməsinə bax).
 - Salon profilləri, təsdiqlənmiş biznes nişanı, rəylər/reytinqlər.
 - Daxili mesajlaşma və email/SMS/push bildirişləri.
 - VIP, ödəniş, abunəlik və provider webhook-ları.
@@ -77,6 +77,15 @@ PDF planındakı sonrakı mərhələlər bu dəyişiklikdə tamamlanmış hesab 
 - Eyni vaxtda moderasiya/redaktə/bloklama üçün daha geniş concurrency və yük testləri.
 
 Baxış sayı səhifənin açılma sayıdır, unikal ziyarətçi və saxtalaşdırmadan qorunan analitika deyil. Xəritə ilk 500 uyğun koordinatlı elanı göstərir. Admin istifadəçi və jurnal siyahıları son 100 qeydlə məhdudlaşdırılıb.
+
+## SEO: sitemap və elan səhifəsi
+
+- `/sitemap.xml` yalnız aktiv, silinməmiş elanları və açıq səhifələri (`/`, `/xarita.html`, `/kredit.html`; `WASH_ENABLED`/`SOS_ENABLED` açıqdırsa avtoyuma/SOS) siyahılayır. Maksimum 5000 elan, 1 saatlıq CDN keşi.
+- `/elan?id=<uuid>` eyni `elan.html` tətbiqidir, amma başlıq, təsvir, `canonical`, Open Graph/Twitter etiketləri və `Product` structured data serverdən yazılır. Beləcə WhatsApp/Telegram/Facebook paylaşma önizləməsi və Google JavaScript işlətmədən elanı görür. Əsas elan kartları və "Paylaş" düyməsi bu ünvanı istifadə edir; köhnə `elan.html?id=...` linkləri işləməyə davam edir.
+- Telefon, ünvan və koordinat heç vaxt bu səhifəyə yazılmır. Aktiv olmayan (gözləyən, satılmış, rədd edilmiş), silinmiş və tapılmayan elanlar `noindex` alır; tapılmayan/silinmiş üçün status 404-dür. Baza xətası olanda səhifə metadatasız açılır, istifadəçi üçün tətbiq elanı API ilə özü yükləyir.
+- Mütləq ünvanlar `APP_ORIGIN`-dən götürülür (yalnız https və ya localhost qəbul olunur), yoxdursa `https://sosavto-az.vercel.app`. `robots.txt`-dəki `Sitemap:` sətri statikdir; öz domeniniz qoşulanda onu yeni domenə dəyişin.
+- `server/seo.mjs` içindəki HTML qabığı `elan.html` ilə eyni olmalıdır; `tests/seo.test.mjs` bunu yoxlayır.
+- Hələ edilməyib: kateqoriya və marka üçün ayrıca indekslənən səhifələr, şəkil sitemap-ı, çoxdilli versiya.
 
 ## Arxitektura
 

@@ -5,3 +5,5 @@ Disallow: /kabinet.html
 Disallow: /menim-elanlarim.html
 Disallow: /favoriler.html
 Disallow: /bildirisler.html
+
+Sitemap: https://sosavto-az.vercel.app/sitemap.xml

@@ -9,6 +9,7 @@ import {query,transaction} from '../server/db.mjs';
 import {HttpError,fail,hash,safeUser,session,createSession,requireUser,requireAdmin,originCheck,rateLimit,clientAddress,body,text,uuid} from '../server/security.mjs';
 import {listingInput,columns,projection,search} from '../server/listings.mjs';
 import {upload} from '../server/uploads.mjs';
+import {seoPage} from '../server/seo.mjs';
 const json=(res,status,data)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(data));};
 async function imagesFor(c,user,id,ids){
  if(ids.length){const r=await c.query('SELECT id FROM images WHERE id=ANY($1::uuid[]) AND user_id=$2 AND (listing_id IS NULL OR listing_id=$3) FOR UPDATE',[ids,user.id,id]);if(r.rows.length!==ids.length)fail(400,'Şəkil seçimi düzgün deyil.');}
@@ -24,6 +25,7 @@ export default async function handler(req,res){
  if(path==='/api/config'&&method==='GET')return json(res,200,{wash:washEnabled(),sos:process.env.SOS_ENABLED==='true',ai:assistantConfig().enabled,aiProvider:assistantConfig().provider,uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
  const address=clientAddress(req);
  await rateLimit(`api:ip:${address}`,300,60);
+ if(['/sitemap.xml','/elan'].includes(path)&&['GET','HEAD'].includes(method))return seoPage(req,res,path,url);
  const user=await session(req);
  if(user&&!['GET','HEAD','OPTIONS'].includes(method))await rateLimit(`write:${user.id}`,120,60);
  if(path.startsWith('/api/wash/'))return json(res,200,await wash(req,user,path,method));
