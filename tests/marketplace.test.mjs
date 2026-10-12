@@ -83,3 +83,31 @@ test('ordinary listing delete works without wash tables and removes dependent fa
  for(const table of ['favorites','reports'])assert.equal((await query(`SELECT * FROM ${table} WHERE listing_id=$1`,[id])).rows.length,0);
  assert.equal((await request('/listings/'+id,{cookie:login.cookie})).status,404);
 });
+
+test('favorite price drops notify only on approved publication, once, and stop after removal',async()=>{
+ await query('DELETE FROM rate_limits');
+ const seller=await request('/register',{method:'POST',data:{fullname:'Price Seller',username:'price_seller',email:'price_seller@example.test',password:'Test-password-123'}});
+ const watcher=await request('/register',{method:'POST',data:{fullname:'Price Watcher',username:'price_watcher',email:'price_watcher@example.test',password:'Test-password-123'}});
+ assert.equal(seller.status,201);assert.equal(watcher.status,201);
+ const created=await request('/listings',{method:'POST',cookie:seller.cookie,data:{...ad,price:23000}});assert.equal(created.status,201);const id=created.body.id;
+ const moderate=async status=>request('/admin/moderate',{method:'POST',cookie:admin.cookie,data:{id,status,reason:'Test rejection reason'}});
+ const edit=async price=>{const r=await request('/listings/'+id,{method:'PUT',cookie:seller.cookie,data:{...ad,price,details:{...ad.details,_publishedPrice:{price:'999999',category:'car'}}}});assert.equal(r.status,200,JSON.stringify(r.body));};
+ const alerts=async cookie=>(await request('/notifications',{cookie})).body.notifications.filter(n=>n.body.startsWith('Qiymət düşdü:'));
+ assert.equal((await moderate('active')).status,200);
+ for(const cookie of [watcher.cookie,seller.cookie])assert.equal((await request('/favorites/'+id,{method:'PUT',cookie,data:{}})).status,200);
+ // Legacy listings have no snapshot until their first edit after deployment.
+ await query("UPDATE listings SET details=details-'_publishedPrice' WHERE id=$1",[id]);
+ await edit(22000);await edit(21000);assert.equal((await alerts(watcher.cookie)).length,0);
+ assert.equal((await moderate('rejected')).status,200);assert.equal((await alerts(watcher.cookie)).length,0);
+ await edit(21500);assert.equal((await moderate('active')).status,200);
+ let notes=await alerts(watcher.cookie);assert.equal(notes.length,1);assert.match(notes[0].body,/23\D?000/);assert.match(notes[0].body,/21\D?500/);assert.equal(notes[0].read_at,null);
+ assert.equal((await alerts(seller.cookie)).length,0,'seller does not receive their own price alert');
+ assert.equal((await moderate('active')).status,409);assert.equal((await alerts(watcher.cookie)).length,1);
+ await edit(21500);await moderate('active');await edit(24000);await moderate('active');assert.equal((await alerts(watcher.cookie)).length,1);
+ await edit(23000);const simultaneous=await Promise.all([moderate('active'),moderate('active')]);assert.deepEqual(simultaneous.map(r=>r.status).sort(),[200,409]);assert.equal((await alerts(watcher.cookie)).length,2);
+ await request('/notifications',{method:'PATCH',cookie:watcher.cookie,data:{}});assert.ok((await alerts(watcher.cookie)).every(n=>n.read_at));
+ await request('/favorites/'+id,{method:'DELETE',cookie:watcher.cookie,data:{}});await edit(20000);await moderate('active');assert.equal((await alerts(watcher.cookie)).length,2);
+ // Invalid image ownership must roll back the snapshot and proposed price.
+ const failed=await request('/listings/'+id,{method:'PUT',cookie:seller.cookie,data:{...ad,price:1,imageIds:['00000000-0000-4000-8000-000000000001']}});assert.equal(failed.status,400);
+ const saved=(await query('SELECT * FROM listings WHERE id=$1',[id])).rows[0];assert.equal(Number(saved.price),20000);assert.equal(saved.status,'active');
+});

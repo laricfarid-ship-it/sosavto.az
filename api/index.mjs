@@ -1,3 +1,4 @@
+import {preservePublishedPrice,publishPriceAlerts} from '../server/price-alerts.mjs';
 import {assistantConfig,assistantAnswer} from '../server/assistant.mjs';
 import {lockListing,washLinks,requireNoReservations,deleteListing} from '../server/listing-actions.mjs';
 import {washEnabled} from '../server/wash-config.mjs';
@@ -84,10 +85,10 @@ export default async function handler(req,res){
  }
  requireUser(user);if(!owner)fail(403,'Yalnız öz elanınızı dəyişə bilərsiniz.');
  if(method==='PUT'){
- const v=listingInput(await body(req));await transaction(async c=>{await lockListing(c,id,user);if(await washLinks(c,id)){await requireNoReservations(c,id);if(v.category!=='wash')fail(409,'Rezervasiya sistemi qurulmuş avtoyumanın kateqoriyasını dəyişmək olmaz. Yeni kateqoriya üçün ayrıca elan yaradın.');}await c.query(`UPDATE listings SET ${columns.map((k,i)=>`${k}=$${i+1}`).join(',')},status='pending',rejection_reason='',updated_at=now() WHERE id=$${columns.length+1} AND user_id=$${columns.length+2}`,[...columns.map(k=>v[k]),id,user.id]);await imagesFor(c,user,id,v.imageIds);});return json(res,200,{ok:true,status:'pending'});
+ const v=listingInput(await body(req));await transaction(async c=>{const previous=await lockListing(c,id,user);preservePublishedPrice(previous,v);if(await washLinks(c,id)){await requireNoReservations(c,id);if(v.category!=='wash')fail(409,'Rezervasiya sistemi qurulmuş avtoyumanın kateqoriyasını dəyişmək olmaz. Yeni kateqoriya üçün ayrıca elan yaradın.');}await c.query(`UPDATE listings SET ${columns.map((k,i)=>`${k}=$${i+1}`).join(',')},status='pending',rejection_reason='',updated_at=now() WHERE id=$${columns.length+1} AND user_id=$${columns.length+2}`,[...columns.map(k=>v[k]),id,user.id]);await imagesFor(c,user,id,v.imageIds);});return json(res,200,{ok:true,status:'pending'});
  }
  if(method==='PATCH'){
- const b=await body(req);if(!['sold','archived','pending'].includes(b.status))fail(400,'Status düzgün deyil.');await transaction(async c=>{await lockListing(c,id,user);if(await washLinks(c,id))await requireNoReservations(c,id);await c.query('UPDATE listings SET status=$1,rejection_reason=\'\',updated_at=now() WHERE id=$2 AND user_id=$3',[b.status,id,user.id]);});return json(res,200,{ok:true});
+ const b=await body(req);if(!['sold','archived','pending'].includes(b.status))fail(400,'Status düzgün deyil.');await transaction(async c=>{const previous=await lockListing(c,id,user);if(previous.status==='active')await c.query("UPDATE listings SET details=details||jsonb_build_object('_publishedPrice',jsonb_build_object('price',price::text,'category',category)) WHERE id=$1",[id]);if(await washLinks(c,id))await requireNoReservations(c,id);await c.query('UPDATE listings SET status=$1,rejection_reason=\'\',updated_at=now() WHERE id=$2 AND user_id=$3',[b.status,id,user.id]);});return json(res,200,{ok:true});
  }
  if(method==='DELETE'){await transaction(c=>deleteListing(c,id,user));return json(res,200,{ok:true});}
  }
@@ -123,7 +124,7 @@ export default async function handler(req,res){
  }
  if(path==='/api/admin/moderate'&&method==='POST'){
  const b=await body(req);const id=uuid(b.id);if(!['active','rejected'].includes(b.status))fail(400,'Status düzgün deyil.');const reason=b.status==='rejected'?text(b.reason,'Rədd səbəbi',5,1000):'';
- await transaction(async c=>{const r=await c.query("UPDATE listings SET status=$1,rejection_reason=$2,updated_at=now() WHERE id=$3 AND status='pending' RETURNING user_id,title",[b.status,reason,id]);if(!r.rows.length)fail(409,'Elan artıq yoxlanılıb və ya tapılmadı.');await notify(c,r.rows[0].user_id,b.status==='active'?`Elanınız təsdiqləndi: ${r.rows[0].title}`:`Elanınız rədd edildi: ${reason}`);await c.query('INSERT INTO audit_logs(id,admin_id,action,entity_id) VALUES($1,$2,$3,$4)',[randomUUID(),user.id,b.status,id]);});return json(res,200,{ok:true});
+ await transaction(async c=>{const locked=(await c.query("SELECT * FROM listings WHERE id=$1 FOR UPDATE",[id])).rows[0];if(!locked||locked.status!=='pending'||locked.details?._deleted)fail(409,'Elan artıq yoxlanılıb və ya tapılmadı.');if(b.status==='active')await publishPriceAlerts(c,locked);const r=await c.query("UPDATE listings SET status=$1,rejection_reason=$2,updated_at=now() WHERE id=$3 AND status='pending' RETURNING user_id,title",[b.status,reason,id]);if(!r.rows.length)fail(409,'Elan artıq yoxlanılıb və ya tapılmadı.');await notify(c,r.rows[0].user_id,b.status==='active'?`Elanınız təsdiqləndi: ${r.rows[0].title}`:`Elanınız rədd edildi: ${reason}`);await c.query('INSERT INTO audit_logs(id,admin_id,action,entity_id) VALUES($1,$2,$3,$4)',[randomUUID(),user.id,b.status,id]);});return json(res,200,{ok:true});
  }
  if(path==='/api/admin/user'&&method==='POST'){
  const b=await body(req);const id=uuid(b.id);if(!['active','banned'].includes(b.status)||id===user.id)fail(400,'Əməliyyat mümkün deyil.');
