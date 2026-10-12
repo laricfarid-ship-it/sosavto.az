@@ -1,3 +1,4 @@
+import {mountBrandPicker} from './brand-picker.js';
 import {creditMarkup,mountCredit} from './credit.js';
 import {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights} from './discovery.js';
 import {groupMapListings,mapKinds} from './service-map.js';
@@ -27,15 +28,17 @@ const pickerField=(name,label)=>`<label class="field">${label}<select name="${na
 const brandField=()=>pickerField('brand','Marka');
 function vehiclePickers(form){
  const brand=form.elements.brand,model=form.elements.model;if(!brand||!model)return null;
+ let brandPicker;
  const custom=n=>form.querySelector(`[data-custom="${n}"]`);
  const choices=(el,values)=>{el.innerHTML=`<option value="">${el.name==='brand'?'Marka':'Model'} seçin</option><option value="__other__">Digər — əl ilə yaz</option>`+values.map(v=>`<option value="${esc(v)}">${esc(v==='LiXiang (Lixiang)'?'Li Auto (Lixiang)':v==='Lada'?'Lada / VAZ':v)}</option>`).join('');};
- const sync=()=>{for(const el of [brand,model]){const x=custom(el.name),other=el.value==='__other__';x.hidden=!other;x.disabled=el.disabled||!other;x.required=!x.disabled;}};
+ const sync=()=>{for(const el of [brand,model]){const x=custom(el.name),other=el.value==='__other__';x.hidden=!other;x.disabled=el.disabled||!other;x.required=!x.disabled;}brandPicker?.sync();};
  const value=el=>el.value==='__other__'?custom(el.name).value.trim():el.value;
  const assign=(el,v)=>{if(!v){el.value='';custom(el.name).value='';}else if([...el.options].some(o=>o.value===v)){el.value=v;custom(el.name).value='';}else{el.value='__other__';custom(el.name).value=v;}};
  const update=()=>choices(model,cars[value(brand)]||[]);
  choices(brand,Object.keys(cars));update();
  brand.onchange=()=>{custom('brand').value='';custom('model').value='';update();sync();};model.onchange=sync;
  custom('brand').onchange=()=>{const v=resolveBrand(custom('brand').value);if(cars[v]){assign(brand,v);update();custom('model').value='';}sync();};
+ brandPicker=mountBrandPicker(brand);
  sync();return {sync,set(b,m){assign(brand,resolveBrand(b||''));update();assign(model,m||'');sync();}};
 }
 function vehicleData(form){const data=Object.fromEntries(new FormData(form));for(const n of ['brand','model'])if(data[n]==='__other__')data[n]=form.querySelector(`[data-custom="${n}"]`).value.trim();return data;}
