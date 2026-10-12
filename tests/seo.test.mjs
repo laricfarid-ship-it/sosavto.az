@@ -66,7 +66,8 @@ test('listing text cannot break out of the page or the structured data',async()=
 test('inactive, deleted, unknown and malformed ids are never indexable',async()=>{
  for(const k of ['pending','sold']){const r=await get('/elan?id='+ids[k]);assert.equal(r.status,200);assert.ok(r.body.includes('<meta name="robots" content="noindex">'),k);assert.equal(r.headers['x-robots-tag'],'noindex');assert.equal(r.headers['cache-control'],'no-store');assert.ok(!r.body.includes('Gözləyən')&&!r.body.includes('Satılmış')&&!r.body.includes('canonical'));}
  for(const q of ['?id='+ids.deleted,'?id='+ids.missing,'?id=not-a-uuid','','?id=\' OR 1=1 --']){const r=await get('/elan'+q);assert.equal(r.status,404,q);assert.ok(r.body.includes('noindex'));assert.equal(r.headers['x-robots-tag'],'noindex');assert.ok(r.body.includes('<main id="main"'),'client app still shows its own not-found message');}
- assert.equal((await get('/elan?id='+ids.active,'POST')).status,404,'only GET/HEAD are served as pages');
+ assert.equal((await get('/elan?id='+ids.active,'HEAD')).status,200,'HEAD is served like GET');
+ assert.equal((await get('/elan?id='+ids.active,'POST')).status,403,'writes without a trusted origin never reach the page route');
 });
 
 test('the server-rendered shell matches elan.html so the client app behaves the same',async()=>{
