@@ -21,6 +21,7 @@ export function listingInput(b){
 }
 export const columns=['category','title','description','price','city','brand','model','year','mileage','phone','address','latitude','longitude','details'];
 export const projection=`l.*, (SELECT url FROM images WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS image,
+ (SELECT coalesce(json_agg(p.url ORDER BY p.sort_order,p.id),'[]'::json) FROM (SELECT id,url,sort_order FROM images WHERE listing_id=l.id ORDER BY sort_order,id LIMIT 8) p) AS card_images,
  (SELECT count(*)::integer FROM favorites WHERE listing_id=l.id) AS favorite_count`;
 export function search(input){
  const category=input.get('category');if(category&&!categories.includes(category))fail(400,'Kateqoriya düzgün deyil.');
