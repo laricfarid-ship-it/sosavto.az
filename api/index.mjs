@@ -1,3 +1,4 @@
+import {priceHistogram} from '../server/price-histogram.mjs';
 import {preservePublishedPrice,publishPriceAlerts} from '../server/price-alerts.mjs';
 import {assistantConfig,assistantAnswer} from '../server/assistant.mjs';
 import {lockListing,washLinks,requireNoReservations,deleteListing} from '../server/listing-actions.mjs';
@@ -63,6 +64,7 @@ export default async function handler(req,res){
  const password=text(b.password,'Yeni şifrə',10,72);if(Buffer.byteLength(password)>72)fail(400,'Şifrə çox uzundur.');
  await transaction(async c=>{await c.query('UPDATE users SET password_hash=$1 WHERE id=$2',[await bcrypt.hash(password,12),user.id]);await c.query('DELETE FROM sessions WHERE user_id=$1',[user.id]);});await createSession(res,user);return json(res,200,{ok:true});
  }
+ if(path==='/api/price-histogram'&&method==='GET')return json(res,200,await priceHistogram(query,url.searchParams));
  if(path==='/api/listings'&&method==='GET'){
  const s=search(url.searchParams);const total=(await query(`SELECT count(*)::integer AS count FROM listings l WHERE ${s.where}`,s.args)).rows[0].count;
  const rows=(await query(`SELECT ${projection} FROM listings l WHERE ${s.where} ORDER BY ${s.order} LIMIT 24 OFFSET $${s.args.length+1}`,[...s.args,(s.page-1)*24])).rows;return json(res,200,{listings:rows,total,page:s.page,pages:Math.ceil(total/24)});

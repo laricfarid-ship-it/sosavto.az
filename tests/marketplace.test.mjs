@@ -111,3 +111,8 @@ test('favorite price drops notify only on approved publication, once, and stop a
  const failed=await request('/listings/'+id,{method:'PUT',cookie:seller.cookie,data:{...ad,price:1,imageIds:['00000000-0000-4000-8000-000000000001']}});assert.equal(failed.status,400);
  const saved=(await query('SELECT * FROM listings WHERE id=$1',[id])).rows[0];assert.equal(Number(saved.price),20000);assert.equal(saved.status,'active');
 });
+
+
+test('public histogram endpoint returns aggregate prices without applying selected price limits',async()=>{
+ const r=await request('/price-histogram?category=car&price_min=999999999');assert.equal(r.status,200);assert.ok(r.body.total>0);assert.equal(r.body.bins.reduce((s,b)=>s+b.count,0),r.body.total);assert.equal('listings' in r.body,false);
+});
