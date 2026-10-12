@@ -1,0 +1,972 @@
+[
+  {
+    "brand": "Abarth",
+    "source": "https://www.carlogos.org/logo/Abarth-logo-1920x1080.png",
+    "file": "abarth.png"
+  },
+  {
+    "brand": "AC",
+    "source": "https://www.carlogos.org/logo/AC-logo-1920x1080.png",
+    "file": "ac.png"
+  },
+  {
+    "brand": "Acura",
+    "source": "https://www.carlogos.org/logo/Acura-logo-1990-1024x768.png",
+    "file": "acura.png"
+  },
+  {
+    "brand": "Aion",
+    "source": "https://github.com/vehiclespecs/brand-logos/blob/main/aion-logo.svg",
+    "file": "aion-logo.svg"
+  },
+  {
+    "brand": "Aito",
+    "source": "https://github.com/vehiclespecs/brand-logos/blob/main/aito-logo.svg",
+    "file": "aito-logo.svg"
+  },
+  {
+    "brand": "Aiways",
+    "source": "https://www.carlogos.org/car-logos/aiways-logo-2100x1350-show.png",
+    "file": "aiways.png"
+  },
+  {
+    "brand": "Alfa Romeo",
+    "source": "https://www.carlogos.org/logo/Alfa-Romeo-logo-2015-1920x1080.png",
+    "file": "alfa-romeo.png"
+  },
+  {
+    "brand": "Alpine",
+    "source": "https://www.carlogos.org/logo/Alpine-logo-1440x900.png",
+    "file": "alpine.png"
+  },
+  {
+    "brand": "AMC",
+    "source": "https://www.carlogos.org/logo/American-Motors-logo-2048x2048.png",
+    "file": "amc.png"
+  },
+  {
+    "brand": "Arcfox",
+    "source": "https://www.carlogos.org/car-logos/arcfox-logo-1250x220-show.png",
+    "file": "arcfox.png"
+  },
+  {
+    "brand": "Aston Martin",
+    "source": "https://www.carlogos.org/logo/Aston-Martin-logo-2003-6000x3000.png",
+    "file": "aston-martin.png"
+  },
+  {
+    "brand": "Audi",
+    "source": "https://www.carlogos.org/car-logos/audi-logo-2016-640.png",
+    "file": "audi.png"
+  },
+  {
+    "brand": "Austin",
+    "source": "https://www.carlogos.org/logo/Austin-logo-640x500.jpg",
+    "file": "austin.png"
+  },
+  {
+    "brand": "Autobianchi",
+    "source": "https://www.carlogos.org/logo/Autobianchi-logo-1920x1080.png",
+    "file": "autobianchi.png"
+  },
+  {
+    "brand": "Avatr",
+    "source": "https://github.com/vehiclespecs/brand-logos/blob/main/avatr-logo.svg",
+    "file": "avatr-logo.svg"
+  },
+  {
+    "brand": "Baic",
+    "source": "https://www.carlogos.org/logo/BAIC-Motor-logo-2560x1440.png",
+    "file": "baic-motor.png"
+  },
+  {
+    "brand": "Baojun",
+    "source": "https://www.carlogos.org/logo/Baojun-logo-2010-1920x1080.png",
+    "file": "baojun.png"
+  },
+  {
+    "brand": "Bentley",
+    "source": "https://www.carlogos.org/car-logos/bentley-logo-2002-640.png",
+    "file": "bentley.png"
+  },
+  {
+    "brand": "Bestune",
+    "source": "https://www.carlogos.org/car-logos/bestune-logo-2400x1200-show.png",
+    "file": "bestune.png"
+  },
+  {
+    "brand": "BMW",
+    "source": "https://www.carlogos.org/car-logos/bmw-logo-2020-gray.png",
+    "file": "bmw.png"
+  },
+  {
+    "brand": "Borgward",
+    "source": "https://www.carlogos.org/logo/Borgward-logo-2016-1920x1080.png",
+    "file": "borgward.png"
+  },
+  {
+    "brand": "Brilliance",
+    "source": "https://www.carlogos.org/logo/Brilliance-logo-3840x2160.png",
+    "file": "brilliance.png"
+  },
+  {
+    "brand": "Bristol",
+    "source": "https://www.carlogos.org/logo/Bristol-Cars-logo.png",
+    "file": "bristol.png"
+  },
+  {
+    "brand": "Bugatti",
+    "source": "https://www.carlogos.org/logo/Bugatti-logo-1024x768.png",
+    "file": "bugatti.png"
+  },
+  {
+    "brand": "Buick",
+    "source": "https://www.carlogos.org/logo/Buick-logo-2002-2560x1440.png",
+    "file": "buick.png"
+  },
+  {
+    "brand": "BYD",
+    "source": "https://www.carlogos.org/logo/BYD-logo-2007-2560x1440.png",
+    "file": "byd.png"
+  },
+  {
+    "brand": "Cadillac",
+    "source": "https://www.carlogos.org/car-logos/cadillac-logo-2021-full-640.png",
+    "file": "cadillac.png"
+  },
+  {
+    "brand": "Caterham",
+    "source": "https://www.carlogos.org/logo/Caterham-logo-1920x1080.png",
+    "file": "caterham.png"
+  },
+  {
+    "brand": "Changan",
+    "source": "https://www.carlogos.org/logo/Changan-logo-2010-2560x1440.png",
+    "file": "changan.png"
+  },
+  {
+    "brand": "Chery",
+    "source": "https://www.carlogos.org/logo/Chery-logo-2013-3840x2160.png",
+    "file": "chery.png"
+  },
+  {
+    "brand": "Chevrolet",
+    "source": "https://www.carlogos.org/logo/Chevrolet-logo-2013-2560x1440.png",
+    "file": "chevrolet.png"
+  },
+  {
+    "brand": "Chrysler",
+    "source": "https://www.carlogos.org/car-logos/chrysler-logo-2009-640.png",
+    "file": "chrysler.png"
+  },
+  {
+    "brand": "Citroën",
+    "source": "https://www.carlogos.org/logo/Citroen-logo-2009-2048x2048.png",
+    "file": "citroen.png"
+  },
+  {
+    "brand": "Cupra",
+    "source": "/Users/filip.popranec/Develop/car-logos-dataset/local-logos/cupra.png",
+    "file": "cupra.png"
+  },
+  {
+    "brand": "Dacia",
+    "source": "https://www.carlogos.org/logo/Dacia-logo-2008-1920x1080.png",
+    "file": "dacia.png"
+  },
+  {
+    "brand": "Daewoo",
+    "source": "https://www.carlogos.org/logo/Daewoo-logo-1920x1080.png",
+    "file": "daewoo.png"
+  },
+  {
+    "brand": "Daihatsu",
+    "source": "https://www.carlogos.org/logo/Daihatsu-logo-1997-1280x233.png",
+    "file": "daihatsu.png"
+  },
+  {
+    "brand": "Datsun",
+    "source": "https://www.carlogos.org/logo/Datsun-logo-2013-2560x1440.png",
+    "file": "datsun.png"
+  },
+  {
+    "brand": "De Tomaso",
+    "source": "https://www.carlogos.org/logo/De-Tomaso-logo-2011-640x251.png",
+    "file": "de-tomaso.png"
+  },
+  {
+    "brand": "Deepal",
+    "source": "https://github.com/vehiclespecs/brand-logos/blob/main/deepal-logo.svg",
+    "file": "deepal-logo.svg"
+  },
+  {
+    "brand": "DeLorean",
+    "source": "https://www.carlogos.org/logo/DMC-logo-1440x900.png",
+    "file": "dmc.png"
+  },
+  {
+    "brand": "Denza",
+    "source": "https://github.com/vehiclespecs/brand-logos/blob/main/denza-logo.svg",
+    "file": "denza-logo.svg"
+  },
+  {
+    "brand": "DeSoto",
+    "source": "https://www.carlogos.org/car-logos/desoto-logo-650x650-show.png",
+    "file": "desoto.png"
+  },
+  {
+    "brand": "DKW",
+    "source": "https://www.carlogos.org/logo/DKW-logo-black-640x550.jpg",
+    "file": "dkw.png"
+  },
+  {
+    "brand": "Dodge",
+    "source": "https://www.carlogos.org/car-logos/dodge-logo-2010-640.png",
+    "file": "dodge.png"
+  },
+  {
+    "brand": "Dongfeng",
+    "source": "https://www.carlogos.org/logo/Dongfeng-logo-2560x1440.png",
+    "file": "dongfeng.png"
+  },
+  {
+    "brand": "DS Automobiles",
+    "source": "https://www.carlogos.org/logo/DS-logo-2009-1920x1080.png",
+    "file": "ds.png"
+  },
+  {
+    "brand": "Duesenberg",
+    "source": "https://www.carlogos.org/car-logos/duesenberg-logo-1000x600-show.png",
+    "file": "duesenberg.png"
+  },
+  {
+    "brand": "Exeed",
+    "source": "https://www.carlogos.org/car-logos/exeed-logo-1200x200-show.png",
+    "file": "exeed.png"
+  },
+  {
+    "brand": "Facel Vega",
+    "source": "https://www.carlogos.org/logo/Facel-Vega-logo-1024x768.png",
+    "file": "facel-vega.png"
+  },
+  {
+    "brand": "Fangchengbao",
+    "source": "https://carbrandlogos.com/logos/fangchengbao.png",
+    "file": "fangchengbao.png"
+  },
+  {
+    "brand": "FAW",
+    "source": "https://www.carlogos.org/logo/FAW-logo-1920x1080.png",
+    "file": "faw.png"
+  },
+  {
+    "brand": "Ferrari",
+    "source": "https://www.carlogos.org/car-logos/ferrari-logo-2002-640.png",
+    "file": "ferrari.png"
+  },
+  {
+    "brand": "Fiat",
+    "source": "https://www.carlogos.org/logo/Fiat-logo-2006-1920x1080.png",
+    "file": "fiat.png"
+  },
+  {
+    "brand": "Firefly",
+    "source": "https://carbrandlogos.com/logos/firefly.png",
+    "file": "firefly.png"
+  },
+  {
+    "brand": "Fisker",
+    "source": "https://www.carlogos.org/logo/Fisker-logo-2007-1920x1080.png",
+    "file": "fisker.png"
+  },
+  {
+    "brand": "Ford",
+    "source": "https://www.carlogos.org/car-logos/ford-logo-2017-640.png",
+    "file": "ford.png"
+  },
+  {
+    "brand": "Foton",
+    "source": "https://www.carlogos.org/logo/Foton-logo-1920x1080.png",
+    "file": "foton.png"
+  },
+  {
+    "brand": "FSO",
+    "source": "https://www.carlogos.org/car-logos/fso-logo-1200x500-show.png",
+    "file": "fso.png"
+  },
+  {
+    "brand": "GAC",
+    "source": "https://www.carlogos.org/logo/GAC-Group-logo-2560x1440.png",
+    "file": "gac-group.png"
+  },
+  {
+    "brand": "GAZ",
+    "source": "https://www.carlogos.org/logo/GAZ-logo-2015-1920x1080.png",
+    "file": "gaz.png"
+  },
+  {
+    "brand": "Geely",
+    "source": "https://www.carlogos.org/logo/Geely-logo-2014-2560x1440.png",
+    "file": "geely.png"
+  },
+  {
+    "brand": "Genesis",
+    "source": "https://www.carlogos.org/logo/Genesis-logo-640x248.jpg",
+    "file": "genesis.png"
+  },
+  {
+    "brand": "Geometry",
+    "source": "https://www.carlogos.org/car-logos/geometry-logo-640x480.png",
+    "file": "geometry.png"
+  },
+  {
+    "brand": "GMC",
+    "source": "https://www.carlogos.org/logo/GMC-logo-2200x600.png",
+    "file": "gmc.png"
+  },
+  {
+    "brand": "Great Wall",
+    "source": "https://www.carlogos.org/logo/Great-Wall-logo-2007-2048x2048.png",
+    "file": "great-wall.png"
+  },
+  {
+    "brand": "Haima",
+    "source": "https://www.carlogos.org/logo/Haima-logo-3840x2160.png",
+    "file": "haima.png"
+  },
+  {
+    "brand": "Haval",
+    "source": "https://www.carlogos.org/logo/Haval-logo-1366x768.png",
+    "file": "haval.png"
+  },
+  {
+    "brand": "Hillman",
+    "source": "https://www.carlogos.org/logo/Hillman-logo-640x145.jpg",
+    "file": "hillman.png"
+  },
+  {
+    "brand": "HiPhi",
+    "source": "https://www.carlogos.org/car-logos/hiphi-logo-2100x600-show.png",
+    "file": "hiphi.png"
+  },
+  {
+    "brand": "Holden",
+    "source": "https://www.carlogos.org/logo/Holden-logo-2016-1920x1080.png",
+    "file": "holden.png"
+  },
+  {
+    "brand": "Honda",
+    "source": "https://www.carlogos.org/car-logos/honda-logo-2000-full-640.png",
+    "file": "honda.png"
+  },
+  {
+    "brand": "Hongqi",
+    "source": "https://www.carlogos.org/car-logos/hongqi-logo-2018-800x600-show.png",
+    "file": "hongqi.png"
+  },
+  {
+    "brand": "Horch",
+    "source": "https://www.carlogos.org/logo/Horch-logo-black-1920x1080.png",
+    "file": "horch.png"
+  },
+  {
+    "brand": "Hudson",
+    "source": "https://www.carlogos.org/logo/Hudson-logo-2560x1440.png",
+    "file": "hudson.png"
+  },
+  {
+    "brand": "Hummer",
+    "source": "https://www.carlogos.org/logo/Hummer-logo-2000x205.png",
+    "file": "hummer.png"
+  },
+  {
+    "brand": "Hyundai",
+    "source": "https://www.carlogos.org/car-logos/hyundai-logo-2011-640.png",
+    "file": "hyundai.png"
+  },
+  {
+    "brand": "IM Motors",
+    "source": "https://carbrandlogos.com/logos/im-motors.png",
+    "file": "immotors.png"
+  },
+  {
+    "brand": "Ineos",
+    "source": "https://github.com/vehiclespecs/brand-logos/blob/main/ineos-logo.svg",
+    "file": "ineos-logo.svg"
+  },
+  {
+    "brand": "Infiniti",
+    "source": "https://www.carlogos.org/logo/Infiniti-logo-1989-2560x1440.png",
+    "file": "infiniti.png"
+  },
+  {
+    "brand": "Innocenti",
+    "source": "https://www.carlogos.org/logo/Innocenti-logo-310x310.png",
+    "file": "innocenti.png"
+  },
+  {
+    "brand": "Isdera",
+    "source": "https://www.carlogos.org/logo/Isdera-logo-640x413.jpg",
+    "file": "isdera.png"
+  },
+  {
+    "brand": "Iso",
+    "source": "https://www.carlogos.org/logo/Iso-logo-1920x1080.png",
+    "file": "iso.png"
+  },
+  {
+    "brand": "Isuzu",
+    "source": "https://www.carlogos.org/logo/Isuzu-logo-1991-3840x2160.png",
+    "file": "isuzu.png"
+  },
+  {
+    "brand": "JAC",
+    "source": "https://www.carlogos.org/logo/JAC-Motors-logo-2016-1920x1080.png",
+    "file": "jac.png"
+  },
+  {
+    "brand": "Jaecoo",
+    "source": "https://github.com/vehiclespecs/brand-logos/blob/main/jaecoo-logo.svg",
+    "file": "jaecoo-logo.svg"
+  },
+  {
+    "brand": "Jaguar",
+    "source": "https://www.carlogos.org/car-logos/jaguar-logo-2021-640.png",
+    "file": "jaguar.png"
+  },
+  {
+    "brand": "Jeep",
+    "source": "https://www.carlogos.org/car-logos/jeep-logo-1993-640.png",
+    "file": "jeep.png"
+  },
+  {
+    "brand": "Jensen",
+    "source": "https://www.carlogos.org/logo/Jensen-logo-640x556.jpg",
+    "file": "jensen.png"
+  },
+  {
+    "brand": "Jetour",
+    "source": "/Users/filip.popranec/Develop/car-logos-dataset/local-logos/jetour.png",
+    "file": "jetour.png"
+  },
+  {
+    "brand": "KGM",
+    "source": "https://github.com/vehiclespecs/brand-logos/blob/main/kgm-logo.svg",
+    "file": "kgm-logo.svg"
+  },
+  {
+    "brand": "Kia",
+    "source": "https://www.carlogos.org/logo/Kia-logo-2560x1440.png",
+    "file": "kia.png"
+  },
+  {
+    "brand": "Koenigsegg",
+    "source": "https://www.carlogos.org/logo/Koenigsegg-logo-1994-2048x2048.png",
+    "file": "koenigsegg.png"
+  },
+  {
+    "brand": "Lada",
+    "source": "https://www.carlogos.org/logo/Lada-logo-silver-640x248.jpg",
+    "file": "lada.png"
+  },
+  {
+    "brand": "Lamborghini",
+    "source": "https://www.carlogos.org/car-logos/lamborghini-logo-1998-640.png",
+    "file": "lamborghini.png"
+  },
+  {
+    "brand": "Lancia",
+    "source": "https://www.carlogos.org/logo/Lancia-logo-2007-1920x1080.png",
+    "file": "lancia.png"
+  },
+  {
+    "brand": "Land Rover / Range Rover",
+    "source": "https://www.carlogos.org/logo/Land-Rover-logo-2011-1920x1080.png",
+    "file": "land-rover.png"
+  },
+  {
+    "brand": "Leapmotor",
+    "source": "https://www.carlogos.org/car-logos/leapmotor-logo-1000x650-show.png",
+    "file": "leapmotor.png"
+  },
+  {
+    "brand": "Lexus",
+    "source": "https://www.carlogos.org/logo/Lexus-logo-1988-1920x1080.png",
+    "file": "lexus.png"
+  },
+  {
+    "brand": "Lifan",
+    "source": "https://www.carlogos.org/logo/Lifan-logo-4000x1200.png",
+    "file": "lifan.png"
+  },
+  {
+    "brand": "Lincoln",
+    "source": "https://www.carlogos.org/logo/Lincoln-logo-2019-1920x1080.png",
+    "file": "lincoln.png"
+  },
+  {
+    "brand": "LiXiang (Lixiang)",
+    "source": "https://www.carlogos.org/car-logos/lixiang-logo-1050x300-show.png",
+    "file": "li-auto.png"
+  },
+  {
+    "brand": "Lotus",
+    "source": "https://www.carlogos.org/logo/Lotus-logo-2019-1800x1800.png",
+    "file": "lotus.png"
+  },
+  {
+    "brand": "Lucid",
+    "source": "https://www.carlogos.org/logo/Lucid-Motors-logo-1500x200.png",
+    "file": "lucid.png"
+  },
+  {
+    "brand": "Luxeed",
+    "source": "https://carbrandlogos.com/logos/luxeed.png",
+    "file": "luxeed.png"
+  },
+  {
+    "brand": "Lynk & Co",
+    "source": "https://www.carlogos.org/car-logos/lynkco-logo-2150x400-show.png",
+    "file": "lynk-and-co.png"
+  },
+  {
+    "brand": "Mahindra",
+    "source": "https://www.carlogos.org/logo/Mahindra-logo-2560x1440.png",
+    "file": "mahindra.png"
+  },
+  {
+    "brand": "Maruti Suzuki",
+    "source": "https://carbrandlogos.com/logos/maruti-suzuki.png",
+    "file": "marutisuzuki.png"
+  },
+  {
+    "brand": "Maserati",
+    "source": "https://www.carlogos.org/car-logos/maserati-logo-2020-640.png",
+    "file": "maserati.png"
+  },
+  {
+    "brand": "Maxus",
+    "source": "https://www.carlogos.org/logo/Maxus-logo-2014-1920x1080.png",
+    "file": "maxus.png"
+  },
+  {
+    "brand": "Mazda",
+    "source": "https://www.carlogos.org/car-logos/mazda-logo-2018-vertical-640.png",
+    "file": "mazda.png"
+  },
+  {
+    "brand": "McLaren",
+    "source": "https://www.carlogos.org/logo/McLaren-logo-2002-2560x1440.png",
+    "file": "mclaren.png"
+  },
+  {
+    "brand": "Mercedes-Benz",
+    "source": "https://www.carlogos.org/logo/Mercedes-Benz-logo-2011-1920x1080.png",
+    "file": "mercedes-benz.png"
+  },
+  {
+    "brand": "Mercury",
+    "source": "https://www.carlogos.org/logo/Mercury-logo-1980-2500x2500.png",
+    "file": "mercury.png"
+  },
+  {
+    "brand": "MG",
+    "source": "https://www.carlogos.org/logo/MG-logo-red-2010-1920x1080.png",
+    "file": "mg.png"
+  },
+  {
+    "brand": "Mini",
+    "source": "https://www.carlogos.org/logo/Mini-logo-2001-1920x1080.png",
+    "file": "mini.png"
+  },
+  {
+    "brand": "Mitsubishi",
+    "source": "https://www.carlogos.org/logo/Mitsubishi-logo-2000x2500.png",
+    "file": "mitsubishi.png"
+  },
+  {
+    "brand": "Morgan",
+    "source": "https://www.carlogos.org/logo/Morgan-logo-1920x1080.png",
+    "file": "morgan.png"
+  },
+  {
+    "brand": "Morris",
+    "source": "https://www.carlogos.org/logo/Morris-logo-640x497.jpg",
+    "file": "morris.png"
+  },
+  {
+    "brand": "Moskvich",
+    "source": "https://carbrandlogos.com/logos/moskvitch.png",
+    "file": "moskvich.png"
+  },
+  {
+    "brand": "Nash",
+    "source": "https://carbrandlogos.com/logos/nash.png",
+    "file": "nash.png"
+  },
+  {
+    "brand": "Neta",
+    "source": "https://carbrandlogos.com/logos/neta.png",
+    "file": "neta.png"
+  },
+  {
+    "brand": "Nio",
+    "source": "https://www.carlogos.org/car-logos/nio-logo-1800x700-show.png",
+    "file": "nio.png"
+  },
+  {
+    "brand": "Nissan",
+    "source": "https://www.carlogos.org/car-logos/nissan-logo-2020-black-show.png",
+    "file": "nissan.png"
+  },
+  {
+    "brand": "Oldsmobile",
+    "source": "https://www.carlogos.org/logo/Oldsmobile-logo-1996-1024x768.png",
+    "file": "oldsmobile.png"
+  },
+  {
+    "brand": "Omoda",
+    "source": "/Users/filip.popranec/Develop/car-logos-dataset/local-logos/omoda.png",
+    "file": "omoda.png"
+  },
+  {
+    "brand": "Onvo",
+    "source": "https://carbrandlogos.com/logos/onvo.png",
+    "file": "onvo.png"
+  },
+  {
+    "brand": "Opel",
+    "source": "https://www.carlogos.org/logo/Opel-logo-2009-1920x1080.png",
+    "file": "opel.png"
+  },
+  {
+    "brand": "Ora",
+    "source": "https://github.com/vehiclespecs/brand-logos/blob/main/ora-logo.png",
+    "file": "ora-logo.png"
+  },
+  {
+    "brand": "Packard",
+    "source": "https://www.carlogos.org/car-logos/packard-logo-650x650-show.png",
+    "file": "packard.png"
+  },
+  {
+    "brand": "Pagani",
+    "source": "https://www.carlogos.org/logo/Pagani-logo-1992-1440x900.png",
+    "file": "pagani.png"
+  },
+  {
+    "brand": "Panhard",
+    "source": "https://www.carlogos.org/logo/Panhard-logo.png",
+    "file": "panhard.png"
+  },
+  {
+    "brand": "Perodua",
+    "source": "https://www.carlogos.org/logo/Perodua-logo-2008-2560x1440.png",
+    "file": "perodua.png"
+  },
+  {
+    "brand": "Peugeot",
+    "source": "https://www.carlogos.org/logo/Peugeot-logo-2010-1920x1080.png",
+    "file": "peugeot.png"
+  },
+  {
+    "brand": "Pierce-Arrow",
+    "source": "https://www.carlogos.org/logo/Pierce-Arrow-logo-640x416.jpg",
+    "file": "pierce-arrow.png"
+  },
+  {
+    "brand": "Plymouth",
+    "source": "https://www.carlogos.org/logo/Plymouth-logo-1920x1080.png",
+    "file": "plymouth.png"
+  },
+  {
+    "brand": "Polestar",
+    "source": "https://www.carlogos.org/logo/Polestar-logo-1366x768.png",
+    "file": "polestar.png"
+  },
+  {
+    "brand": "Pontiac",
+    "source": "https://www.carlogos.org/logo/Pontiac-logo-2560x1440.png",
+    "file": "pontiac.png"
+  },
+  {
+    "brand": "Porsche",
+    "source": "https://www.carlogos.org/car-logos/porsche-logo-2014-full-640.png",
+    "file": "porsche.png"
+  },
+  {
+    "brand": "Proton",
+    "source": "https://www.carlogos.org/logo/Proton-logo-2016-2048x2048.png",
+    "file": "proton.png"
+  },
+  {
+    "brand": "Ram",
+    "source": "https://www.carlogos.org/logo/RAM-logo-2009-1920x1080.png",
+    "file": "ram.png"
+  },
+  {
+    "brand": "Renault",
+    "source": "https://www.carlogos.org/logo/Renault-logo-2015-2048x2048.png",
+    "file": "renault.png"
+  },
+  {
+    "brand": "Riley",
+    "source": "https://www.carlogos.org/logo/Riley-logo-640x389.png",
+    "file": "riley.png"
+  },
+  {
+    "brand": "Rimac",
+    "source": "https://www.carlogos.org/logo/Rimac-logo-2016-2048x2048.png",
+    "file": "rimac.png"
+  },
+  {
+    "brand": "Rivian",
+    "source": "https://www.carlogos.org/car-logos/rivian-logo-black-1300x1150-show.png",
+    "file": "rivian.png"
+  },
+  {
+    "brand": "Roewe",
+    "source": "https://www.carlogos.org/logo/Roewe-logo-2006-1920x1080.png",
+    "file": "roewe.png"
+  },
+  {
+    "brand": "Rolls-Royce",
+    "source": "https://www.carlogos.org/logo/Rolls-Royce-logo-2048x2048.png",
+    "file": "rolls-royce.png"
+  },
+  {
+    "brand": "Rover",
+    "source": "https://www.carlogos.org/logo/Rover-logo-2003-3840x2160.png",
+    "file": "rover.png"
+  },
+  {
+    "brand": "Saab",
+    "source": "https://www.carlogos.org/logo/Saab-logo-2013-2000x450.png",
+    "file": "saab.png"
+  },
+  {
+    "brand": "Saleen",
+    "source": "https://www.carlogos.org/logo/Saleen-logo-640x456.jpg",
+    "file": "saleen.png"
+  },
+  {
+    "brand": "Saturn",
+    "source": "https://www.carlogos.org/logo/Saturn-logo-1985-2048x2048.png",
+    "file": "saturn.png"
+  },
+  {
+    "brand": "Scion",
+    "source": "https://www.carlogos.org/logo/Scion-logo-2003-1920x1080.png",
+    "file": "scion.png"
+  },
+  {
+    "brand": "Seat",
+    "source": "https://www.carlogos.org/logo/SEAT-logo-2012-6000x5000.png",
+    "file": "seat.png"
+  },
+  {
+    "brand": "Seres",
+    "source": "https://github.com/vehiclespecs/brand-logos/blob/main/seres-logo.png",
+    "file": "seres-logo.png"
+  },
+  {
+    "brand": "Simca",
+    "source": "https://www.carlogos.org/logo/Simca-logo-2048x2048.png",
+    "file": "simca.png"
+  },
+  {
+    "brand": "Skoda",
+    "source": "https://www.carlogos.org/logo/Skoda-logo-2016-1920x1080.png",
+    "file": "skoda.png"
+  },
+  {
+    "brand": "Skywell",
+    "source": "https://carbrandlogos.com/logos/skywell.png",
+    "file": "skywell.png"
+  },
+  {
+    "brand": "Smart",
+    "source": "https://www.carlogos.org/logo/Smart-logo-1994-1366x768.png",
+    "file": "smart.png"
+  },
+  {
+    "brand": "Soueast",
+    "source": "https://www.carlogos.org/logo/Soueast-logo-1995-800x600.png",
+    "file": "soueast.png"
+  },
+  {
+    "brand": "Spyker",
+    "source": "https://www.carlogos.org/logo/Spyker-logo-black-1920x1080.png",
+    "file": "spyker.png"
+  },
+  {
+    "brand": "SsangYong",
+    "source": "https://www.carlogos.org/logo/SsangYong-logo-2560x1440.png",
+    "file": "ssangyong.png"
+  },
+  {
+    "brand": "Studebaker",
+    "source": "https://www.carlogos.org/logo/Studebaker-logo-1920x1080.png",
+    "file": "studebaker.png"
+  },
+  {
+    "brand": "Subaru",
+    "source": "https://www.carlogos.org/car-logos/subaru-logo-2019-640.png",
+    "file": "subaru.png"
+  },
+  {
+    "brand": "Sunbeam",
+    "source": "https://carbrandlogos.com/logos/sunbeam.png",
+    "file": "sunbeam.png"
+  },
+  {
+    "brand": "Suzuki",
+    "source": "https://www.carlogos.org/logo/Suzuki-logo-5000x2500.png",
+    "file": "suzuki.png"
+  },
+  {
+    "brand": "Talbot",
+    "source": "https://www.carlogos.org/logo/Talbot-logo-1440x900.png",
+    "file": "talbot.png"
+  },
+  {
+    "brand": "Tank",
+    "source": "https://carbrandlogos.com/logos/tank.png",
+    "file": "tank.png"
+  },
+  {
+    "brand": "Tata",
+    "source": "https://www.carlogos.org/logo/Tata-logo-2000-2560x1440.png",
+    "file": "tata.png"
+  },
+  {
+    "brand": "Tatra",
+    "source": "https://www.carlogos.org/logo/Tatra-logo-1920x1080.png",
+    "file": "tatra.png"
+  },
+  {
+    "brand": "Tesla",
+    "source": "https://www.carlogos.org/car-logos/tesla-logo-2007-full-640.png",
+    "file": "tesla.png"
+  },
+  {
+    "brand": "TOGG",
+    "source": "https://github.com/vehiclespecs/brand-logos/blob/main/togg-logo.svg",
+    "file": "togg-logo.svg"
+  },
+  {
+    "brand": "Toyota",
+    "source": "https://www.carlogos.org/car-logos/toyota-logo-2020-europe-640.png",
+    "file": "toyota.png"
+  },
+  {
+    "brand": "Trabant",
+    "source": "https://github.com/vehiclespecs/brand-logos/blob/main/trabant-logo.svg",
+    "file": "trabant-logo.svg"
+  },
+  {
+    "brand": "Triumph",
+    "source": "https://www.carlogos.org/logo/Triumph-logo-1920x1080.png",
+    "file": "triumph.png"
+  },
+  {
+    "brand": "TVR",
+    "source": "https://www.carlogos.org/logo/TVR-logo-800x600.png",
+    "file": "tvr.png"
+  },
+  {
+    "brand": "UAZ",
+    "source": "https://www.carlogos.org/logo/UAZ-logo-1366x768.png",
+    "file": "uaz.png"
+  },
+  {
+    "brand": "Vauxhall",
+    "source": "https://www.carlogos.org/logo/Vauxhall-logo-2008-red-2560x1440.png",
+    "file": "vauxhall.png"
+  },
+  {
+    "brand": "VinFast",
+    "source": "https://www.carlogos.org/car-logos/vinfast-logo-900x850-show.png",
+    "file": "vinfast.png"
+  },
+  {
+    "brand": "Volkswagen",
+    "source": "https://www.carlogos.org/logo/Volkswagen-logo-2019-1500x1500.png",
+    "file": "volkswagen.png"
+  },
+  {
+    "brand": "Volvo",
+    "source": "https://www.carlogos.org/logo/Volvo-logo-2014-1920x1080.png",
+    "file": "volvo.png"
+  },
+  {
+    "brand": "Voyah",
+    "source": "https://carbrandlogos.com/logos/voyah.png",
+    "file": "voyah.png"
+  },
+  {
+    "brand": "Wanderer",
+    "source": "https://www.carlogos.org/logo/Wanderer-logo-black-640x311.jpg",
+    "file": "wanderer.png"
+  },
+  {
+    "brand": "Wartburg",
+    "source": "https://www.carlogos.org/logo/Wartburg-logo-1920x1080.png",
+    "file": "wartburg.png"
+  },
+  {
+    "brand": "Wey",
+    "source": "https://www.carlogos.org/car-logos/wey-logo-800x1100-show.png",
+    "file": "wey.png"
+  },
+  {
+    "brand": "Willys",
+    "source": "https://www.carlogos.org/logo/Willys-Overland-logo-2560x1440.png",
+    "file": "willys-overland.png"
+  },
+  {
+    "brand": "Wolseley",
+    "source": "https://carbrandlogos.com/logos/wolseley.png",
+    "file": "wolseley.png"
+  },
+  {
+    "brand": "Wuling",
+    "source": "https://www.carlogos.org/logo/Wuling-logo-1920x1080.png",
+    "file": "wuling.png"
+  },
+  {
+    "brand": "XPeng",
+    "source": "https://www.carlogos.org/car-logos/xpeng-logo-2021-2700x1100-show.png",
+    "file": "xpeng.png"
+  },
+  {
+    "brand": "Yangwang",
+    "source": "https://github.com/vehiclespecs/brand-logos/blob/main/yangwang-logo.svg",
+    "file": "yangwang-logo.svg"
+  },
+  {
+    "brand": "Zastava",
+    "source": "https://www.carlogos.org/logo/Zastava-logo-640x274.jpg",
+    "file": "zastava.png"
+  },
+  {
+    "brand": "ZAZ",
+    "source": "https://www.carlogos.org/logo/ZAZ-logo-800x600.png",
+    "file": "zaz.png"
+  },
+  {
+    "brand": "Zeekr",
+    "source": "https://www.carlogos.org/car-logos/zeekr-logo-2300x700-show.png",
+    "file": "zeekr.png"
+  },
+  {
+    "brand": "ZIL",
+    "source": "https://carbrandlogos.com/logos/zil.png",
+    "file": "zil.png"
+  },
+  {
+    "brand": "Zotye",
+    "source": "https://www.carlogos.org/logo/Zotye-logo-2560x1440.png",
+    "file": "zotye.png"
+  }
+]
