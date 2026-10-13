@@ -1,6 +1,6 @@
 # Technol advertising preview
 
-Preview branch only; not approved for production.
+Approved for production by the user on 2026-10-13.
 
 Original logo: https://technol.az/wp-content/uploads/2023/03/logo-main.webp
 Original product: https://technol.az/wp-content/uploads/2025/12/Technol-Platinum-ECO-5W-30-4L-410x505.webp
