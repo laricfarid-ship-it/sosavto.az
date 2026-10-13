@@ -1,3 +1,4 @@
+if(process.env.VERCEL_ENV==='production')await import('../server/password-reset-migrate.mjs');
 import {washEnabled} from '../server/wash-config.mjs';
 // Apply the additive production schema before publishing. Failure aborts this build.
 if(process.env.VERCEL_ENV==='production'&&washEnabled())await import('../server/wash-migrate.mjs');
