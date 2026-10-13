@@ -1,3 +1,4 @@
+import {imagesFor} from '../server/listing-media.mjs';
 import {priceHistogram} from '../server/price-histogram.mjs';
 import {preservePublishedPrice,publishPriceAlerts} from '../server/price-alerts.mjs';
 import {assistantConfig,assistantAnswer} from '../server/assistant.mjs';
@@ -13,11 +14,6 @@ import {listingInput,columns,projection,search} from '../server/listings.mjs';
 import {upload} from '../server/uploads.mjs';
 import {seoPage} from '../server/seo.mjs';
 const json=(res,status,data)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(data));};
-async function imagesFor(c,user,id,ids){
- if(ids.length){const r=await c.query('SELECT id FROM images WHERE id=ANY($1::uuid[]) AND user_id=$2 AND (listing_id IS NULL OR listing_id=$3) FOR UPDATE',[ids,user.id,id]);if(r.rows.length!==ids.length)fail(400,'Şəkil seçimi düzgün deyil.');}
- await c.query('UPDATE images SET listing_id=NULL WHERE listing_id=$1',[id]);
- for(let i=0;i<ids.length;i++)await c.query('UPDATE images SET listing_id=$1,sort_order=$2 WHERE id=$3',[id,i,ids[i]]);
-}
 const notify=(c,user,body)=>c.query('INSERT INTO notifications(id,user_id,body) VALUES($1,$2,$3)',[randomUUID(),user,body]);
 export default async function handler(req,res){
  res.setHeader('Cache-Control','no-store');res.setHeader('X-Content-Type-Options','nosniff');
@@ -71,7 +67,7 @@ export default async function handler(req,res){
  }
  if(path==='/api/listings'&&method==='POST'){
  requireUser(user);await rateLimit(`create:${user.id}`,20,3600);const v=listingInput(await body(req));const id=randomUUID();
- await transaction(async c=>{await c.query(`INSERT INTO listings(id,user_id,${columns.join(',')}) VALUES(${Array.from({length:columns.length+2},(_,i)=>'$'+(i+1)).join(',')})`,[id,user.id,...columns.map(k=>v[k])]);await imagesFor(c,user,id,v.imageIds);});return json(res,201,{id,status:'pending'});
+ await transaction(async c=>{await c.query(`INSERT INTO listings(id,user_id,${columns.join(',')}) VALUES(${Array.from({length:columns.length+2},(_,i)=>'$'+(i+1)).join(',')})`,[id,user.id,...columns.map(k=>v[k])]);await imagesFor(c,user,id,v.imageIds,v.spinImageIds,v.category);});return json(res,201,{id,status:'pending'});
  }
  if(path==='/api/my-listings'&&method==='GET'){
  requireUser(user);return json(res,200,{listings:(await query(`SELECT ${projection} FROM listings l WHERE l.user_id=$1 AND NOT (l.details @> '{"_deleted":true}'::jsonb) ORDER BY l.created_at DESC`,[user.id])).rows});
@@ -83,11 +79,11 @@ export default async function handler(req,res){
  if(method==='GET'){
  if(l.status!=='active'&&!owner&&user?.role!=='admin')fail(404,'Elan tapılmadı.');
  if(l.status==='active'&&!owner)await query('UPDATE listings SET views=views+1 WHERE id=$1',[id]);
- l.images=(await query('SELECT id,url FROM images WHERE listing_id=$1 ORDER BY sort_order',[id])).rows;return json(res,200,{listing:l});
+ l.images=(await query('SELECT id,url FROM images WHERE listing_id=$1 AND sort_order<100 ORDER BY sort_order,id',[id])).rows;l.spin_frames=l.category==='car'?(await query('SELECT id,url FROM images WHERE listing_id=$1 AND sort_order>=100 ORDER BY sort_order,id LIMIT 36',[id])).rows:[];return json(res,200,{listing:l});
  }
  requireUser(user);if(!owner)fail(403,'Yalnız öz elanınızı dəyişə bilərsiniz.');
  if(method==='PUT'){
- const v=listingInput(await body(req));await transaction(async c=>{const previous=await lockListing(c,id,user);preservePublishedPrice(previous,v);if(await washLinks(c,id)){await requireNoReservations(c,id);if(v.category!=='wash')fail(409,'Rezervasiya sistemi qurulmuş avtoyumanın kateqoriyasını dəyişmək olmaz. Yeni kateqoriya üçün ayrıca elan yaradın.');}await c.query(`UPDATE listings SET ${columns.map((k,i)=>`${k}=$${i+1}`).join(',')},status='pending',rejection_reason='',updated_at=now() WHERE id=$${columns.length+1} AND user_id=$${columns.length+2}`,[...columns.map(k=>v[k]),id,user.id]);await imagesFor(c,user,id,v.imageIds);});return json(res,200,{ok:true,status:'pending'});
+ const v=listingInput(await body(req));await transaction(async c=>{const previous=await lockListing(c,id,user);preservePublishedPrice(previous,v);if(await washLinks(c,id)){await requireNoReservations(c,id);if(v.category!=='wash')fail(409,'Rezervasiya sistemi qurulmuş avtoyumanın kateqoriyasını dəyişmək olmaz. Yeni kateqoriya üçün ayrıca elan yaradın.');}await c.query(`UPDATE listings SET ${columns.map((k,i)=>`${k}=$${i+1}`).join(',')},status='pending',rejection_reason='',updated_at=now() WHERE id=$${columns.length+1} AND user_id=$${columns.length+2}`,[...columns.map(k=>v[k]),id,user.id]);await imagesFor(c,user,id,v.imageIds,v.spinImageIds,v.category);});return json(res,200,{ok:true,status:'pending'});
  }
  if(method==='PATCH'){
  const b=await body(req);if(!['sold','archived','pending'].includes(b.status))fail(400,'Status düzgün deyil.');await transaction(async c=>{const previous=await lockListing(c,id,user);if(previous.status==='active')await c.query("UPDATE listings SET details=details||jsonb_build_object('_publishedPrice',jsonb_build_object('price',price::text,'category',category)) WHERE id=$1",[id]);if(await washLinks(c,id))await requireNoReservations(c,id);await c.query('UPDATE listings SET status=$1,rejection_reason=\'\',updated_at=now() WHERE id=$2 AND user_id=$3',[b.status,id,user.id]);});return json(res,200,{ok:true});
@@ -103,6 +99,7 @@ export default async function handler(req,res){
  const r=await query("INSERT INTO favorites(user_id,listing_id) SELECT $1,id FROM listings WHERE id=$2 AND status='active' ON CONFLICT DO NOTHING RETURNING listing_id",[user.id,id]);if(!r.rows.length && !(await query('SELECT 1 FROM favorites WHERE user_id=$1 AND listing_id=$2',[user.id,id])).rows.length)fail(404,'Elan tapılmadı.');
  }else await query('DELETE FROM favorites WHERE user_id=$1 AND listing_id=$2',[user.id,id]);return json(res,200,{ok:true});
  }
+ if(path==='/api/spin-uploads'&&method==='POST'){requireUser(user);await rateLimit(`spin-uploads:${user.id}`,80,3600);return json(res,201,await upload(user,await body(req),{spin:true}));}
  if(path==='/api/uploads'&&method==='POST'){requireUser(user);await rateLimit(`uploads:${user.id}`,40,3600);return json(res,201,await upload(user,await body(req)));}
  if(path==='/api/notifications'&&method==='GET'){requireUser(user);return json(res,200,{notifications:(await query('SELECT * FROM notifications WHERE user_id=$1 ORDER BY created_at DESC LIMIT 100',[user.id])).rows});}
  if(path==='/api/notifications'&&method==='PATCH'){requireUser(user);await query('UPDATE notifications SET read_at=now() WHERE user_id=$1',[user.id]);return json(res,200,{ok:true});}

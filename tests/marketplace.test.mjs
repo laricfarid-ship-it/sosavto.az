@@ -124,3 +124,31 @@ test('listing projection returns bounded ordered photo URLs for card galleries',
  for(let i=0;i<9;i++)await query('INSERT INTO images(id,user_id,listing_id,url,sort_order) VALUES($1,$2,$3,$4,$5)',[`00000000-0000-4000-8000-${String(100+i).padStart(12,'0')}`,owner.body.user.id,id,`https://example.test/${i}.webp`,8-i]);
  const row=(await query(`SELECT ${projection} FROM listings l WHERE l.id=$1`,[id])).rows[0];assert.equal(row.card_images.length,8);assert.equal(row.card_images[0],'https://example.test/8.webp');assert.equal(row.card_images[7],'https://example.test/1.webp');
 });
+
+test('360 media is owner-scoped, separate from gallery, moderated, ordered and preserved by older clients',async()=>{
+ await query('DELETE FROM rate_limits');
+ const login=await request('/login',{method:'POST',data:{identifier:'owner_test',password:'New-password-123'}});assert.equal(login.status,200);
+ const ids=Array.from({length:24},(_,i)=>`00000000-0000-4000-8001-${String(i).padStart(12,'0')}`);
+ for(const [i,id] of ids.entries())await query('INSERT INTO images(id,user_id,url,sort_order) VALUES($1,$2,$3,100)',[id,owner.body.user.id,`https://example.test/spin-${i}.webp`]);
+ for(const spinImageIds of [ids.slice(0,23),[...ids,ids[0]],'invalid'])assert.equal((await request('/listings',{method:'POST',cookie:login.cookie,data:{...ad,spinImageIds}})).status,400);
+ assert.equal((await request('/listings',{method:'POST',cookie:login.cookie,data:{...ad,category:'parts',spinImageIds:ids}})).status,400);
+ const created=await request('/listings',{method:'POST',cookie:login.cookie,data:{...ad,spinImageIds:ids}});assert.equal(created.status,201,JSON.stringify(created.body));const id=created.body.id;
+ assert.equal((await request('/listings/'+id)).status,404);
+ let detail=(await request('/listings/'+id,{cookie:login.cookie})).body.listing;assert.equal(detail.images.length,0);assert.equal(detail.card_images.length,0);assert.equal(detail.spin_frames.length,24);assert.ok(detail.has_spin);
+ assert.equal((await request('/listings',{method:'POST',cookie:admin.cookie,data:{...ad,spinImageIds:ids}})).status,400);
+ assert.equal((await request('/listings',{method:'POST',cookie:login.cookie,data:{...ad,spinImageIds:ids}})).status,400,'frames cannot belong to two listings');
+ await request('/admin/moderate',{method:'POST',cookie:admin.cookie,data:{id,status:'active'}});
+ assert.equal((await request('/listings/'+id)).body.listing.spin_frames.length,24);
+ assert.equal((await request('/listings/'+id,{method:'PUT',cookie:login.cookie,data:{...ad,price:22000}})).status,200);
+ detail=(await request('/listings/'+id,{cookie:login.cookie})).body.listing;assert.equal(detail.spin_frames.length,24);assert.equal((await request('/listings/'+id)).status,404);
+ assert.equal((await request('/listings/'+id,{method:'PUT',cookie:login.cookie,data:{...ad,spinImageIds:[...ids].reverse()}})).status,200);
+ detail=(await request('/listings/'+id,{cookie:login.cookie})).body.listing;assert.equal(detail.spin_frames[0].id,ids[23]);
+ const invalid=await request('/listings/'+id,{method:'PUT',cookie:login.cookie,data:{...ad,imageIds:[ids[0]],spinImageIds:ids}});assert.equal(invalid.status,400);assert.equal((await request('/listings/'+id,{cookie:login.cookie})).body.listing.spin_frames.length,24);
+ assert.equal((await request('/listings/'+id,{method:'PUT',cookie:login.cookie,data:{...ad,spinImageIds:[]}})).status,200);assert.equal((await request('/listings/'+id,{cookie:login.cookie})).body.listing.has_spin,false);
+ const temp=await mkdtemp(join(tmpdir(),'sosavto-spin-')),original=process.cwd();process.chdir(temp);
+ try{const data='data:image/png;base64,'+(await sharp({create:{width:4,height:4,channels:3,background:'#fff'}}).png().toBuffer()).toString('base64');
+ assert.equal((await request('/spin-uploads',{method:'POST',data:{data}})).status,401);
+ const r=await request('/spin-uploads',{method:'POST',cookie:login.cookie,data:{data}});assert.equal(r.status,201);assert.equal((await query('SELECT sort_order FROM images WHERE id=$1',[r.body.id])).rows[0].sort_order,100);
+ assert.equal((await request('/listings',{method:'POST',cookie:login.cookie,data:{...ad,imageIds:[r.body.id]}})).status,400,'spin frame cannot enter ordinary gallery');
+ }finally{process.chdir(original);await rm(temp,{recursive:true,force:true});}
+});
