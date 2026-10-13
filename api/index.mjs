@@ -1,3 +1,4 @@
+import {resetEnabled,requestReset,completeReset} from '../server/password-reset.mjs';
 import {imagesFor} from '../server/listing-media.mjs';
 import {priceHistogram} from '../server/price-histogram.mjs';
 import {preservePublishedPrice,publishPriceAlerts} from '../server/price-alerts.mjs';
@@ -20,7 +21,7 @@ export default async function handler(req,res){
  try{
  const url=new URL(req.url,'http://localhost'); const path=url.pathname.replace(/\/$/,'');const method=req.method;
  originCheck(req);
- if(path==='/api/config'&&method==='GET')return json(res,200,{wash:washEnabled(),sos:process.env.SOS_ENABLED==='true',ai:assistantConfig().enabled,aiProvider:assistantConfig().provider,uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
+ if(path==='/api/config'&&method==='GET')return json(res,200,{passwordReset:resetEnabled(),wash:washEnabled(),sos:process.env.SOS_ENABLED==='true',ai:assistantConfig().enabled,aiProvider:assistantConfig().provider,uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
  const address=clientAddress(req);
  await rateLimit(`api:ip:${address}`,300,60);
  if(['/sitemap.xml','/elan'].includes(path)&&['GET','HEAD'].includes(method))return seoPage(req,res,path,url);
@@ -48,6 +49,9 @@ export default async function handler(req,res){
  const valid=await bcrypt.compare(password,u?.password_hash||'$2b$12$XU7.1nUi/iCTy4lYfsZnGO9DZdvNU91FdY56dLg47/O85VzVFhUUe');
  if(!u||!valid||u.status!=='active')fail(401,'Giriş məlumatları düzgün deyil.');await createSession(res,u);return json(res,200,{user:safeUser(u)});
  }
+ if(['/api/password-reset/request','/api/password-reset/complete'].includes(path)&&method==='POST'){
+ await rateLimit(`recovery:ip:${address}`,10,900);const b=await body(req);return json(res,200,await (path.endsWith('/request')?requestReset(b):completeReset(b)));
+ }
  if(path==='/api/logout'&&method==='POST'){
  const token=(req.headers.cookie||'').split(';').map(v=>v.trim()).find(v=>v.startsWith('sosavto_session='))?.slice(16);if(token)await query('DELETE FROM sessions WHERE token_hash=$1',[hash(token)]);
  res.setHeader('Set-Cookie',`sosavto_session=; Path=/; HttpOnly; SameSite=Lax; Max-Age=0${process.env.NODE_ENV==='production'||process.env.VERCEL?'; Secure':''}`);return json(res,200,{ok:true});
@@ -58,7 +62,7 @@ export default async function handler(req,res){
  if(path==='/api/password'&&method==='POST'){
  requireUser(user);await rateLimit(`password:${user.id}`,5,900);const b=await body(req);if(!await bcrypt.compare(text(b.current,'Cari şifrə',1,72),user.password_hash))fail(400,'Cari şifrə düzgün deyil.');
  const password=text(b.password,'Yeni şifrə',10,72);if(Buffer.byteLength(password)>72)fail(400,'Şifrə çox uzundur.');
- await transaction(async c=>{await c.query('UPDATE users SET password_hash=$1 WHERE id=$2',[await bcrypt.hash(password,12),user.id]);await c.query('DELETE FROM sessions WHERE user_id=$1',[user.id]);});await createSession(res,user);return json(res,200,{ok:true});
+ await transaction(async c=>{await c.query('UPDATE users SET password_hash=$1 WHERE id=$2',[await bcrypt.hash(password,12),user.id]);await c.query('DELETE FROM sessions WHERE user_id=$1',[user.id]);await c.query('DELETE FROM password_resets WHERE user_id=$1',[user.id]);});await createSession(res,user);return json(res,200,{ok:true});
  }
  if(path==='/api/price-histogram'&&method==='GET')return json(res,200,await priceHistogram(query,url.searchParams));
  if(path==='/api/listings'&&method==='GET'){

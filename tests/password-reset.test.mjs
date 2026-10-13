@@ -1,0 +1,31 @@
+import test,{before,after} from 'node:test';
+import assert from 'node:assert/strict';
+import {readFile} from 'node:fs/promises';
+import {Readable} from 'node:stream';
+process.env.LOCAL_DATABASE='true';process.env.LOCAL_DB_PATH='memory://';process.env.APP_ORIGIN='http://localhost:4173';delete process.env.DATABASE_URL;
+const {database,query,close}=await import('../server/db.mjs');
+const {default:handler}=await import('../api/index.mjs');
+let mail,failDelivery=false;const originalFetch=globalThis.fetch;
+globalThis.fetch=async(url,options)=>{assert.equal(url,'https://api.resend.com/emails');mail=JSON.parse(options.body);return {ok:!failDelivery};};
+async function request(path,data,cookie){const req=Readable.from(data?[JSON.stringify(data)]:[]);req.method=data?'POST':'GET';req.url='/api'+path;req.headers={'content-type':'application/json',origin:process.env.APP_ORIGIN,...(cookie?{cookie}:{})};const headers={};let output;const res={statusCode:200,setHeader:(k,v)=>headers[k]=v,end:v=>output=v};await handler(req,res);return {status:res.statusCode,body:JSON.parse(output),cookie:headers['Set-Cookie']?.split(';')[0]};}
+const token=()=>new URL(mail.text.match(/http[^\s]+/)[0]).hash.slice(7);
+before(async()=>{await (await database()).exec(await readFile(new URL('../server/schema.sql',import.meta.url),'utf8'));});
+after(async()=>{globalThis.fetch=originalFetch;await close();});
+test('email reset lifecycle, revocation, expiry, privacy and delivery failure',async()=>{
+ assert.equal((await request('/password-reset/request',{email:'owner@example.test'})).status,503);
+ process.env.RESEND_API_KEY='test-only';process.env.EMAIL_FROM='SosAvto <test@example.test>';
+ const account=await request('/register',{fullname:'Test Owner',username:'resetowner',email:'owner@example.test',password:'Original-password-123'});assert.equal(account.status,201);
+ const sent=await request('/password-reset/request',{email:'owner@example.test'});assert.equal(sent.status,200);const first=token();assert.equal(first.length,64);assert.ok(!JSON.stringify(sent.body).includes(first));
+ const stored=(await query('SELECT token_hash FROM password_resets')).rows[0];assert.notEqual(stored.token_hash,first);
+ const unknown=await request('/password-reset/request',{email:'missing@example.test'});assert.deepEqual(unknown.body,sent.body);
+ assert.equal((await request('/password-reset/complete',{token:first,password:'short'})).status,400);
+ assert.equal((await request('/password-reset/complete',{token:first,password:'Replacement-password-123'})).status,200);
+ assert.equal((await request('/me',null,account.cookie)).body.user,null);
+ assert.equal((await request('/login',{identifier:'resetowner',password:'Original-password-123'})).status,401);
+ const login=await request('/login',{identifier:'resetowner',password:'Replacement-password-123'});assert.equal(login.status,200);
+ assert.equal((await request('/password-reset/complete',{token:first,password:'Another-password-123'})).status,400);
+ await query('DELETE FROM rate_limits');
+ await request('/password-reset/request',{email:'owner@example.test'});const expired=token();await query("UPDATE password_resets SET expires_at=now()-interval '1 minute'");assert.equal((await request('/password-reset/complete',{token:expired,password:'Another-password-123'})).status,400);
+ await request('/password-reset/request',{email:'owner@example.test'});const revoked=token();assert.equal((await request('/password',{current:'Replacement-password-123',password:'Changed-again-123'},login.cookie)).status,200);assert.equal((await request('/password-reset/complete',{token:revoked,password:'Another-password-123'})).status,400);
+ failDelivery=true;assert.deepEqual((await request('/password-reset/request',{email:'owner@example.test'})).body,sent.body);assert.equal((await query('SELECT * FROM password_resets')).rows.length,0);
+});
