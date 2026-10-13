@@ -1,3 +1,4 @@
+import {spinSelection} from './listing-media.mjs';
 import {text,number,fail,uuid} from './security.mjs';
 import {partTypes,insuranceTypes,serviceTypes,detailFields,filterKeys,normalizeCode,normalizePlate} from '../assets/catalog.js';
 export const categories=['car','parts','service','wash','detailing','insurance','plates'];
@@ -17,11 +18,12 @@ export function listingInput(b){
  if(details.map_visible&&(!v.address||v.latitude===null||v.longitude===null))fail(400,'Mağazanı xəritədə göstərmək üçün ünvanı yazın və xəritədə nöqtə seçin.');
  v.details=JSON.stringify(details);
  if(!Array.isArray(b.imageIds)||b.imageIds.length>8||new Set(b.imageIds).size!==b.imageIds.length)fail(400,'Maksimum 8 fərqli şəkil seçin.');
- v.imageIds=b.imageIds.map(uuid);return v;
+ v.imageIds=b.imageIds.map(uuid);v.spinImageIds=spinSelection(b,v.category);return v;
 }
 export const columns=['category','title','description','price','city','brand','model','year','mileage','phone','address','latitude','longitude','details'];
-export const projection=`l.*, (SELECT url FROM images WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS image,
- (SELECT coalesce(json_agg(p.url ORDER BY p.sort_order,p.id),'[]'::json) FROM (SELECT id,url,sort_order FROM images WHERE listing_id=l.id ORDER BY sort_order,id LIMIT 8) p) AS card_images,
+export const projection=`l.*, (SELECT url FROM images WHERE listing_id=l.id AND sort_order<100 ORDER BY sort_order LIMIT 1) AS image,
+ (SELECT coalesce(json_agg(p.url ORDER BY p.sort_order,p.id),'[]'::json) FROM (SELECT id,url,sort_order FROM images WHERE listing_id=l.id AND sort_order<100 ORDER BY sort_order,id LIMIT 8) p) AS card_images,
+ (l.category='car' AND (SELECT count(*) FROM images WHERE listing_id=l.id AND sort_order>=100) BETWEEN 24 AND 36) AS has_spin,
  (SELECT count(*)::integer FROM favorites WHERE listing_id=l.id) AS favorite_count`;
 export function search(input){
  const category=input.get('category');if(category&&!categories.includes(category))fail(400,'Kateqoriya düzgün deyil.');
