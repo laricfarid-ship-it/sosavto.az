@@ -1,7 +1,7 @@
 // Static informational pages: about, contact, terms and privacy.
 // Every statement here describes what the code does today; update this file when behaviour changes.
 // The contact details are shown on the contact and privacy pages. Fill them in once, here.
-export const contact={email:'',phone:''};
+export const contact={email:'sosavtoaz@gmail.com',phone:'010 215 90 55'};
 export const updated='16 oktyabr 2026';
 
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));

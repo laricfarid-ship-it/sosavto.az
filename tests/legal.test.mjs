@@ -64,3 +64,12 @@ test('footer links to all legal pages and the sitemap lists them',async()=>{
   assert.ok(app.includes(`'${file}':()=>legalRoute()`),'route '+file);
  }
 });
+
+test('the real contact details are configured and shown on contact and privacy pages',()=>{
+ assert.equal(legal.contact.email,'sosavtoaz@gmail.com');
+ for(const k of ['elaqe.html','mexfiyyet.html']){
+  const html=legal.legalPage(k).html;
+  assert.ok(html.includes('mailto:sosavtoaz@gmail.com')&&html.includes('tel:0102159055'),k);
+  assert.ok(!html.includes('tezliklə əlavə olunacaq'),k);
+ }
+});
