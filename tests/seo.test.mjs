@@ -35,6 +35,7 @@ test('sitemap lists only active, non-deleted listings and public pages',async()=
  assert.ok(r.body.startsWith('<?xml'));
  assert.match(r.body,new RegExp(`<loc>http://localhost:4173/elan\\?id=${ids.active}</loc><lastmod>\\d{4}-\\d\\d-\\d\\dT`));
  assert.ok(r.body.includes('<loc>http://localhost:4173/</loc>')&&r.body.includes('/kredit.html'));
+ for(const page of ['haqqinda','elaqe','qaydalar','mexfiyyet'])assert.ok(r.body.includes(`/${page}.html</loc>`),page);
  for(const k of ['pending','sold','deleted'])assert.ok(!r.body.includes(ids[k]),k);
  assert.ok(!r.body.includes('/avtoyuma.html')&&!r.body.includes('/sos.html'),'disabled modules stay out of the sitemap');
 });

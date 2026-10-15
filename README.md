@@ -87,6 +87,10 @@ Baxış sayı səhifənin açılma sayıdır, unikal ziyarətçi və saxtalaşd�
 - `server/seo.mjs` içindəki HTML qabığı `elan.html` ilə eyni olmalıdır; `tests/seo.test.mjs` bunu yoxlayır.
 - Hələ edilməyib: kateqoriya və marka üçün ayrıca indekslənən səhifələr, şəkil sitemap-ı, çoxdilli versiya.
 
+## Hüquqi səhifələr
+
+`haqqinda.html`, `elaqe.html`, `qaydalar.html`, `mexfiyyet.html` səhifələrinin mətni `assets/legal.js`-dədir və footer-dən, sitemap-dan bağlanır. Mətn koddakı real davranışı təsvir edir (hansı məlumat toplanır, hansı provayderlər istifadə olunur). Yeni provayder, izləyici və ya məlumat növü əlavə edəndə `mexfiyyet.html` mətnini də yeniləyin; `tests/legal.test.mjs` əsas faktları yoxlayır. Əlaqə e-poçtu/telefonu `legal.js`-də `contact` obyektindədir; boş olanda "tezliklə əlavə olunacaq" yazılır. Mətnlər hüquqi məsləhət deyil, dərc etməzdən əvvəl sahib tərəfindən oxunmalıdır.
+
 ## Arxitektura
 
 `assets/app.js` → `/api/index.mjs` → `server/db.mjs` → PostgreSQL.
