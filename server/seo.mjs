@@ -50,7 +50,7 @@ export function listingHead(l,origin){
 }
 
 export function sitemapXml(rows,origin,{wash=false,sos=false}={}){
- const pages=['/','/xarita.html','/kredit.html',...(wash?['/avtoyuma.html']:[]),...(sos?['/sos.html']:[])];
+ const pages=['/','/xarita.html','/kredit.html','/haqqinda.html','/elaqe.html','/qaydalar.html','/mexfiyyet.html',...(wash?['/avtoyuma.html']:[]),...(sos?['/sos.html']:[])];
  const urls=pages.map(p=>`<url><loc>${esc(origin+p)}</loc></url>`);
  for(const r of rows){
   if(!UUID.test(String(r.id)))continue;

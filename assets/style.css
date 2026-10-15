@@ -126,3 +126,4 @@
 @media(prefers-reduced-motion:reduce){.technol-art img{animation:none}}
 @media(min-width:1180px){.page.home-page>.technol-ad{width:112px;margin:0}}
 @media(min-width:1580px){.page.home-page>.technol-ad{width:160px}}
+.legal{max-width:760px;line-height:1.7}.legal h1{margin-bottom:6px}.legal h2{margin:28px 0 8px;font-size:1.15rem}.legal ul{padding-left:20px;margin:8px 0}.legal li{margin:6px 0}.legal p{margin:8px 0}.legal code{background:var(--panel2);padding:1px 6px;border-radius:6px}.footer .row{flex-wrap:wrap;gap:6px 16px}
