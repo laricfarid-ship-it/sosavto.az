@@ -222,7 +222,7 @@ const STRINGS = {
 };
 const LANG_KEY = "sosavto-language";
 function readLanguage() { try { return localStorage.getItem(LANG_KEY) || "az"; } catch { return "az"; } }
-function saveLanguage(lang) { try { saveLanguage(lang); } catch { /* Language still works for this page view. */ } }
+function saveLanguage(lang) { try { localStorage.setItem(LANG_KEY, lang); } catch { /* Language still works for this page view. */ } }
 const reverse = {};
 for (const [az, translations] of Object.entries(STRINGS)) {
   reverse[translations.en] = az;
