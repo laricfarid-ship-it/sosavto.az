@@ -58,6 +58,8 @@ const DICTIONARY = {
   }
 };
 let current = 'az';
+const originalText = new WeakMap();
+const originalAttributes = new WeakMap();
 const skipSelector = 'input,textarea,select,option,script,style,code,pre,[contenteditable="true"],.card h3.break,.card .price,.card-meta,.listing-description,[data-user-content],.user-content';
 function getLanguage(){return current;}
 function t(value){return DICTIONARY[current]?.[value] || value;}
@@ -67,7 +69,8 @@ function translateTree(root=document.body){
   const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
   for(const node of nodes){
     if(node.parentElement?.closest(skipSelector))continue;
-    const original=node.nodeValue;
+    if(!originalText.has(node))originalText.set(node,node.nodeValue);
+    const original=originalText.get(node);
     const trimmed=original.trim();
     if(!trimmed)continue;
     const translated=t(trimmed);
@@ -76,8 +79,10 @@ function translateTree(root=document.body){
   root.querySelectorAll?.('[placeholder],[aria-label],[title]').forEach(el=>{
     if(el.closest(skipSelector))return;
     for(const attr of ['placeholder','aria-label','title']){
-      const value=el.getAttribute(attr);
-      if(value&&t(value)!==value)el.setAttribute(attr,t(value));
+      let saved=originalAttributes.get(el);if(!saved){saved={};originalAttributes.set(el,saved);}
+      if(!(attr in saved))saved[attr]=el.getAttribute(attr);
+      const value=saved[attr];
+      if(value&&t(value)!==value)el.setAttribute(attr,t(value));else if(value)el.setAttribute(attr,value);
     }
   });
 }
@@ -110,7 +115,7 @@ function initI18n(){
   if(!window.__sosavtoI18nObserver){
     const observer=new MutationObserver(records=>{
       for(const record of records){
-        if(record.type==='childList')record.addedNodes.forEach(node=>{if(node.nodeType===Node.ELEMENT_NODE)translateTree(node);else if(node.nodeType===Node.TEXT_NODE){const p=node.parentElement;if(p&&!p.closest(skipSelector)){const old=node.nodeValue.trim();if(old){const translated=t(old);if(old!==translated)node.nodeValue=node.nodeValue.replace(old,translated);}}}});
+        if(record.type==='childList')record.addedNodes.forEach(node=>{if(node.nodeType===Node.ELEMENT_NODE)translateTree(node);else if(node.nodeType===Node.TEXT_NODE){const p=node.parentElement;if(p&&!p.closest(skipSelector)){if(!originalText.has(node))originalText.set(node,node.nodeValue);const source=originalText.get(node),old=source.trim();if(old){const translated=t(old);node.nodeValue=source.replace(old,translated);}}}});
       }
     });
     observer.observe(document.body,{childList:true,subtree:true});
