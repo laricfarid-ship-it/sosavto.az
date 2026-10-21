@@ -28,6 +28,17 @@ const DICTIONARY = {
     'İstifadə şərtləri':'Terms of use','Məxfilik siyasəti':'Privacy policy','SosAvto yüklənir…':'Loading SosAvto…',
     'Xidmət növü':'Service type','İş saatları':'Opening hours','Detalın növü':'Part type','Sığorta növü':'Insurance type','Sığorta şirkəti':'Insurance company','Qeydiyyat nişanı':'License plate',
     'Yenidən göndərildi':'Resubmitted','Bildiriş yoxdur':'No notifications','Nəticə tapılmadı':'No results found'
+    'Əsas menyu':'Main menu','Əməliyyatın təsdiqi':'Confirm action','Saytdan istifadə etmək üçün JavaScript-i aktivləşdirin.':'Enable JavaScript to use this site.',
+    'Elanlara qayıt':'Back to listings','Ana səhifəyə qayıt':'Back to home','Elana bax':'View listing','Elanı təsdiqlə':'Approve listing','Elanı rədd et':'Reject listing',
+    'Təsdiqlə':'Approve','Rədd et':'Reject','Blokla':'Block','Blokdan çıxar':'Unblock','Baxıldı kimi qeyd et':'Mark as reviewed',
+    'Şikayətlər':'Reports','Açıq şikayət yoxdur.':'No open reports.','Yoxlanış gözləyən elanlar':'Listings awaiting review','Gözləyən elan yoxdur':'No pending listings',
+    'Son 100 istifadəçi':'Latest 100 users','Əməliyyat tarixçəsi':'Activity log','Ad':'Name','Status':'Status','Əməliyyat':'Action','Tarix':'Date',
+    'İş saatları':'Opening hours','Xidmət xəritəsi':'Service map','Məni tap':'Find me','Məsafə':'Distance','Reytinq':'Rating','Boş yerlər':'Available slots',
+    'Daxil ol':'Sign in','Qeydiyyatdan keç':'Create account','Hesab yarat':'Create account','Telefon nömrəsi':'Phone number','E-poçt':'Email',
+    'Elan başlığı':'Listing title','Elan təsviri':'Listing description','Şəkil əlavə et':'Add photo','Şəkilləri seç':'Choose photos',
+    'Qiyməti daxil edin':'Enter a price','Şəhər seçin':'Select a city','Axtarış sözü':'Search term','Nəticələr':'Results',
+    'İstifadəçi hesabı':'User account','İdarəçi':'Administrator','Bloklanıb':'Blocked','Əməliyyat uğurla tamamlandı.':'Operation completed successfully.',
+    'Məlumat tapılmadı':'No information found','Xidmət hazırda əlçatan deyil.':'The service is currently unavailable.'
   },
   ru: {
     'Elanlar':'Объявления','Servis xəritəsi':'Карта сервисов','AI köməkçi':'ИИ-помощник','Seçilmişlər':'Избранное','Daxil ol':'Войти','Elan ver':'Подать объявление',
@@ -55,6 +66,17 @@ const DICTIONARY = {
     'İstifadə şərtləri':'Условия использования','Məxfilik siyasəti':'Политика конфиденциальности','SosAvto yüklənir…':'Загрузка SosAvto…',
     'Xidmət növü':'Тип услуги','İş saatları':'Часы работы','Detalın növü':'Тип запчасти','Sığorta növü':'Тип страхования','Sığorta şirkəti':'Страховая компания','Qeydiyyat nişanı':'Номерной знак',
     'Bildiriş yoxdur':'Нет уведомлений','Nəticə tapılmadı':'Результаты не найдены'
+    'Əsas menyu':'Главное меню','Əməliyyatın təsdiqi':'Подтверждение действия','Saytdan istifadə etmək üçün JavaScript-i aktivləşdirin.':'Включите JavaScript, чтобы пользоваться сайтом.',
+    'Elanlara qayıt':'Вернуться к объявлениям','Ana səhifəyə qayıt':'На главную','Elana bax':'Смотреть объявление','Elanı təsdiqlə':'Подтвердить объявление','Elanı rədd et':'Отклонить объявление',
+    'Təsdiqlə':'Подтвердить','Rədd et':'Отклонить','Blokla':'Заблокировать','Blokdan çıxar':'Разблокировать','Baxıldı kimi qeyd et':'Отметить как просмотренное',
+    'Şikayətlər':'Жалобы','Açıq şikayət yoxdur.':'Нет открытых жалоб.','Yoxlanış gözləyən elanlar':'Объявления на проверке','Gözləyən elan yoxdur':'Нет объявлений на проверке',
+    'Son 100 istifadəçi':'Последние 100 пользователей','Əməliyyat tarixçəsi':'Журнал действий','Ad':'Имя','Status':'Статус','Əməliyyat':'Действие','Tarix':'Дата',
+    'Xidmət xəritəsi':'Карта сервисов','Məni tap':'Найти меня','Məsafə':'Расстояние','Reytinq':'Рейтинг','Boş yerlər':'Свободные места',
+    'Hesab yarat':'Создать аккаунт','Telefon nömrəsi':'Номер телефона','E-poçt':'Электронная почта',
+    'Elan başlığı':'Заголовок объявления','Elan təsviri':'Описание объявления','Şəkil əlavə et':'Добавить фото','Şəkilləri seç':'Выбрать фото',
+    'Qiyməti daxil edin':'Введите цену','Şəhər seçin':'Выберите город','Axtarış sözü':'Поисковый запрос','Nəticələr':'Результаты',
+    'İstifadəçi hesabı':'Аккаунт пользователя','İdarəçi':'Администратор','Bloklanıb':'Заблокирован','Əməliyyat uğurla tamamlandı.':'Операция успешно завершена.',
+    'Məlumat tapılmadı':'Информация не найдена','Xidmət hazırda əlçatan deyil.':'Сервис сейчас недоступен.'
   }
 };
 let current = 'az';
@@ -64,7 +86,7 @@ const skipSelector = 'input,textarea,select,option,script,style,code,pre,[conten
 function getLanguage(){return current;}
 function t(value){return DICTIONARY[current]?.[value] || value;}
 function translateTree(root=document.body){
-  if(current==='az'||!root)return;
+  if(!root)return;
   const walker=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);
   const nodes=[];while(walker.nextNode())nodes.push(walker.currentNode);
   for(const node of nodes){
