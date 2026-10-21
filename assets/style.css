@@ -136,3 +136,10 @@
 :root[data-theme=dark] .theme-toggle .i-sun{display:block}:root[data-theme=dark] .theme-toggle .i-moon{display:none}
 @media(max-width:720px){.theme-toggle{width:38px;height:38px}}
 @media(max-width:400px){.nav-actions{gap:4px}.nav-actions .btn.primary .icon{display:none}}
+
+
+/* Compact persistent site-language selector */
+.language-picker{display:inline-flex;align-items:center;gap:4px;border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:3px 7px;color:var(--muted);min-width:66px;height:40px}
+.language-picker .language-globe{font-size:17px;line-height:1}
+.language-picker select{border:0;background:transparent;color:var(--text);font:inherit;font-size:.82rem;font-weight:750;outline-offset:2px;cursor:pointer;padding:4px 1px;min-width:36px}
+@media(max-width:720px){.language-picker{height:36px;padding:2px 5px;gap:2px;min-width:58px}.language-picker select{font-size:.75rem;min-width:31px}.language-picker .language-globe{font-size:14px}}
