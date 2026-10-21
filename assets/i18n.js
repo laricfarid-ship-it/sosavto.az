@@ -70,7 +70,7 @@ function translateText(text, lang) {
   const trimmed = text.trim();
   if (!trimmed) return text;
   const az = reverse[trimmed] || trimmed;
-  const translated = STRINGS[az]?.[lang];
+  const translated = lang === "az" ? az : STRINGS[az]?.[lang];
   if (!translated) return text;
   return text.replace(trimmed, translated);
 }
@@ -116,6 +116,6 @@ export function initLanguage() {
   };
   if (!window.__sosavtoLanguageObserver) {
     window.__sosavtoLanguageObserver = new MutationObserver(() => applyLanguage(localStorage.getItem(LANG_KEY) || "az"));
-    window.__sosavtoLanguageObserver.observe(document.body, {childList:true,subtree:true,characterData:true});
+    window.__sosavtoLanguageObserver.observe(document.body, {childList:true,subtree:true});
   }
 }
