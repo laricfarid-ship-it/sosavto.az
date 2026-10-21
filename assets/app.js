@@ -1,3 +1,4 @@
+import {initI18n,mountLanguagePicker} from './i18n.js';
 import {technolAds} from './technol-ads.js';
 import {mountSpinViewer} from './spin-viewer.js';
 import {mountSpinUploader} from './spin-uploader.js';
@@ -283,7 +284,7 @@ async function init(){
  // Remove obsolete browser credentials from the original prototype. They never authorize API access.
  try{for(const k of ['isLoggedIn','sosavto_logged_user','sosavto_user_name','sosavto_users','redirectAfterLogin'])localStorage.removeItem(k);sessionStorage.removeItem('sosavto_logged');}catch{}
  const [authState,settings]=await Promise.allSettled([api('/me'),api('/config')]);if(authState.status==='fulfilled')me=authState.value.user;if(settings.status==='fulfilled')config=settings.value;
- header();if(me){try{favorites=new Set((await api('/favorites')).listings.map(l=>l.id));}catch{}}
+ header();initI18n();mountLanguagePicker();if(me){try{favorites=new Set((await api('/favorites')).listings.map(l=>l.id));}catch{}}
  const sosPage=async()=>{const {roadside}=await import('./sos.js');await roadside({main,me,config,api,esc,toast,task,mapLibrary});};
  const washPage=async()=>{const {carwash}=await import('./wash.js');await carwash({main,me,config,api,esc,toast,task});};
  const routes={'kredit.html':()=>{main.innerHTML='<p><a href="index.html">← Elanlara qayıt</a></p>'+creditMarkup();mountCredit(main);},'avtoyuma.html':washPage,'avtoyuma-panel.html':washPage,'sos.html':sosPage,'sos-usta.html':sosPage,'index.html':home,'muqayise.html':comparisonPage,'sifre-berpa.html':passwordRecovery,'giris.html':()=>auth(false),'qeydiyyat.html':()=>auth(true),'kabinet.html':profile,'menim-elanlarim.html':()=>collection('my-listings'),'favoriler.html':()=>collection('favorites'),'elan-ver.html':listingForm,'elan.html':detail,'haqqinda.html':()=>legalRoute(),'elaqe.html':()=>legalRoute(),'qaydalar.html':()=>legalRoute(),'mexfiyyet.html':()=>legalRoute(),'xarita.html':mapPage,'ai.html':assistant,'admin.html':admin,'bildirisler.html':notifications};
