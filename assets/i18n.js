@@ -221,6 +221,8 @@ const STRINGS = {
   "Şifrəniz yeniləndi. Yeni şifrə ilə daxil olun.": {en:"Your password has been reset. Log in with your new password.",ru:"Пароль сброшен. Войдите с новым паролем."}
 };
 const LANG_KEY = "sosavto-language";
+function readLanguage() { try { return localStorage.getItem(LANG_KEY) || "az"; } catch { return "az"; } }
+function saveLanguage(lang) { try { saveLanguage(lang); } catch { /* Language still works for this page view. */ } }
 const reverse = {};
 for (const [az, translations] of Object.entries(STRINGS)) {
   reverse[translations.en] = az;
@@ -235,7 +237,7 @@ function translateText(text, lang) {
   return text.replace(trimmed, translated);
 }
 function excluded(node) {
-  return node.closest("script,style,textarea,input,select,option,.break,.listing-title,[data-user-content],.user-content,.user-description,.listing-description,[data-user-generated]");
+  return node.closest("script,style,textarea,input,.break,.listing-title,[data-user-content],.user-content,.user-description,.listing-description,[data-user-generated]");
 }
 function applyLanguage(lang) {
   const root = document.documentElement;
@@ -265,7 +267,7 @@ function applyLanguage(lang) {
 export function initLanguage() {
   const picker = document.getElementById("site-language");
   if (!picker) return;
-  let lang = localStorage.getItem(LANG_KEY) || "az";
+  let lang = readLanguage();
   if (!["az", "en", "ru"].includes(lang)) lang = "az";
   picker.value = lang;
   applyLanguage(lang);
@@ -275,7 +277,7 @@ export function initLanguage() {
     applyLanguage(lang);
   };
   if (!window.__sosavtoLanguageObserver) {
-    window.__sosavtoLanguageObserver = new MutationObserver(() => applyLanguage(localStorage.getItem(LANG_KEY) || "az"));
+    window.__sosavtoLanguageObserver = new MutationObserver(() => applyLanguage(readLanguage()));
     window.__sosavtoLanguageObserver.observe(document.body, {childList:true,subtree:true});
   }
 }
