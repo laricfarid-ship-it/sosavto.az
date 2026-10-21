@@ -81,7 +81,7 @@ function applyLanguage(lang) {
   const root = document.documentElement;
   root.lang = lang;
   document.querySelectorAll("body *").forEach(el => {
-    if (el.children.length === 0 && !excluded(el)) {
+    if (!excluded(el)) {
       for (const node of el.childNodes) {
         if (node.nodeType === Node.TEXT_NODE) node.nodeValue = translateText(node.nodeValue, lang);
       }
