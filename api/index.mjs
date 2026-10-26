@@ -53,7 +53,7 @@ export default async function handler(req,res){
  const u=(await query('SELECT * FROM users WHERE id=$1',[id])).rows[0];await createSession(res,u);return json(res,201,{user:safeUser(u)});
  }
  const u=(await query('SELECT * FROM users WHERE email=$1 OR username=$1',[identifier])).rows[0];
- const valid=await bcrypt.compare(password,u?.password_hash||'$2b$12$XU7.1nUi/iCTy4lYfsGO9DZdvNU91FdY56dLg47/O85VzVFhUUe');
+ const valid=await bcrypt.compare(password,u?.password_hash||'$2b$12$XU7.1nUi/iCTy4lYfsZnGO9DZdvNU91FdY56dLg47/O85VzVFhUUe');
  if(!u||!valid||u.status!=='active')fail(401,'Giriş məlumatları düzgün deyil.');
  if(u.role==='admin'&&(await query('SELECT enabled FROM admin_totp WHERE user_id=$1',[u.id])).rows[0]?.enabled){
   await issueAdminChallenge(res,u);return json(res,200,{requires2fa:true});
