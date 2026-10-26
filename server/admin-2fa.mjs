@@ -15,7 +15,7 @@ export function verifyTotp(secret,code,now=Date.now()){if(!/^\d{6}$/.test(String
 export async function admin2fa(req,res,user,path,method){
  if(path==='/api/admin/2fa/status'&&method==='GET'){requireAdmin(user);const r=await query('SELECT enabled FROM admin_totp WHERE user_id=$1',[user.id]);return {enabled:!!r.rows[0]?.enabled};}
  if(path==='/api/admin/2fa/setup'&&method==='POST'){
-  requireAdmin(user);await rateLimit('admin2fa-setup:'+user.id,5,900);const b=await body(req);if(!b.password||!await bcrypt.compare(String(b.password),user.password_hash))fail(401,'Quraşdırmanı təsdiqləmək üçün cari şifrənizi düzgün daxil edin.');
+  requireAdmin(user);await rateLimit('admin2fa-setup:'+user.id,5,900);const b=await body(req);if(!b.password||!await bcrypt.compare(String(b.password),user.password_hash))fail(401,'Quraşdırmanı təsdiqləmək üçün cari şifrənizi düzgün daxil edin.');if((await query('SELECT enabled FROM admin_totp WHERE user_id=$1',[user.id])).rows[0]?.enabled)fail(409,'İki mərhələli doğrulama artıq aktivdir.');
   const secret=newTotpSecret();const encrypted=encryptSecret(secret);await query('INSERT INTO admin_totp(user_id,secret,enabled,updated_at) VALUES($1,$2,false,now()) ON CONFLICT(user_id) DO UPDATE SET secret=EXCLUDED.secret,enabled=false,updated_at=now()',[user.id,encrypted]);
   const issuer='SosAvto',label=encodeURIComponent(user.email||user.username),uri='otpauth://totp/'+encodeURIComponent(issuer)+':'+label+'?secret='+secret+'&issuer='+encodeURIComponent(issuer)+'&algorithm=SHA1&digits=6&period=30';
   return {secret,otpauthUri:uri,manualEntry:true};
