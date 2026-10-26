@@ -32,7 +32,7 @@ export async function admin2fa(req,res,user,path,method){
 }
 export async function verifyAdminLogin(req,res,user,code){
  const row=(await query('SELECT secret,enabled FROM admin_totp WHERE user_id=$1',[user.id])).rows[0];
- if(!row?.enabled)return false;
+ if(!row?.enabled)fail(401,'İki mərhələli doğrulama aktiv deyil və ya giriş sorğusu etibarsızdır.');
  await rateLimit('admin2fa-login:'+user.id,8,900);
  if(verifyTotp(decryptSecret(row.secret),code))return true;
  const backup=String(code||'').toLowerCase();if(!/^[a-f0-9]{16}$/.test(backup))fail(401,'Authenticator kodu düzgün deyil.');
