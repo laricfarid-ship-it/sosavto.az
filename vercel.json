@@ -46,7 +46,7 @@
       ]
     }
   ],
-  "buildCommand": "npm run build",
+  "buildCommand": "npm test && npm run build",
   "outputDirectory": "public",
   "framework": null
 }
