@@ -31,3 +31,16 @@ CREATE TABLE IF NOT EXISTS password_resets (
 );
 CREATE INDEX IF NOT EXISTS password_resets_user ON password_resets(user_id);
 CREATE INDEX IF NOT EXISTS password_resets_expiry ON password_resets(expires_at);
+
+CREATE TABLE IF NOT EXISTS admin_totp (
+ user_id uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+ secret text NOT NULL,
+ enabled boolean NOT NULL DEFAULT false,
+ updated_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE TABLE IF NOT EXISTS admin_login_challenges (
+ token_hash text PRIMARY KEY,
+ user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ expires_at timestamptz NOT NULL
+);
+CREATE INDEX IF NOT EXISTS admin_login_challenges_expiry ON admin_login_challenges(expires_at);
