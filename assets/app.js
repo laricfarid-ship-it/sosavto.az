@@ -1,1 +1,2 @@
-RECOVER_FROM_FILE
+import {technolAds} from './technol-ads.js';
+// PLACEHOLDER - will replace
