@@ -194,10 +194,10 @@ async function auth(register=false){
  $('#show-password').onchange=e=>$('#auth').elements.password.type=e.target.checked?'text':'password';
  let secondFactor=false;
  $('#auth').onsubmit=async e=>{e.preventDefault();const button=e.target.querySelector('button');button.disabled=true;$('#auth-error').textContent='';try{
-  if(secondFactor){await api('/admin/2fa/verify-login','POST',{code:e.target.elements.totp.value});const next=params.get('next');location.href=next&&/^\/[a-z0-9-]+\.html(?:\?[^\r\n]*)?$.test(next)?next:'kabinet.html';return;}
+  if(secondFactor){await api('/admin/2fa/verify-login','POST',{code:e.target.elements.totp.value});const next=params.get('next');location.href=next&&/^\/[a-z0-9-]+\.html(?:\?[^\r\n]*)?$/.test(next)?next:'kabinet.html';return;}
   const result=await api(register?'/register':'/login','POST',Object.fromEntries(new FormData(e.target)));
   if(result.requires2fa){secondFactor=true;e.target.elements.password.value='';for(const el of [...e.target.elements])if(el.name&&el.name!=='totp')el.disabled=true;const field=document.createElement('label');field.className='field';field.innerHTML='Google Authenticator kodu<input name="totp" inputmode="numeric" autocomplete="one-time-code" pattern="(?:[0-9]{6}|[a-fA-F0-9]{16})" minlength="6" maxlength="16" required aria-label="Authenticator və ya bərpa kodu">';$('#auth-error').className='notice';$('#auth-error').textContent='Admin hesabı üçün ikinci təsdiq tələb olunur. Google Authenticator-da görünən 6 rəqəmli kodu daxil edin.';$('#auth-error').after(field);button.textContent='Kodu təsdiqlə';field.querySelector('input').focus();return;}
-  const next=params.get('next');location.href=next&&/^\/[a-z0-9-]+\.html(?:\?[^\r\n]*)?$.test(next)?next:'kabinet.html';
+  const next=params.get('next');location.href=next&&/^\/[a-z0-9-]+\.html(?:\?[^\r\n]*)?$/.test(next)?next:'kabinet.html';
  }catch(err){$('#auth-error').className='error';$('#auth-error').textContent=err.message;}finally{button.disabled=false;}};
 }
 async function passwordRecovery(){
