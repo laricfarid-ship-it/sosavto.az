@@ -21,7 +21,7 @@ export async function admin2fa(req,res,user,path,method){
   return {secret,otpauthUri:uri,manualEntry:true};
  }
  if(path==='/api/admin/2fa/confirm'&&method==='POST'){
-  requireAdmin(user);await rateLimit('admin2fa-confirm:'+user.id,10,900);const b=await body(req);const r=(await query('SELECT secret FROM admin_totp WHERE user_id=$1 AND enabled=false',[user.id])).rows[0];if(!r||!verifyTotp(r.secret,b.code))fail(400,'Kod düzgün deyil. Authenticator-da göstərilən cari 6 rəqəmli kodu daxil edin.');
+  requireAdmin(user);await rateLimit('admin2fa-confirm:'+user.id,10,900);const b=await body(req);const r=(await query('SELECT secret FROM admin_totp WHERE user_id=$1 AND enabled=false',[user.id])).rows[0];if(!r||!verifyTotp(decryptSecret(r.secret),b.code))fail(400,'Kod düzgün deyil. Authenticator-da göstərilən cari 6 rəqəmli kodu daxil edin.');
   const backupCodes=Array.from({length:10},()=>randomBytes(8).toString('hex'));await query('DELETE FROM admin_totp_backup_codes WHERE user_id=$1',[user.id]);for(const code of backupCodes)await query('INSERT INTO admin_totp_backup_codes(user_id,code_hash) VALUES($1,$2)',[user.id,hash(code)]);await query('UPDATE admin_totp SET enabled=true,updated_at=now() WHERE user_id=$1',[user.id]);await query('DELETE FROM sessions WHERE user_id=$1',[user.id]);await createSession(res,user);return {ok:true,enabled:true,backupCodes};
  }
  if(path==='/api/admin/2fa/disable'&&method==='POST'){
