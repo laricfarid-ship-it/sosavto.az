@@ -1,6 +1,6 @@
 import {createHmac,randomBytes,createHash,timingSafeEqual} from 'node:crypto';
 import {query,transaction} from './db.mjs';
-import {fail,hash,rateLimit,requireAdmin,body} from './security.mjs';
+import {fail,hash,rateLimit,requireAdmin,body,createSession} from './security.mjs';
 
 const alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 function base32(bytes){let bits=0,value=0,out='';for(const b of bytes){value=(value<<8)|b;bits+=8;while(bits>=5){out+=alphabet[(value>>>(bits-5))&31];bits-=5;}}if(bits)out+=alphabet[(value<<(5-bits))&31];return out;}
@@ -18,7 +18,7 @@ export async function admin2fa(req,res,user,path,method){
  }
  if(path==='/api/admin/2fa/confirm'&&method==='POST'){
   requireAdmin(user);await rateLimit('admin2fa-confirm:'+user.id,10,900);const b=await body(req);const r=(await query('SELECT secret FROM admin_totp WHERE user_id=$1 AND enabled=false',[user.id])).rows[0];if(!r||!verifyTotp(r.secret,b.code))fail(400,'Kod düzgün deyil. Authenticator-da göstərilən cari 6 rəqəmli kodu daxil edin.');
-  await query('UPDATE admin_totp SET enabled=true,updated_at=now() WHERE user_id=$1',[user.id]);return {ok:true,enabled:true};
+  await query('UPDATE admin_totp SET enabled=true,updated_at=now() WHERE user_id=$1',[user.id]);await query('DELETE FROM sessions WHERE user_id=$1',[user.id]);await createSession(res,user);return {ok:true,enabled:true};
  }
  if(path==='/api/admin/2fa/disable'&&method==='POST'){
   requireAdmin(user);await rateLimit('admin2fa-disable:'+user.id,5,900);const b=await body(req);const r=(await query('SELECT secret,enabled FROM admin_totp WHERE user_id=$1',[user.id])).rows[0];if(!r?.enabled||!verifyTotp(r.secret,b.code))fail(400,'Kod düzgün deyil. 2FA söndürülmədi.');
