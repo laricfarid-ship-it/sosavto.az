@@ -44,3 +44,12 @@ CREATE TABLE IF NOT EXISTS admin_login_challenges (
  expires_at timestamptz NOT NULL
 );
 CREATE INDEX IF NOT EXISTS admin_login_challenges_expiry ON admin_login_challenges(expires_at);
+
+CREATE TABLE IF NOT EXISTS admin_totp_backup_codes (
+ user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ code_hash text NOT NULL UNIQUE,
+ used_at timestamptz,
+ created_at timestamptz NOT NULL DEFAULT now(),
+ PRIMARY KEY(user_id,code_hash)
+);
+CREATE INDEX IF NOT EXISTS admin_totp_backup_user ON admin_totp_backup_codes(user_id,used_at);
