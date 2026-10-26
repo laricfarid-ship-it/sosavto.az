@@ -12,7 +12,8 @@ test('TOTP rejects malformed and incorrect codes',()=>{
  const secret=newTotpSecret();
  assert.equal(verifyTotp(secret,'123'),false);
  assert.equal(verifyTotp(secret,'abcdef'),false);
- assert.equal(verifyTotp(secret,'000000'),false);
+ const wrong=String((Number(totp(secret))+1)%1000000).padStart(6,'0');
+ assert.equal(verifyTotp(secret,wrong),false);
 });
 test('TOTP accepts a small clock drift but not a distant time-step',()=>{
  const secret=newTotpSecret(),now=Date.now();
