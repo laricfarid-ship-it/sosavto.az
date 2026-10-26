@@ -22,11 +22,11 @@ export async function admin2fa(req,res,user,path,method){
  }
  if(path==='/api/admin/2fa/confirm'&&method==='POST'){
   requireAdmin(user);await rateLimit('admin2fa-confirm:'+user.id,10,900);const b=await body(req);const r=(await query('SELECT secret FROM admin_totp WHERE user_id=$1 AND enabled=false',[user.id])).rows[0];if(!r||!verifyTotp(r.secret,b.code))fail(400,'Kod düzgün deyil. Authenticator-da göstərilən cari 6 rəqəmli kodu daxil edin.');
-  await query('UPDATE admin_totp SET enabled=true,updated_at=now() WHERE user_id=$1',[user.id]);await query('DELETE FROM sessions WHERE user_id=$1',[user.id]);await createSession(res,user);return {ok:true,enabled:true};
+  const backupCodes=Array.from({length:10},()=>randomBytes(8).toString('hex'));await query('DELETE FROM admin_totp_backup_codes WHERE user_id=$1',[user.id]);for(const code of backupCodes)await query('INSERT INTO admin_totp_backup_codes(user_id,code_hash) VALUES($1,$2)',[user.id,hash(code)]);await query('UPDATE admin_totp SET enabled=true,updated_at=now() WHERE user_id=$1',[user.id]);await query('DELETE FROM sessions WHERE user_id=$1',[user.id]);await createSession(res,user);return {ok:true,enabled:true,backupCodes};
  }
  if(path==='/api/admin/2fa/disable'&&method==='POST'){
   requireAdmin(user);await rateLimit('admin2fa-disable:'+user.id,5,900);const b=await body(req);const r=(await query('SELECT secret,enabled FROM admin_totp WHERE user_id=$1',[user.id])).rows[0];if(!r?.enabled||!verifyTotp(decryptSecret(r.secret),b.code))fail(400,'Kod düzgün deyil. 2FA söndürülmədi.');
-  await query('DELETE FROM admin_totp WHERE user_id=$1',[user.id]);return {ok:true,enabled:false};
+  await query('DELETE FROM admin_totp WHERE user_id=$1',[user.id]);await query('DELETE FROM admin_totp_backup_codes WHERE user_id=$1',[user.id]);return {ok:true,enabled:false};
  }
  return null;
 }
@@ -34,7 +34,9 @@ export async function verifyAdminLogin(req,res,user,code){
  const row=(await query('SELECT secret,enabled FROM admin_totp WHERE user_id=$1',[user.id])).rows[0];
  if(!row?.enabled)return false;
  await rateLimit('admin2fa-login:'+user.id,8,900);
- if(!verifyTotp(decryptSecret(row.secret),code))fail(401,'Authenticator kodu düzgün deyil.');
+ if(verifyTotp(decryptSecret(row.secret),code))return true;
+ const backup=String(code||'').toLowerCase();if(!/^[a-f0-9]{16}$/.test(backup))fail(401,'Authenticator kodu düzgün deyil.');
+ const used=await query('DELETE FROM admin_totp_backup_codes WHERE user_id=$1 AND code_hash=$2 AND used_at IS NULL RETURNING code_hash',[user.id,hash(backup)]);if(!used.rows.length)fail(401,'Authenticator və ya bərpa kodu düzgün deyil və ya artıq istifadə olunub.');
  return true;
 }
 export async function issueAdminChallenge(res,user){
