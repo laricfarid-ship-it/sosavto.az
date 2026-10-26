@@ -31,7 +31,7 @@ export default async function handler(req,res){
   const pending=await challengeUser(req);if(!pending)fail(401,'Giriş müddəti bitdi. Yenidən daxil olun.');
   await rateLimit(`admin2fa-challenge:${pending.id}`,8,900);const b=await body(req);await verifyAdminLogin(req,res,pending,b.code);
   await transaction(async c=>{await c.query('DELETE FROM admin_login_challenges WHERE user_id=$1',[pending.id]);});
-  await consumeChallenge(req,res);await createSession(res,pending);return json(res,200,{user:safeUser(pending)});
+  const clearChallengeCookie=await consumeChallenge(req);const sessionCookie=await createSession(res,pending);res.setHeader('Set-Cookie',[sessionCookie,clearChallengeCookie]);return json(res,200,{user:safeUser(pending)});
  }
  if(user&&!['GET','HEAD','OPTIONS'].includes(method))await rateLimit(`write:${user.id}`,120,60);
  if(path.startsWith('/api/wash/'))return json(res,200,await wash(req,user,path,method));
