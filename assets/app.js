@@ -282,7 +282,7 @@ async function assistant(){
  $('#chat-form').onsubmit=e=>{e.preventDefault();task(e.submitter,async()=>{const input=e.target.elements.message;const value=input.value;const bubble=document.createElement('div');bubble.className='bubble user';bubble.textContent=value;$('#chat-history').append(bubble);input.value='';const response=document.createElement('div');response.className='bubble';response.textContent='Cavab hazırlanır…';$('#chat-history').append(response);try{const r=await api('/assistant','POST',{message:value});response.textContent=r.answer;}catch(err){response.textContent=err.message;}});};
 }
 async function renderAdmin2FA(){
- const section=document.createElement('section');section.className='panel form-section';section.id='admin-2fa-panel';section.innerHTML='<h2>İki mərhələli doğrulama (2FA)</h2><p class="muted">Google Authenticator ilə admin girişini əlavə kodla qoruyun.</p><div id="admin-2fa-body">${loader()}</div>';
+ const previous=$('#admin-2fa-panel');previous?.remove();const section=document.createElement('section');section.className='panel form-section';section.id='admin-2fa-panel';section.innerHTML='<h2>İki mərhələli doğrulama (2FA)</h2><p class="muted">Google Authenticator ilə admin girişini əlavə kodla qoruyun.</p><div id="admin-2fa-body">'+loader()+'</div>';
  $('#admin-content').prepend(section);const bodyEl=$('#admin-2fa-body');
  try{
   const status=await api('/admin/2fa/status');
