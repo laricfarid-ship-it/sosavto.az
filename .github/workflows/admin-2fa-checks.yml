@@ -23,5 +23,5 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
-      - run: npm test
+      - run: env -u VERCEL -u DATABASE_URL LOCAL_DATABASE=true LOCAL_DB_PATH=memory:// APP_ORIGIN=http://localhost:4173 npm test
       - run: npm run build
