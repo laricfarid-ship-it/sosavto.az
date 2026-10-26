@@ -1,7 +1,11 @@
-import {createHmac,randomBytes,createHash,timingSafeEqual} from 'node:crypto';
-import {query,transaction} from './db.mjs';
+import {createHmac,randomBytes,createCipheriv,createDecipheriv,timingSafeEqual} from 'node:crypto';
+import bcrypt from 'bcryptjs';
+import {query} from './db.mjs';
 import {fail,hash,rateLimit,requireAdmin,body,createSession} from './security.mjs';
 
+function encryptionKey(){const value=process.env.ADMIN_2FA_ENCRYPTION_KEY||'';if(!/^[a-f0-9]{64}$/i.test(value))fail(503,'2FA təhlükəsizlik açarı konfiqurasiya edilməyib.');return Buffer.from(value,'hex');}
+function encryptSecret(secret){const iv=randomBytes(12),cipher=createCipheriv('aes-256-gcm',encryptionKey(),iv);const encrypted=Buffer.concat([cipher.update(secret,'utf8'),cipher.final()]);return 'v1:'+iv.toString('hex')+':'+cipher.getAuthTag().toString('hex')+':'+encrypted.toString('hex');}
+function decryptSecret(value){const [version,iv,tag,data]=String(value).split(':');if(version!=='v1'||![iv,tag,data].every(Boolean))fail(503,'2FA açarı oxuna bilmədi.');try{const decipher=createDecipheriv('aes-256-gcm',encryptionKey(),Buffer.from(iv,'hex'));decipher.setAuthTag(Buffer.from(tag,'hex'));return Buffer.concat([decipher.update(Buffer.from(data,'hex')),decipher.final()]).toString('utf8');}catch{fail(503,'2FA açarı deşifrə edilə bilmədi.');}}
 const alphabet='ABCDEFGHIJKLMNOPQRSTUVWXYZ234567';
 function base32(bytes){let bits=0,value=0,out='';for(const b of bytes){value=(value<<8)|b;bits+=8;while(bits>=5){out+=alphabet[(value>>>(bits-5))&31];bits-=5;}}if(bits)out+=alphabet[(value<<(5-bits))&31];return out;}
 function unbase32(s){let bits=0,value=0,out=[];for(const c of s){const n=alphabet.indexOf(c);if(n<0)throw Error('Invalid base32');value=(value<<5)|n;bits+=5;if(bits>=8){out.push((value>>>(bits-8))&255);bits-=8;}}return Buffer.from(out);}
@@ -11,8 +15,8 @@ export function verifyTotp(secret,code,now=Date.now()){if(!/^\d{6}$/.test(String
 export async function admin2fa(req,res,user,path,method){
  if(path==='/api/admin/2fa/status'&&method==='GET'){requireAdmin(user);const r=await query('SELECT enabled FROM admin_totp WHERE user_id=$1',[user.id]);return {enabled:!!r.rows[0]?.enabled};}
  if(path==='/api/admin/2fa/setup'&&method==='POST'){
-  requireAdmin(user);await rateLimit('admin2fa-setup:'+user.id,5,900);
-  const secret=newTotpSecret();await query('INSERT INTO admin_totp(user_id,secret,enabled,updated_at) VALUES($1,$2,false,now()) ON CONFLICT(user_id) DO UPDATE SET secret=EXCLUDED.secret,enabled=false,updated_at=now()',[user.id,secret]);
+  requireAdmin(user);await rateLimit('admin2fa-setup:'+user.id,5,900);const b=await body(req);if(!b.password||!await bcrypt.compare(String(b.password),user.password_hash))fail(401,'Quraşdırmanı təsdiqləmək üçün cari şifrənizi düzgün daxil edin.');
+  const secret=newTotpSecret();const encrypted=encryptSecret(secret);await query('INSERT INTO admin_totp(user_id,secret,enabled,updated_at) VALUES($1,$2,false,now()) ON CONFLICT(user_id) DO UPDATE SET secret=EXCLUDED.secret,enabled=false,updated_at=now()',[user.id,encrypted]);
   const issuer='SosAvto',label=encodeURIComponent(user.email||user.username),uri='otpauth://totp/'+encodeURIComponent(issuer)+':'+label+'?secret='+secret+'&issuer='+encodeURIComponent(issuer)+'&algorithm=SHA1&digits=6&period=30';
   return {secret,otpauthUri:uri,manualEntry:true};
  }
@@ -21,7 +25,7 @@ export async function admin2fa(req,res,user,path,method){
   await query('UPDATE admin_totp SET enabled=true,updated_at=now() WHERE user_id=$1',[user.id]);await query('DELETE FROM sessions WHERE user_id=$1',[user.id]);await createSession(res,user);return {ok:true,enabled:true};
  }
  if(path==='/api/admin/2fa/disable'&&method==='POST'){
-  requireAdmin(user);await rateLimit('admin2fa-disable:'+user.id,5,900);const b=await body(req);const r=(await query('SELECT secret,enabled FROM admin_totp WHERE user_id=$1',[user.id])).rows[0];if(!r?.enabled||!verifyTotp(r.secret,b.code))fail(400,'Kod düzgün deyil. 2FA söndürülmədi.');
+  requireAdmin(user);await rateLimit('admin2fa-disable:'+user.id,5,900);const b=await body(req);const r=(await query('SELECT secret,enabled FROM admin_totp WHERE user_id=$1',[user.id])).rows[0];if(!r?.enabled||!verifyTotp(decryptSecret(r.secret),b.code))fail(400,'Kod düzgün deyil. 2FA söndürülmədi.');
   await query('DELETE FROM admin_totp WHERE user_id=$1',[user.id]);return {ok:true,enabled:false};
  }
  return null;
@@ -30,7 +34,7 @@ export async function verifyAdminLogin(req,res,user,code){
  const row=(await query('SELECT secret,enabled FROM admin_totp WHERE user_id=$1',[user.id])).rows[0];
  if(!row?.enabled)return false;
  await rateLimit('admin2fa-login:'+user.id,8,900);
- if(!verifyTotp(row.secret,code))fail(401,'Authenticator kodu düzgün deyil.');
+ if(!verifyTotp(decryptSecret(row.secret),code))fail(401,'Authenticator kodu düzgün deyil.');
  return true;
 }
 export async function issueAdminChallenge(res,user){
