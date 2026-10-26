@@ -46,7 +46,7 @@
       ]
     }
   ],
-  "buildCommand": "env -u VERCEL -u DATABASE_URL LOCAL_DATABASE=true LOCAL_DB_PATH=memory:// APP_ORIGIN=http://localhost:4173 npm test && npm run build",
+  "buildCommand": "env -u VERCEL -u DATABASE_URL -u GEMINI_API_KEY -u OPENAI_API_KEY -u OPENAI_MODEL -u AI_PROVIDER -u AI_ENABLED LOCAL_DATABASE=true LOCAL_DB_PATH=memory:// APP_ORIGIN=http://localhost:4173 npm test && npm run build",
   "outputDirectory": "public",
   "framework": null
 }
