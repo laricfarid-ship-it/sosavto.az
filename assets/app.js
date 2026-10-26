@@ -1,2 +1,2 @@
 import {technolAds} from './technol-ads.js';
-// PLACEHOLDER - will replace
+import {mountSpinViewer} from './spin-viewer.js';
