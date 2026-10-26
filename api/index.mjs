@@ -14,6 +14,7 @@ import {HttpError,fail,hash,safeUser,session,createSession,requireUser,requireAd
 import {listingInput,columns,projection,search} from '../server/listings.mjs';
 import {upload} from '../server/uploads.mjs';
 import {seoPage} from '../server/seo.mjs';
+import {admin2fa,verifyAdminLogin,issueAdminChallenge,challengeUser,consumeChallenge} from '../server/admin-2fa.mjs';
 const json=(res,status,data)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(data));};
 const notify=(c,user,body)=>c.query('INSERT INTO notifications(id,user_id,body) VALUES($1,$2,$3)',[randomUUID(),user,body]);
 export default async function handler(req,res){
@@ -26,6 +27,12 @@ export default async function handler(req,res){
  await rateLimit(`api:ip:${address}`,300,60);
  if(['/sitemap.xml','/elan'].includes(path)&&['GET','HEAD'].includes(method))return seoPage(req,res,path,url);
  const user=await session(req);
+ if(path==='/api/admin/2fa/verify-login'&&method==='POST'){
+  const pending=await challengeUser(req);if(!pending)fail(401,'Giriş müddəti bitdi. Yenidən daxil olun.');
+  await rateLimit(`admin2fa-challenge:${pending.id}`,8,900);const b=await body(req);await verifyAdminLogin(req,res,pending,b.code);
+  await transaction(async c=>{await c.query('DELETE FROM admin_login_challenges WHERE user_id=$1',[pending.id]);});
+  const clearChallengeCookie=await consumeChallenge(req);const sessionCookie=await createSession(res,pending);res.setHeader('Set-Cookie',[sessionCookie,clearChallengeCookie]);return json(res,200,{user:safeUser(pending)});
+ }
  if(user&&!['GET','HEAD','OPTIONS'].includes(method))await rateLimit(`write:${user.id}`,120,60);
  if(path.startsWith('/api/wash/'))return json(res,200,await wash(req,user,path,method));
  if(path.startsWith('/api/sos/'))return json(res,200,await sos(req,user,path,method));
@@ -47,7 +54,11 @@ export default async function handler(req,res){
  }
  const u=(await query('SELECT * FROM users WHERE email=$1 OR username=$1',[identifier])).rows[0];
  const valid=await bcrypt.compare(password,u?.password_hash||'$2b$12$XU7.1nUi/iCTy4lYfsZnGO9DZdvNU91FdY56dLg47/O85VzVFhUUe');
- if(!u||!valid||u.status!=='active')fail(401,'Giriş məlumatları düzgün deyil.');await createSession(res,u);return json(res,200,{user:safeUser(u)});
+ if(!u||!valid||u.status!=='active')fail(401,'Giriş məlumatları düzgün deyil.');
+ if(u.role==='admin'&&(await query('SELECT enabled FROM admin_totp WHERE user_id=$1',[u.id])).rows[0]?.enabled){
+  await issueAdminChallenge(res,u);return json(res,200,{requires2fa:true});
+ }
+ await createSession(res,u);return json(res,200,{user:safeUser(u)});
  }
  if(['/api/password-reset/request','/api/password-reset/complete'].includes(path)&&method==='POST'){
  await rateLimit(`recovery:ip:${address}`,10,900);const b=await body(req);return json(res,200,await (path.endsWith('/request')?requestReset(b):completeReset(b)));
@@ -114,6 +125,9 @@ export default async function handler(req,res){
  }
  if(path==='/api/map'&&method==='GET'){
  const s=search(url.searchParams);return json(res,200,{listings:(await query(`SELECT l.id,l.user_id,l.title,l.category,l.city,l.price,l.latitude,l.longitude,l.address,l.phone,l.details,l.created_at,(SELECT url FROM images WHERE listing_id=l.id ORDER BY sort_order LIMIT 1) AS image FROM listings l WHERE ${s.where} AND l.latitude IS NOT NULL AND l.longitude IS NOT NULL AND trim(l.address)<>'' AND (l.category IN ('service','wash','detailing') OR (l.category='parts' AND l.details->>'map_visible'='true')) ORDER BY l.created_at DESC LIMIT 500`,s.args)).rows});
+ }
+ if(path.startsWith('/api/admin/2fa/')){
+  const result=await admin2fa(req,res,user,path,method);if(result)return json(res,200,result);
  }
  if(path.startsWith('/api/admin')){
  requireAdmin(user);

@@ -12,7 +12,7 @@ export async function session(req){
 }
 export async function createSession(res,user){
  const t=randomBytes(32).toString('hex');await query("INSERT INTO sessions VALUES($1,$2,now()+interval '7 days')",[hash(t),user.id]);
- res.setHeader('Set-Cookie',`sosavto_session=${t}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800${process.env.NODE_ENV==='production'||process.env.VERCEL?'; Secure':''}`);
+ const cookie=`sosavto_session=${t}; Path=/; HttpOnly; SameSite=Lax; Max-Age=604800${process.env.NODE_ENV==='production'||process.env.VERCEL?'; Secure':''}`;res.setHeader('Set-Cookie',cookie);return cookie;
 }
 export const requireUser=u=>{if(!u)fail(401,'Davam etmək üçün hesabınıza daxil olun.');return u;};
 export const requireAdmin=u=>{requireUser(u);if(u.role!=='admin')fail(403,'Bu əməliyyat üçün icazəniz yoxdur.');};
