@@ -222,7 +222,6 @@ const STRINGS = {
   "Növbəti avtomobilini": {en:"Find your next car",ru:"Найди свой следующий автомобиль"},
   "burada tap.": {en:"here.",ru:"здесь."},
   "Növbəti avtomobilini burada tap.": {en:"Find your next car here.",ru:"Найди свой следующий автомобиль здесь."},
-  "Marka, qiymət və kuzov tipini seç. Bəyəndiyin avtomobilləri müqayisə et.": {en:"Choose make, price and body type. Compare the cars you like.",ru:"Выберите марку, цену и тип кузова. Сравните понравившиеся автомобили."},
   "BMW avtomobili": {en:"BMW car",ru:"Автомобиль BMW"},
   "SosAvto · Avtomobil seçimin burada başlayır": {en:"SosAvto · Your car search starts here",ru:"SosAvto · Здесь начинается выбор автомобиля"},
   "Avtomobil, ehtiyat hissələri və servis — SosAvto.az": {en:"Cars, spare parts and services — SosAvto.az",ru:"Автомобили, запчасти и сервис — SosAvto.az"},
