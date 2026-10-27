@@ -219,6 +219,14 @@ const STRINGS = {
   "Düzəliş et": {en:"Edit",ru:"Изменить"},
   "Xəta baş verdi.": {en:"An error occurred.",ru:"Произошла ошибка."},
   "Şifrəniz yeniləndi. Yeni şifrə ilə daxil olun.": {en:"Your password has been reset. Log in with your new password.",ru:"Пароль сброшен. Войдите с новым паролем."}
+  "Növbəti avtomobilini": {en:"Find your next car",ru:"Найди свой следующий автомобиль"},
+  "burada tap.": {en:"here.",ru:"здесь."},
+  "Növbəti avtomobilini burada tap.": {en:"Find your next car here.",ru:"Найди свой следующий автомобиль здесь."},
+  "Marka, qiymət və kuzov tipini seç. Bəyəndiyin avtomobilləri müqayisə et.": {en:"Choose make, price and body type. Compare the cars you like.",ru:"Выберите марку, цену и тип кузова. Сравните понравившиеся автомобили."},
+  "BMW avtomobili": {en:"BMW car",ru:"Автомобиль BMW"},
+  "SosAvto · Avtomobil seçimin burada başlayır": {en:"SosAvto · Your car search starts here",ru:"SosAvto · Здесь начинается выбор автомобиля"},
+  "Avtomobil, ehtiyat hissələri və servis — SosAvto.az": {en:"Cars, spare parts and services — SosAvto.az",ru:"Автомобили, запчасти и сервис — SosAvto.az"},
+  "SosAvto.az — Azərbaycanda avtomobil, ehtiyat hissələri, usta, servis və avtoyuma elanları.": {en:"SosAvto.az — car, spare parts, mechanic, service and car wash listings in Azerbaijan.",ru:"SosAvto.az — объявления об автомобилях, запчастях, мастерах, сервисах и автомойках в Азербайджане."},
 };
 const LANG_KEY = "sosavto-language";
 function readLanguage() { try { return localStorage.getItem(LANG_KEY) || "az"; } catch { return "az"; } }
@@ -242,6 +250,19 @@ function excluded(node) {
 function applyLanguage(lang) {
   const root = document.documentElement;
   root.lang = lang;
+  const pageTitles = {
+    az: "Avtomobil, ehtiyat hissələri və servis — SosAvto.az",
+    en: "Cars, spare parts and services — SosAvto.az",
+    ru: "Автомобили, запчасти и сервис — SosAvto.az"
+  };
+  document.title = pageTitles[lang] || pageTitles.az;
+  const descriptions = {
+    az: "SosAvto.az — Azərbaycanda avtomobil, ehtiyat hissələri, usta, servis və avtoyuma elanları.",
+    en: "SosAvto.az — car, spare parts, mechanic, service and car wash listings in Azerbaijan.",
+    ru: "SosAvto.az — объявления об автомобилях, запчастях, мастерах, сервисах и автомойках в Азербайджане."
+  };
+  const descriptionMeta = document.querySelector('meta[name="description"]');
+  if (descriptionMeta) descriptionMeta.setAttribute("content", descriptions[lang] || descriptions.az);
   document.querySelectorAll("body *").forEach(el => {
     if (!excluded(el)) {
       for (const node of el.childNodes) {
@@ -253,7 +274,7 @@ function applyLanguage(lang) {
       if (!el.hasAttribute("data-i18n-placeholder")) el.setAttribute("data-i18n-placeholder", original);
       el.setAttribute("placeholder", translateText(original, lang));
     }
-    for (const attr of ["aria-label", "title"]) {
+    for (const attr of ["aria-label", "title", "alt"]) {
       if (!el.hasAttribute(attr)) continue;
       const key = "data-i18n-" + attr;
       const original = el.getAttribute(key) || el.getAttribute(attr);
