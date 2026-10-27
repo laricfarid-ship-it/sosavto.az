@@ -218,7 +218,7 @@ const STRINGS = {
   "Yadda saxla": {en:"Save",ru:"Сохранить"},
   "Düzəliş et": {en:"Edit",ru:"Изменить"},
   "Xəta baş verdi.": {en:"An error occurred.",ru:"Произошла ошибка."},
-  "Şifrəniz yeniləndi. Yeni şifrə ilə daxil olun.": {en:"Your password has been reset. Log in with your new password.",ru:"Пароль сброшен. Войдите с новым паролем."}
+  "Şifrəniz yeniləndi. Yeni şifrə ilə daxil olun.": {en:"Your password has been reset. Log in with your new password.",ru:"Пароль сброшен. Войдите с новым паролем."},
   "Növbəti avtomobilini": {en:"Find your next car",ru:"Найди свой следующий автомобиль"},
   "burada tap.": {en:"here.",ru:"здесь."},
   "Növbəti avtomobilini burada tap.": {en:"Find your next car here.",ru:"Найди свой следующий автомобиль здесь."},
