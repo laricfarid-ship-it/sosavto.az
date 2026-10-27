@@ -218,7 +218,30 @@ const STRINGS = {
   "Yadda saxla": {en:"Save",ru:"Сохранить"},
   "Düzəliş et": {en:"Edit",ru:"Изменить"},
   "Xəta baş verdi.": {en:"An error occurred.",ru:"Произошла ошибка."},
-  "Şifrəniz yeniləndi. Yeni şifrə ilə daxil olun.": {en:"Your password has been reset. Log in with your new password.",ru:"Пароль сброшен. Войдите с новым паролем."}
+  "Şifrəniz yeniləndi. Yeni şifrə ilə daxil olun.": {en:"Your password has been reset. Log in with your new password.",ru:"Пароль сброшен. Войдите с новым паролем."},
+  "Marka seçin": {en:"Select make",ru:"Выберите марку"},
+  "Model seçin": {en:"Select model",ru:"Выберите модель"},
+  "Məsələn, 2015": {en:"e.g. 2015",ru:"Например, 2015"},
+  "Məsələn, 2026": {en:"e.g. 2026",ru:"Например, 2026"},
+  "Maksimum": {en:"Maximum",ru:"Максимум"},
+  "Minimum": {en:"Minimum",ru:"Минимум"},
+  "Kuzov tipinə görə seç": {en:"Choose by body type",ru:"Выберите тип кузова"},
+  "Qiymət paylanması": {en:"Price distribution",ru:"Распределение цен"},
+  "Bu filtrlərə uyğun real elan yoxdur. Qiyməti minimum–maksimum sahələrində yaza bilərsiniz.": {en:"No live listings match these filters. You can enter a price in the minimum and maximum fields.",ru:"Нет реальных объявлений, соответствующих фильтрам. Укажите минимальную и максимальную цену."},
+  "Şəhər və əlavə filtrlər": {en:"City and additional filters",ru:"Город и дополнительные фильтры"},
+  "Filtrlənmiş axtarışın linkini paylaşa bilərsiniz.": {en:"You can share a link to this filtered search.",ru:"Вы можете поделиться ссылкой на этот поиск с фильтрами."},
+  "Filtrləri sıfırla": {en:"Reset filters",ru:"Сбросить фильтры"},
+  "Filtrləri sıfırla.": {en:"Reset filters.",ru:"Сбросить фильтры."},
+  "Nümunə elanlar": {en:"Sample listings",ru:"Примеры объявлений"},
+  "Marka": {en:"Make",ru:"Марка"},
+  "Model": {en:"Model",ru:"Модель"},
+  "Növbəti avtomobilini": {en:"Find your next car",ru:"Найди свой следующий автомобиль"},
+  "burada tap.": {en:"here.",ru:"здесь."},
+  "Növbəti avtomobilini burada tap.": {en:"Find your next car here.",ru:"Найди свой следующий автомобиль здесь."},
+  "BMW avtomobili": {en:"BMW car",ru:"Автомобиль BMW"},
+  "SosAvto · Avtomobil seçimin burada başlayır": {en:"SosAvto · Your car search starts here",ru:"SosAvto · Здесь начинается выбор автомобиля"},
+  "Avtomobil, ehtiyat hissələri və servis — SosAvto.az": {en:"Cars, spare parts and services — SosAvto.az",ru:"Автомобили, запчасти и сервис — SosAvto.az"},
+  "SosAvto.az — Azərbaycanda avtomobil, ehtiyat hissələri, usta, servis və avtoyuma elanları.": {en:"SosAvto.az — car, spare parts, mechanic, service and car wash listings in Azerbaijan.",ru:"SosAvto.az — объявления об автомобилях, запчастях, мастерах, сервисах и автомойках в Азербайджане."},
 };
 const LANG_KEY = "sosavto-language";
 function readLanguage() { try { return localStorage.getItem(LANG_KEY) || "az"; } catch { return "az"; } }
@@ -242,6 +265,19 @@ function excluded(node) {
 function applyLanguage(lang) {
   const root = document.documentElement;
   root.lang = lang;
+  const pageTitles = {
+    az: "Avtomobil, ehtiyat hissələri və servis — SosAvto.az",
+    en: "Cars, spare parts and services — SosAvto.az",
+    ru: "Автомобили, запчасти и сервис — SosAvto.az"
+  };
+  document.title = pageTitles[lang] || pageTitles.az;
+  const descriptions = {
+    az: "SosAvto.az — Azərbaycanda avtomobil, ehtiyat hissələri, usta, servis və avtoyuma elanları.",
+    en: "SosAvto.az — car, spare parts, mechanic, service and car wash listings in Azerbaijan.",
+    ru: "SosAvto.az — объявления об автомобилях, запчастях, мастерах, сервисах и автомойках в Азербайджане."
+  };
+  const descriptionMeta = document.querySelector('meta[name="description"]');
+  if (descriptionMeta) descriptionMeta.setAttribute("content", descriptions[lang] || descriptions.az);
   document.querySelectorAll("body *").forEach(el => {
     if (!excluded(el)) {
       for (const node of el.childNodes) {
@@ -253,7 +289,7 @@ function applyLanguage(lang) {
       if (!el.hasAttribute("data-i18n-placeholder")) el.setAttribute("data-i18n-placeholder", original);
       el.setAttribute("placeholder", translateText(original, lang));
     }
-    for (const attr of ["aria-label", "title"]) {
+    for (const attr of ["aria-label", "title", "alt"]) {
       if (!el.hasAttribute(attr)) continue;
       const key = "data-i18n-" + attr;
       const original = el.getAttribute(key) || el.getAttribute(attr);
