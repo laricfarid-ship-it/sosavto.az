@@ -1,0 +1,25 @@
+{
+  "id": "/",
+  "name": "SosAvto.az",
+  "short_name": "SosAvto",
+  "description": "Azərbaycanda avtomobil, ehtiyat hissələri, usta, servis və avtoyuma elanları.",
+  "lang": "az",
+  "dir": "ltr",
+  "start_url": "/?source=pwa",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#060a10",
+  "theme_color": "#060a10",
+  "categories": ["automotive", "shopping"],
+  "icons": [
+    { "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
+    { "src": "/assets/icon-maskable-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Elan ver", "url": "/elan-ver.html", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "SOS yol yardımı", "url": "/sos.html", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png" }] },
+    { "name": "Xəritə", "url": "/xarita.html", "icons": [{ "src": "/assets/icon-192.png", "sizes": "192x192", "type": "image/png" }] }
+  ]
+}

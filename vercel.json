@@ -44,6 +44,32 @@
           "value": "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' https: data: blob:; connect-src 'self'; font-src 'self'; object-src 'none'; base-uri 'self'; frame-ancestors 'none'; form-action 'self'"
         }
       ]
+    },
+    {
+      "source": "/sw.js",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/javascript; charset=utf-8"
+        }
+      ]
+    },
+    {
+      "source": "/manifest.webmanifest",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=3600"
+        },
+        {
+          "key": "Content-Type",
+          "value": "application/manifest+json; charset=utf-8"
+        }
+      ]
     }
   ],
   "buildCommand": "env -u VERCEL -u VERCEL_ENV -u DATABASE_URL -u GEMINI_API_KEY -u OPENAI_API_KEY -u OPENAI_MODEL -u AI_PROVIDER -u AI_ENABLED LOCAL_DATABASE=true LOCAL_DB_PATH=memory:// APP_ORIGIN=http://localhost:4173 npm test && npm run build",
