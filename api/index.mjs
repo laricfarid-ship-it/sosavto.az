@@ -15,6 +15,7 @@ import {listingInput,columns,projection,search} from '../server/listings.mjs';
 import {upload} from '../server/uploads.mjs';
 import {seoPage} from '../server/seo.mjs';
 import {admin2fa,verifyAdminLogin,issueAdminChallenge,challengeUser,consumeChallenge} from '../server/admin-2fa.mjs';
+import {reviewListing} from '../server/moderation-review.mjs';
 const json=(res,status,data)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(data));};
 const notify=(c,user,body)=>c.query('INSERT INTO notifications(id,user_id,body) VALUES($1,$2,$3)',[randomUUID(),user,body]);
 export default async function handler(req,res){
@@ -134,10 +135,10 @@ export default async function handler(req,res){
  if(path==='/api/admin'&&method==='GET'){
  const [stats,pending,reports,users,logs]=await Promise.all([
  query("SELECT count(*)::integer total,count(*) FILTER(WHERE status='active')::integer active,count(*) FILTER(WHERE status='pending')::integer pending FROM listings"),
- query(`SELECT ${projection} FROM listings l WHERE l.status='pending' ORDER BY l.created_at`),
+ query(`SELECT ${projection}, u.fullname AS seller_name, u.created_at AS seller_created_at, (SELECT count(*)::integer FROM images i WHERE i.listing_id=l.id AND i.sort_order<100) AS image_count, (SELECT count(DISTINCT d.id)::integer FROM listings d WHERE d.id<>l.id AND d.status IN ('pending','active') AND (lower(trim(d.title))=lower(trim(l.title)) OR EXISTS (SELECT 1 FROM images di JOIN images li ON li.url=di.url WHERE di.listing_id=d.id AND li.listing_id=l.id AND di.sort_order<100 AND li.sort_order<100))) AS duplicate_count, (SELECT count(*)::integer FROM listings sp WHERE sp.user_id=l.user_id AND sp.status='pending') AS seller_pending_count, (SELECT CAST(percentile_cont(0.5) WITHIN GROUP (ORDER BY peer.price) AS double precision) FROM listings peer WHERE l.category='car' AND peer.status='active' AND peer.category='car' AND lower(peer.brand)=lower(l.brand) AND lower(peer.model)=lower(l.model) AND peer.year BETWEEN l.year-2 AND l.year+2 AND peer.price>0 AND peer.id<>l.id) AS reference_price FROM listings l JOIN users u ON u.id=l.user_id WHERE l.status='pending' ORDER BY l.created_at`),
  query("SELECT r.*,l.title FROM reports r JOIN listings l ON l.id=r.listing_id WHERE r.status='open' ORDER BY r.created_at DESC LIMIT 100"),
  query('SELECT id,fullname,email,role,status,created_at FROM users ORDER BY created_at DESC LIMIT 100'),query('SELECT a.*,u.fullname FROM audit_logs a JOIN users u ON u.id=a.admin_id ORDER BY a.created_at DESC LIMIT 100')]);
- return json(res,200,{stats:stats.rows[0],pending:pending.rows,reports:reports.rows,users:users.rows,logs:logs.rows});
+ return json(res,200,{stats:stats.rows[0],pending:pending.rows.map(l=>({...l,review:reviewListing(l)})),reports:reports.rows,users:users.rows,logs:logs.rows});
  }
  if(path==='/api/admin/moderate'&&method==='POST'){
  const b=await body(req);const id=uuid(b.id);if(!['active','rejected'].includes(b.status))fail(400,'Status düzgün deyil.');const reason=b.status==='rejected'?text(b.reason,'Rədd səbəbi',5,1000):'';
