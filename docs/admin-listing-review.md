@@ -32,6 +32,8 @@
 - The full Vercel test/build command passed on commit `654feec6bc85ab452b31cc7e9c0c5cf3e5163710`; all six new rule tests passed.
 - A Vercel preview is READY at `https://sosavto-az-git-feat-admin-listing-review-laricfarid-ship-it.vercel.app`.
 - Interactive visual review with an isolated preview database is still outstanding because preview protection/environment settings need verification.
+- The ready preview's `/api/config` currently reports `ai: true`, `aiProvider: gemini`, and `uploads: false`. This is pre-existing preview environment configuration; this branch did not change environment variables and did not send any AI-provider request. Do not run AI calls until the provider key, budget and consent are reviewed.
+- The preview deployment's authentication protection blocks direct authenticated-admin API verification through the current fetch path. Do not disable deployment protection to work around this.
 - Do not merge to `main` or enable paid AI without owner approval.
 
 ## Next steps
