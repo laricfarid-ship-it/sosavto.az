@@ -36,3 +36,18 @@ Status: preparation only. No live charges, provider keys, prices or paid listing
 7. Activate only after owner explicitly approves final product prices and live processing.
 
 Provider candidate: Epoint. Official docs: https://developer.epoint.az/az . No provider chosen or contracted yet.
+
+
+## Multi-service payment scope
+Payments cover the entire platform, not only VIP/Premium promotions.
+- VIP/Premium listing: pay platform, activate only after verified payment.
+- Carwash reservation: hold a slot atomically; optionally take deposit or full prepayment; handle timeouts, cancellation, refund, no-show and double booking.
+- SOS roadside assistance: provider quote, customer approval, dispatch, job completion, dispute, cancellation and refund. Do not assume escrow or delayed capture is supported.
+- Detailing and other services: reusable service booking payment flow.
+- Provider subscriptions: future option, disabled by default.
+
+Use one shared payments ledger with service_type, service_reference_id, payer, provider, gross_amount_minor, platform_fee_minor, provider_amount_minor, currency, payment_status, fulfillment_status and refund_status. Splits in the ledger do NOT mean automatic bank payouts. Confirm merchant-of-record, payout contracts, tax treatment and provider settlement before implementing provider payouts.
+
+Never activate services from browser success redirects alone. Verify provider callback signatures and transaction status, enforce idempotency, prevent double booking and duplicate charges. Keep payment and service fulfillment as separate states.
+
+No prices, fees, deposits, payout schedules or provider contracts have been approved. No live charging or paid API is enabled.
