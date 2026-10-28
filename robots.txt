@@ -6,4 +6,4 @@ Disallow: /menim-elanlarim.html
 Disallow: /favoriler.html
 Disallow: /bildirisler.html
 
-Sitemap: https://sosavto-az.vercel.app/sitemap.xml
+Sitemap: https://sosavto.az/sitemap.xml
