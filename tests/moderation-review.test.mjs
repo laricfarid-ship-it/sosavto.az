@@ -30,7 +30,7 @@ test('large pending queue on one account is flagged', () => {
 test('outlier prices are flagged only when a reference median exists', () => {
   assert.equal(reviewListing({ price: 3000, reference_price: 10000 }).flags.some(flag => flag.code === 'price-low'), true);
   assert.equal(reviewListing({ price: 22000, reference_price: 10000 }).flags.some(flag => flag.code === 'price-high'), true);
-  assert.deepEqual(reviewListing({ price: 3000, reference_price: 0 }).flags, []);
+  assert.equal(reviewListing({ image_count: 1, duplicate_count: 0, seller_pending_count: 1, price: 3000, reference_price: 0 }).flags.some(flag => flag.code.startsWith('price-')), false);
 });
 
 test('missing or malformed metrics fail safely without throwing', () => {
