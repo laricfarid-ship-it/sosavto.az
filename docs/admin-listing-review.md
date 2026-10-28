@@ -29,7 +29,9 @@
 - These are rule-based warnings, not AI, not proof of fraud, and not a vehicle history/legal ownership check.
 - A new account, unusual price or missing image alone must not be treated as proof of wrongdoing.
 - The price comparison depends on the quantity and quality of active comparable listings. When no comparison set exists, no price warning is shown.
-- This branch still needs automated tests/build and a preview review before any merge.
+- The full Vercel test/build command passed on commit `654feec6bc85ab452b31cc7e9c0c5cf3e5163710`; all six new rule tests passed.
+- A Vercel preview is READY at `https://sosavto-az-git-feat-admin-listing-review-laricfarid-ship-it.vercel.app`.
+- Interactive visual review with an isolated preview database is still outstanding because preview protection/environment settings need verification.
 - Do not merge to `main` or enable paid AI without owner approval.
 
 ## Next steps
