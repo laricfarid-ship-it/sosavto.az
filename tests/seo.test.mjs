@@ -81,7 +81,7 @@ test('the server-rendered shell matches elan.html so the client app behaves the 
 test('canonical origin only trusts https or localhost configuration',()=>{
  assert.equal(seo.siteOrigin({APP_ORIGIN:'https://sosavto.az'}),'https://sosavto.az');
  assert.equal(seo.siteOrigin({APP_ORIGIN:'http://localhost:4173'}),'http://localhost:4173');
- for(const v of [undefined,'','not a url','http://evil.example','javascript:alert(1)'])assert.equal(seo.siteOrigin({APP_ORIGIN:v}),'https://sosavto-az.vercel.app');
+ for(const v of [undefined,'','not a url','http://evil.example','javascript:alert(1)'])assert.equal(seo.siteOrigin({APP_ORIGIN:v}),'https://sosavto.az');
 });
 
 test('sitemap builder skips malformed ids and escapes values',()=>{
