@@ -51,3 +51,7 @@ Use one shared payments ledger with service_type, service_reference_id, payer, p
 Never activate services from browser success redirects alone. Verify provider callback signatures and transaction status, enforce idempotency, prevent double booking and duplicate charges. Keep payment and service fulfillment as separate states.
 
 No prices, fees, deposits, payout schedules or provider contracts have been approved. No live charging or paid API is enabled.
+
+
+## Approved carwash pricing rule (owner decision)
+For each carwash reservation, add a fixed platform service fee of 1.00 AZN to the provider's displayed wash price. Example: wash price 10.00 AZN + SOSAVTO fee 1.00 AZN = customer checkout total 11.00 AZN. Display the wash price, service fee and total separately before confirmation. Calculate integer minor units on the server (1000 + 100 = 1100 qepik), not from browser input. Persist the immutable breakdown on the payment order; prevent client price tampering. The 1.00 AZN is the platform's gross fee before payment processor charges and applicable taxes. Provider entitlement is 10.00 AZN in the example; actual settlement and split transfers depend on merchant/provider contracts and must not be assumed. On cancellation/refund, apply the published fee refund policy (not yet approved). Do not activate live payments until merchant onboarding and settlement mechanics are confirmed.
