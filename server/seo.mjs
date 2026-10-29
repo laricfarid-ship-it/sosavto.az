@@ -5,7 +5,7 @@ import {washEnabled} from './wash-config.mjs';
 // link previews (WhatsApp, Telegram, Facebook) see real titles, descriptions and images
 // without running JavaScript. Private data (phone, address, coordinates) is never read.
 
-const FALLBACK_ORIGIN='https://sosavto-az.vercel.app';
+const FALLBACK_ORIGIN='https://sosavto.az';
 const SITEMAP_LIMIT=5000;
 const UUID=/^[a-f0-9]{8}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{4}-[a-f0-9]{12}$/;
 
