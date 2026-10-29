@@ -1,4 +1,12 @@
 const STRINGS = {
+  "Dil seçimi": {en:"Language selection",ru:"Выбор языка"},
+  "Əsas menyu": {en:"Main menu",ru:"Главное меню"},
+  "Menyunu aç": {en:"Open menu",ru:"Открыть меню"},
+  "İşıqlı rejimə keç": {en:"Switch to light mode",ru:"Включить светлую тему"},
+  "Tünd rejimə keç": {en:"Switch to dark mode",ru:"Включить тёмную тему"},
+  "SOS yol yardımını aç": {en:"Open SOS roadside assistance",ru:"Открыть помощь SOS"},
+  "Marka adını yazın": {en:"Enter make",ru:"Введите марку"},
+  "Model adını yazın": {en:"Enter model",ru:"Введите модель"},
   "Elanlar": {en:"Listings",ru:"Объявления"},
   "Servis xəritəsi": {en:"Service map",ru:"Карта сервисов"},
   "AI köməkçi": {en:"AI assistant",ru:"ИИ-помощник"},
@@ -309,7 +317,7 @@ export function initLanguage() {
   applyLanguage(lang);
   picker.onchange = () => {
     lang = picker.value;
-    localStorage.setItem(LANG_KEY, lang);
+    saveLanguage(lang);
     applyLanguage(lang);
   };
   if (!window.__sosavtoLanguageObserver) {
