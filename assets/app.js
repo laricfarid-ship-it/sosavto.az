@@ -9,7 +9,7 @@ import {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights} from './discover
 import {groupMapListings,mapKinds} from './service-map.js';
 import {mountDemoListings} from './demo-listings.js';
 import {cars} from './cars.js';
-import {initLanguage,refreshLanguage} from './i18n.js';
+import {initLanguage} from './i18n.js';
 import {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys} from './catalog.js';
 const $=s=>document.querySelector(s), $$=s=>[...document.querySelectorAll(s)];
 const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -316,6 +316,6 @@ async function init(){
  const routes={'kredit.html':()=>{main.innerHTML='<p><a href="index.html">← Elanlara qayıt</a></p>'+creditMarkup();mountCredit(main);},'avtoyuma.html':washPage,'avtoyuma-panel.html':washPage,'sos.html':sosPage,'sos-usta.html':sosPage,'index.html':home,'muqayise.html':comparisonPage,'sifre-berpa.html':passwordRecovery,'giris.html':()=>auth(false),'qeydiyyat.html':()=>auth(true),'kabinet.html':profile,'menim-elanlarim.html':()=>collection('my-listings'),'favoriler.html':()=>collection('favorites'),'elan-ver.html':listingForm,'elan.html':detail,'haqqinda.html':()=>legalRoute(),'elaqe.html':()=>legalRoute(),'qaydalar.html':()=>legalRoute(),'mexfiyyet.html':()=>legalRoute(),'xarita.html':mapPage,'ai.html':assistant,'admin.html':admin,'bildirisler.html':notifications};
  await (routes[page]||(()=>{main.innerHTML=empty('Səhifə tapılmadı','Axtardığınız səhifə mövcud deyil.','<a href="index.html" class="btn primary">Ana səhifəyə qayıt</a>');}))();
  mountDemoListings({main,page,params,esc,money});
- refreshLanguage();
+ window.__sosavtoRefreshLanguage?.();
 }
 init().catch(e=>errorBox(main,e));
