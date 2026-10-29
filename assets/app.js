@@ -20,6 +20,7 @@ const cities=['Bakı','Sumqayıt','Gəncə','Xırdalan','Abşeron','Mingəçevir
 let geminiConsent=false;
 let me=null,config={},favorites=new Set(),page=location.pathname.split('/').pop()||'index.html';if(page==='elan')page='elan.html';
 const params=new URLSearchParams(location.search), main=$('#main');
+if(page==='index.html')document.documentElement.classList.add('sosavto-js-ready');
 const money=n=>new Intl.NumberFormat('az-AZ',{maximumFractionDigits:0}).format(Number(n))+' ₼';
 const date=v=>new Date(v).toLocaleDateString('az-AZ');
 const imageUrl=v=>typeof v==='string'&&(/^(https:\/\/|\/media\/)/.test(v))?v:'';
