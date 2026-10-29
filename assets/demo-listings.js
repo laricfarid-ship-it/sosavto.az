@@ -1,4 +1,4 @@
-export const demoEnabled=true;
+export const demoEnabled=false;
 export const demoListings=[
   {
     "id": "demo-car-1",
