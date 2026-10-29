@@ -1,4 +1,7 @@
 const STRINGS = {
+  "Bu bölmədə təmir işləri gedir": {en:"This section is under maintenance",ru:"В этом разделе ведутся технические работы"},
+  "Xidmət hələ istifadəyə açılmayıb. Hazırlıq işləri tamamlandıqdan sonra burada aktiv olacaq.": {en:"This service is not available yet. It will open here once preparations are complete.",ru:"Услуга пока недоступна. Она появится здесь после завершения подготовительных работ."},
+  "Əsas səhifəyə qayıt": {en:"Back to homepage",ru:"Вернуться на главную"},
   "Təsdiqlənmiş ustalar": {en:"Verified mechanics",ru:"Проверенные мастера"},
   "Əvvəlcədən razılaşdırılan qiymət": {en:"Price agreed in advance",ru:"Цена согласовывается заранее"},
   "Hesabda saxlanan sifarişlər": {en:"Requests saved in your account",ru:"Заявки сохраняются в аккаунте"},
