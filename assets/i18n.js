@@ -1,4 +1,12 @@
 const STRINGS = {
+  "Elan axtar": {en:"Search listings",ru:"Поиск объявлений"},
+  "Elan axtar…": {en:"Search listings…",ru:"Поиск объявлений…"},
+  "Region kodu": {en:"Region code",ru:"Код региона"},
+  "Hərflər": {en:"Letters",ru:"Буквы"},
+  "Son rəqəmlər": {en:"Last digits",ru:"Последние цифры"},
+  "Məhsullara bax": {en:"View products",ru:"Смотреть товары"},
+  "AZƏRBAYCANIN AVTOMOBİL PLATFORMASI": {en:"AZERBAIJAN'S AUTOMOTIVE PLATFORM",ru:"АВТОМОБИЛЬНАЯ ПЛАТФОРМА АЗЕРБАЙДЖАНА"},
+  "Detal adı və ya kodu": {en:"Part name or code",ru:"Название или код детали"},
   "Təmiz avtomobil.": {en:"Clean car.",ru:"Чистый автомобиль."},
   "Rahat bir gün.": {en:"An easier day.",ru:"Лёгкий день."},
   "Yaxınlıqdakı avtoyumanı tapın, xidmətinizi seçin, vaxtınızı ayırın.": {en:"Find a nearby car wash, choose a service and book a time.",ru:"Найдите ближайшую автомойку, выберите услугу и время."},
