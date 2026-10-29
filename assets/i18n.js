@@ -371,6 +371,9 @@ function applyLanguage(lang) {
   const picker = document.getElementById("site-language");
   if (picker && picker.value !== lang) picker.value = lang;
 }
+export function refreshLanguage() {
+  applyLanguage(readLanguage());
+}
 export function initLanguage() {
   const picker = document.getElementById("site-language");
   if (!picker) return;
