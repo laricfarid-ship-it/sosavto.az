@@ -284,14 +284,22 @@ for (const [az, translations] of Object.entries(STRINGS)) {
   reverse[translations.en] = az;
   reverse[translations.ru] = az;
 }
+const TRANSLATION_KEYS = Object.keys(STRINGS).sort((a,b)=>b.length-a.length);
+const originalTextNodes = new WeakMap();
 function translateText(text, lang) {
-  const trimmed = text.trim();
-  if (!trimmed) return text;
-  const az = reverse[trimmed] || trimmed;
-  const translated = lang === "az" ? az : STRINGS[az]?.[lang];
-  if (!translated) return text;
-  return text.replace(trimmed, translated);
+  if (!text.trim()) return text;
+  if (lang === "az") return text;
+  const exact = STRINGS[text.trim()]?.[lang];
+  if (exact) return text.replace(text.trim(), exact);
+  let result = text;
+  for (const key of TRANSLATION_KEYS) {
+    if (key.length < 5 || !result.includes(key)) continue;
+    const translated = STRINGS[key]?.[lang];
+    if (translated) result = result.split(key).join(translated);
+  }
+  return result;
 }
+
 function excluded(node) {
   return node.closest("script,style,textarea,input,.break,.listing-title,[data-user-content],.user-content,.user-description,.listing-description,[data-user-generated]");
 }
@@ -314,7 +322,11 @@ function applyLanguage(lang) {
   document.querySelectorAll("body *").forEach(el => {
     if (!excluded(el)) {
       for (const node of el.childNodes) {
-        if (node.nodeType === Node.TEXT_NODE) node.nodeValue = translateText(node.nodeValue, lang);
+        if (node.nodeType === Node.TEXT_NODE) {
+          if (!originalTextNodes.has(node)) originalTextNodes.set(node, node.nodeValue);
+          const next = translateText(originalTextNodes.get(node), lang);
+          if (node.nodeValue !== next) node.nodeValue = next;
+        }
       }
     }
     if (el.hasAttribute("placeholder")) {
