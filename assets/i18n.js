@@ -1,4 +1,7 @@
 const STRINGS = {
+  "Əsas məlumatlar": {en:"Basic information",ru:"Основная информация"},
+  "Kateqoriya": {en:"Category",ru:"Категория"},
+  "Əsas məlumatları doldurun": {en:"Fill in the basic information",ru:"Заполните основные сведения"},
   "Ünvan və xəritə": {en:"Address and map",ru:"Адрес и карта"},
   "Ünvan": {en:"Address",ru:"Адрес"},
   "Rayon, küçə və ya obyektin ünvanı": {en:"District, street or business address",ru:"Район, улица или адрес объекта"},
@@ -304,16 +307,11 @@ const TRANSLATION_KEYS = Object.keys(STRINGS).sort((a,b)=>b.length-a.length);
 const originalTextNodes = new WeakMap();
 function translateText(text, lang) {
   if (!text.trim()) return text;
-  if (lang === "az") return text;
-  const exact = STRINGS[text.trim()]?.[lang];
-  if (exact) return text.replace(text.trim(), exact);
-  let result = text;
-  for (const key of TRANSLATION_KEYS) {
-    if (key.length < 5 || !result.includes(key)) continue;
-    const translated = STRINGS[key]?.[lang];
-    if (translated) result = result.split(key).join(translated);
-  }
-  return result;
+  const trimmed = text.trim();
+  const az = STRINGS[trimmed] ? trimmed : (reverse[trimmed] || trimmed);
+  const translated = lang === "az" ? az : STRINGS[az]?.[lang];
+  if (!translated) return text;
+  return text.replace(trimmed, translated);
 }
 
 function excluded(node) {
