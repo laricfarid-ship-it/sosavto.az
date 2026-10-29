@@ -469,6 +469,7 @@ export function refreshLanguage() {
   applyLanguage(readLanguage());
 }
 export function initLanguage() {
+  window.__sosavtoRefreshLanguage = refreshLanguage;
   const picker = document.getElementById("site-language");
   if (!picker) return;
   let lang = readLanguage();
