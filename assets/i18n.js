@@ -1,4 +1,6 @@
 const STRINGS = {
+  "Avtomobilin ətrafında bir tam dövrə üzrə ": {en:"Choose ",ru:"Выберите "},
+  " seçin. Adi 8 elan şəklindən ayrıca saxlanılır.": {en:" around the car in one full circle. These are stored separately from the 8 regular listing photos.",ru:" по полному кругу вокруг автомобиля. Они хранятся отдельно от 8 обычных фото объявления."},
   "Şəkilləri seçin": {en:"Choose photos",ru:"Выберите фотографии"},
   "Şəkillər və təsvir": {en:"Photos and description",ru:"Фотографии и описание"},
   "8 şəkilədək · hər biri maksimum 3 MB · JPEG, PNG, WebP. İlk şəkil əsas şəkildir. İki və daha çox şəkil əlavə etdikdə alıcılar kartda şəkilləri sürüşdürə bilərlər. Bu, 360° çəkiliş deyil.": {en:"Up to 8 photos · maximum 3 MB each · JPEG, PNG, WebP. The first photo is the cover. With two or more photos, buyers can swipe through them on the card. This is not a 360° capture.",ru:"До 8 фото · максимум 3 МБ каждое · JPEG, PNG, WebP. Первое фото — главное. Если фотографий две или больше, покупатели смогут листать их в карточке. Это не съёмка 360°."},
