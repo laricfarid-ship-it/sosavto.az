@@ -522,6 +522,6 @@ export function initLanguage() {
   };
   if (!window.__sosavtoLanguageObserver) {
     window.__sosavtoLanguageObserver = new MutationObserver(() => applyLanguage(readLanguage()));
-    window.__sosavtoLanguageObserver.observe(document.body, {childList:true,subtree:true});
+    window.__sosavtoLanguageObserver.observe(document.body, {childList:true,characterData:true,subtree:true});
   }
 }
