@@ -1,3 +1,4 @@
+import {adminEvent,pushApi} from '../server/admin-push.mjs';
 import {resetEnabled,requestReset,completeReset} from '../server/password-reset.mjs';
 import {imagesFor} from '../server/listing-media.mjs';
 import {priceHistogram} from '../server/price-histogram.mjs';
@@ -27,11 +28,12 @@ export default async function handler(req,res){
  await rateLimit(`api:ip:${address}`,300,60);
  if(['/sitemap.xml','/elan'].includes(path)&&['GET','HEAD'].includes(method))return seoPage(req,res,path,url);
  const user=await session(req);
+ if(path==='/api/admin/push')return json(res,200,await pushApi(req,user,method));
  if(path==='/api/admin/2fa/verify-login'&&method==='POST'){
   const pending=await challengeUser(req);if(!pending)fail(401,'Giriş müddəti bitdi. Yenidən daxil olun.');
   await rateLimit(`admin2fa-challenge:${pending.id}`,8,900);const b=await body(req);await verifyAdminLogin(req,res,pending,b.code);
   await transaction(async c=>{await c.query('DELETE FROM admin_login_challenges WHERE user_id=$1',[pending.id]);});
-  const clearChallengeCookie=await consumeChallenge(req);const sessionCookie=await createSession(res,pending);res.setHeader('Set-Cookie',[sessionCookie,clearChallengeCookie]);return json(res,200,{user:safeUser(pending)});
+  const clearChallengeCookie=await consumeChallenge(req);const sessionCookie=await createSession(res,pending);res.setHeader('Set-Cookie',[sessionCookie,clearChallengeCookie]);await adminEvent('login',{id:pending.id,name:pending.fullname});return json(res,200,{user:safeUser(pending)});
  }
  if(user&&!['GET','HEAD','OPTIONS'].includes(method))await rateLimit(`write:${user.id}`,120,60);
  if(path.startsWith('/api/wash/'))return json(res,200,await wash(req,user,path,method));
@@ -50,7 +52,7 @@ export default async function handler(req,res){
  const username=text(b.username,'İstifadəçi adı',3,30).toLowerCase();if(!/^[a-z0-9_]+$/.test(username))fail(400,'İstifadəçi adı üçün latın hərfləri, rəqəm və alt xətt istifadə edin.');
  const fullname=text(b.fullname,'Ad və soyad',2,100);const id=randomUUID();
  try{await query('INSERT INTO users(id,fullname,username,email,password_hash) VALUES($1,$2,$3,$4,$5)',[id,fullname,username,email,await bcrypt.hash(password,12)]);}catch(e){if(e.code==='23505')fail(409,'Bu email və ya istifadəçi adı artıq istifadə olunur.');throw e;}
- const u=(await query('SELECT * FROM users WHERE id=$1',[id])).rows[0];await createSession(res,u);return json(res,201,{user:safeUser(u)});
+ const u=(await query('SELECT * FROM users WHERE id=$1',[id])).rows[0];await createSession(res,u);await adminEvent('register',{id:u.id,name:u.fullname});return json(res,201,{user:safeUser(u)});
  }
  const u=(await query('SELECT * FROM users WHERE email=$1 OR username=$1',[identifier])).rows[0];
  const valid=await bcrypt.compare(password,u?.password_hash||'$2b$12$XU7.1nUi/iCTy4lYfsZnGO9DZdvNU91FdY56dLg47/O85VzVFhUUe');
@@ -58,7 +60,7 @@ export default async function handler(req,res){
  if(u.role==='admin'&&(await query('SELECT enabled FROM admin_totp WHERE user_id=$1',[u.id])).rows[0]?.enabled){
   await issueAdminChallenge(res,u);return json(res,200,{requires2fa:true});
  }
- await createSession(res,u);return json(res,200,{user:safeUser(u)});
+ await createSession(res,u);await adminEvent('login',{id:u.id,name:u.fullname});return json(res,200,{user:safeUser(u)});
  }
  if(['/api/password-reset/request','/api/password-reset/complete'].includes(path)&&method==='POST'){
  await rateLimit(`recovery:ip:${address}`,10,900);const b=await body(req);return json(res,200,await (path.endsWith('/request')?requestReset(b):completeReset(b)));
@@ -82,7 +84,7 @@ export default async function handler(req,res){
  }
  if(path==='/api/listings'&&method==='POST'){
  requireUser(user);await rateLimit(`create:${user.id}`,20,3600);const v=listingInput(await body(req));const id=randomUUID();
- await transaction(async c=>{await c.query(`INSERT INTO listings(id,user_id,${columns.join(',')}) VALUES(${Array.from({length:columns.length+2},(_,i)=>'$'+(i+1)).join(',')})`,[id,user.id,...columns.map(k=>v[k])]);await imagesFor(c,user,id,v.imageIds,v.spinImageIds,v.category);});return json(res,201,{id,status:'pending'});
+ await transaction(async c=>{await c.query(`INSERT INTO listings(id,user_id,${columns.join(',')}) VALUES(${Array.from({length:columns.length+2},(_,i)=>'$'+(i+1)).join(',')})`,[id,user.id,...columns.map(k=>v[k])]);await imagesFor(c,user,id,v.imageIds,v.spinImageIds,v.category);});await adminEvent('listing',{id});return json(res,201,{id,status:'pending'});
  }
  if(path==='/api/my-listings'&&method==='GET'){
  requireUser(user);return json(res,200,{listings:(await query(`SELECT ${projection} FROM listings l WHERE l.user_id=$1 AND NOT (l.details @> '{"_deleted":true}'::jsonb) ORDER BY l.created_at DESC`,[user.id])).rows});
@@ -98,10 +100,10 @@ export default async function handler(req,res){
  }
  requireUser(user);if(!owner)fail(403,'Yalnız öz elanınızı dəyişə bilərsiniz.');
  if(method==='PUT'){
- const v=listingInput(await body(req));await transaction(async c=>{const previous=await lockListing(c,id,user);preservePublishedPrice(previous,v);if(await washLinks(c,id)){await requireNoReservations(c,id);if(v.category!=='wash')fail(409,'Rezervasiya sistemi qurulmuş avtoyumanın kateqoriyasını dəyişmək olmaz. Yeni kateqoriya üçün ayrıca elan yaradın.');}await c.query(`UPDATE listings SET ${columns.map((k,i)=>`${k}=$${i+1}`).join(',')},status='pending',rejection_reason='',updated_at=now() WHERE id=$${columns.length+1} AND user_id=$${columns.length+2}`,[...columns.map(k=>v[k]),id,user.id]);await imagesFor(c,user,id,v.imageIds,v.spinImageIds,v.category);});return json(res,200,{ok:true,status:'pending'});
+ const v=listingInput(await body(req));await transaction(async c=>{const previous=await lockListing(c,id,user);preservePublishedPrice(previous,v);if(await washLinks(c,id)){await requireNoReservations(c,id);if(v.category!=='wash')fail(409,'Rezervasiya sistemi qurulmuş avtoyumanın kateqoriyasını dəyişmək olmaz. Yeni kateqoriya üçün ayrıca elan yaradın.');}await c.query(`UPDATE listings SET ${columns.map((k,i)=>`${k}=$${i+1}`).join(',')},status='pending',rejection_reason='',updated_at=now() WHERE id=$${columns.length+1} AND user_id=$${columns.length+2}`,[...columns.map(k=>v[k]),id,user.id]);await imagesFor(c,user,id,v.imageIds,v.spinImageIds,v.category);});await adminEvent('listing',{id});return json(res,200,{ok:true,status:'pending'});
  }
  if(method==='PATCH'){
- const b=await body(req);if(!['sold','archived','pending'].includes(b.status))fail(400,'Status düzgün deyil.');await transaction(async c=>{const previous=await lockListing(c,id,user);if(previous.status==='active')await c.query("UPDATE listings SET details=details||jsonb_build_object('_publishedPrice',jsonb_build_object('price',price::text,'category',category)) WHERE id=$1",[id]);if(await washLinks(c,id))await requireNoReservations(c,id);await c.query('UPDATE listings SET status=$1,rejection_reason=\'\',updated_at=now() WHERE id=$2 AND user_id=$3',[b.status,id,user.id]);});return json(res,200,{ok:true});
+ const b=await body(req);if(!['sold','archived','pending'].includes(b.status))fail(400,'Status düzgün deyil.');await transaction(async c=>{const previous=await lockListing(c,id,user);if(previous.status==='active')await c.query("UPDATE listings SET details=details||jsonb_build_object('_publishedPrice',jsonb_build_object('price',price::text,'category',category)) WHERE id=$1",[id]);if(await washLinks(c,id))await requireNoReservations(c,id);await c.query('UPDATE listings SET status=$1,rejection_reason=\'\',updated_at=now() WHERE id=$2 AND user_id=$3',[b.status,id,user.id]);});if(b.status==='pending'&&l.status!=='pending')await adminEvent('listing',{id});return json(res,200,{ok:true});
  }
  if(method==='DELETE'){await transaction(c=>deleteListing(c,id,user));return json(res,200,{ok:true});}
  }
