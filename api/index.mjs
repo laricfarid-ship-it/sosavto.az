@@ -141,12 +141,13 @@ export default async function handler(req,res){
   return json(res,200,{preview:socialSharePreview(result.rows[0],result.rows[0].image_url||'')});
  }
  if(path==='/api/admin'&&method==='GET'){
- const [stats,pending,reports,users,logs]=await Promise.all([
+ const [stats,pending,activeListings,reports,users,logs]=await Promise.all([
  query("SELECT count(*)::integer total,count(*) FILTER(WHERE status='active')::integer active,count(*) FILTER(WHERE status='pending')::integer pending FROM listings"),
  query(`SELECT ${projection} FROM listings l WHERE l.status='pending' ORDER BY l.created_at`),
+ query(`SELECT l.id,l.title,l.price,l.city,l.brand,l.model,l.year FROM listings l WHERE l.status='active' AND NOT COALESCE((l.details->>'_deleted')::boolean,false) ORDER BY l.updated_at DESC LIMIT 40`),
  query("SELECT r.*,l.title FROM reports r JOIN listings l ON l.id=r.listing_id WHERE r.status='open' ORDER BY r.created_at DESC LIMIT 100"),
  query('SELECT id,fullname,email,role,status,created_at FROM users ORDER BY created_at DESC LIMIT 100'),query('SELECT a.*,u.fullname FROM audit_logs a JOIN users u ON u.id=a.admin_id ORDER BY a.created_at DESC LIMIT 100')]);
- return json(res,200,{stats:stats.rows[0],pending:pending.rows,reports:reports.rows,users:users.rows,logs:logs.rows});
+ return json(res,200,{stats:stats.rows[0],pending:pending.rows,activeListings:activeListings.rows,reports:reports.rows,users:users.rows,logs:logs.rows});
  }
  if(path==='/api/admin/moderate'&&method==='POST'){
  const b=await body(req);const id=uuid(b.id);if(!['active','rejected'].includes(b.status))fail(400,'Status düzgün deyil.');const reason=b.status==='rejected'?text(b.reason,'Rədd səbəbi',5,1000):'';
