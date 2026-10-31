@@ -2,7 +2,37 @@ const supported=()=>window.isSecureContext&&'serviceWorker'in navigator&&'PushMa
 const ios=()=>/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
 const standalone=()=>window.matchMedia?.('(display-mode: standalone)').matches||navigator.standalone;
 const keyBytes=value=>Uint8Array.from(atob(value.replace(/-/g,'+').replace(/_/g,'/')+'='.repeat((4-value.length%4)%4)),c=>c.charCodeAt(0));
-const worker=async()=>{await navigator.serviceWorker.register('/sw.js',{scope:'/'});return Promise.race([navigator.serviceWorker.ready,new Promise((_,reject)=>setTimeout(()=>reject(Error('Bildiriş xidməti açılmadı. Səhifəni yeniləyin.')),12000))]);};
+const worker=async()=>{
+ await navigator.serviceWorker.register('/sw.js',{scope:'/',updateViaCache:'none'});
+ let timer;try{return await Promise.race([navigator.serviceWorker.ready,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error('Bildiriş xidməti açılmadı. Səhifəni yeniləyin.')),12000);})]);}finally{clearTimeout(timer);}
+};
+const sameKey=(sub,desired)=>{
+ if(!sub?.options?.applicationServerKey)return true;
+ const actual=new Uint8Array(sub.options.applicationServerKey);
+ return actual.length===desired.length&&actual.every((v,i)=>v===desired[i]);
+};
+const retryable=error=>!['NotAllowedError','InvalidAccessError','InvalidStateError','NotSupportedError','SecurityError'].includes(error?.name)&&(['AbortError','NetworkError'].includes(error?.name)||/push service (error|not available)|could not connect to push server/i.test(error?.message||''));
+const failureMessage=error=>{
+ if(Notification.permission==='denied'||error?.name==='NotAllowedError')return 'Bildiriş icazəsi bloklanıb. Chrome-un sayt ayarlarında SosAvto üçün bildirişlərə icazə verin.';
+ if(navigator.onLine===false)return 'İnternet bağlantısı yoxdur. İnternetə qoşulub yenidən cəhd edin.';
+ if(retryable(error))return 'Chrome telefonun bildiriş xidmətinə qoşula bilmədi. Wi-Fi əvəzinə mobil internetlə (və ya əksinə) yenidən cəhd edin. VPN aktivdirsə söndürün. Problem qalarsa Chrome və Google Play xidmətlərini yeniləyib telefonu yenidən başladın.';
+ return error?.message||'Bildirişlər aktivləşmədi. Yenidən cəhd edin.';
+};
+async function subscribeWithRetry(reg,desired,onRetry){
+ for(let attempt=0;attempt<3;attempt++){
+  let sub=await reg.pushManager.getSubscription();
+  if(sub&&(!sameKey(sub,desired)||(sub.expirationTime&&sub.expirationTime<=Date.now()))){
+   if(!await sub.unsubscribe())throw Error('Köhnə bildiriş bağlantısı yenilənmədi. Chrome-u bağlayıb yenidən açın.');
+   sub=null;
+  }
+  if(sub)return sub;
+  try{return await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:desired});}
+  catch(error){
+   if(!retryable(error)||attempt===2||Notification.permission!=='granted'||navigator.onLine===false)throw error;
+   onRetry();await new Promise(resolve=>setTimeout(resolve,1000*(attempt+1)));
+  }
+ }
+}
 const subscription=async()=>{const reg=await navigator.serviceWorker.getRegistration('/');return reg?.pushManager.getSubscription();};
 export async function disableAdminPush(api){
  if(!supported())return;
@@ -24,20 +54,27 @@ export async function mountAdminPush(root,{api,toast,task}){
   settings=await api('/admin/push');
   if(!settings.enabled){setStatus('Telefon bildirişləri hələ aktivləşdirilməyib.');enable.hidden=true;return;}
   const sub=await subscription();
-  if(Notification.permission==='granted'&&sub){await api('/admin/push','POST',{subscription:sub.toJSON()});active();}
+  if(Notification.permission==='granted'&&sub&&sameKey(sub,keyBytes(settings.publicKey))&&(!sub.expirationTime||sub.expirationTime>Date.now())){await api('/admin/push','POST',{subscription:sub.toJSON()});active();}
   else if(Notification.permission==='denied'){setStatus('Bildiriş icazəsi bloklanıb. Brauzerin sayt ayarlarında SosAvto üçün bildirişlərə icazə verin.');enable.hidden=true;}
   else reset();
  }catch{setStatus('Bildiriş ayarları yüklənmədi. Səhifəni yeniləyin.');enable.hidden=true;return;}
  enable.onclick=()=>{
-  // Permission must be requested directly from the user's tap (including iOS).
-  const permission=Notification.requestPermission();
+  // Keep the permission request in the user's tap; handle its rejection immediately.
+  const requested=Notification.permission==='granted'?Promise.resolve('granted'):Notification.requestPermission();
+  const result=Promise.resolve(requested).then(value=>({value}),error=>({error}));
   return task(enable,async()=>{
-   if(await permission!=='granted'){setStatus('Bildirişlərə icazə verilmədi. Brauzerin sayt ayarlarından icazə verə bilərsiniz.');return;}
-   const reg=await worker();let sub=await reg.pushManager.getSubscription();
-   const desired=keyBytes(settings.publicKey);
-   if(sub&&sub.options.applicationServerKey&&!desired.every((v,i)=>new Uint8Array(sub.options.applicationServerKey)[i]===v)){await sub.unsubscribe();sub=null;}
-   if(!sub)sub=await reg.pushManager.subscribe({userVisibleOnly:true,applicationServerKey:desired});
-   await api('/admin/push','POST',{subscription:sub.toJSON()});active();toast('Telefon bildirişləri aktivləşdirildi.');
+   try{
+    const permissionResult=await result;if(permissionResult.error)throw permissionResult.error;
+    if(permissionResult.value!=='granted'){setStatus('Bildirişlərə icazə verilmədi. Brauzerin sayt ayarlarından icazə verə bilərsiniz.');return;}
+    if(navigator.onLine===false)throw Error('İnternet bağlantısı yoxdur. İnternetə qoşulub yenidən cəhd edin.');
+    setStatus('Telefon bildirişləri aktivləşdirilir…');
+    const reg=await worker();
+    const sub=await subscribeWithRetry(reg,keyBytes(settings.publicKey),()=>setStatus('Bildiriş xidmətinə bağlantı yenidən yoxlanılır…'));
+    await api('/admin/push','POST',{subscription:sub.toJSON()});active();toast('Telefon bildirişləri aktivləşdirildi.');
+   }catch(error){
+    reset();enable.textContent='Yenidən cəhd et';
+    const message=failureMessage(error);setStatus(message);toast(message);
+   }
   });
  };
  test.onclick=()=>task(test,async()=>{const sub=await subscription();if(!sub){reset();return;}await api('/admin/push','PUT',{endpoint:sub.endpoint});setStatus('Sınaq bildirişi göndərildi. Telefonun bildirişlərini yoxlayın.');});
