@@ -33,6 +33,10 @@ async function subscribeWithRetry(reg,desired,onRetry){
   }
  }
 }
+const bounded=async(promise,ms,message)=>{
+ let timer;try{return await Promise.race([promise,new Promise((_,reject)=>{timer=setTimeout(()=>reject(Error(message)),ms);})]);}finally{clearTimeout(timer);}
+};
+const phoneHelp='Bildiriş görünmürsə: Telefonun Ayarları → Tətbiqlər → Chrome → Bildirişlər bölməsində icazəni açın. Chrome → Ayarlar → Sayt ayarları → Bildirişlər bölməsində sosavto.az üçün də icazəni yoxlayın. Səssiz bildirişləri və Narahat etməyin rejimini yoxlayın.';
 const subscription=async()=>{const reg=await navigator.serviceWorker.getRegistration('/');return reg?.pushManager.getSubscription();};
 export async function disableAdminPush(api){
  if(!supported())return;
@@ -42,11 +46,22 @@ export async function disableAdminPush(api){
  await sub.unsubscribe();
 }
 export async function mountAdminPush(root,{api,toast,task}){
- root.innerHTML='<section class="panel form-section"><h2>Telefon bildirişləri</h2><p>Yeni elan, qeydiyyat və hesaba giriş barədə sayt bağlı olanda da bildiriş alın.</p><p class="muted" data-push-status role="status">Yoxlanılır…</p><div class="form-actions"><button class="btn primary" data-push-enable>Bildirişləri aktiv et</button><button class="btn" data-push-test hidden>Sınaq bildirişi göndər</button><button class="btn" data-push-disable hidden>Bu cihazda söndür</button></div><p class="muted">Bildiriş üçün telefonun interneti və brauzerin bildiriş icazəsi açıq olmalıdır.</p></section>';
- const status=root.querySelector('[data-push-status]'),enable=root.querySelector('[data-push-enable]'),test=root.querySelector('[data-push-test]'),disable=root.querySelector('[data-push-disable]');
+ root.innerHTML='<section class="panel form-section"><h2>Telefon bildirişləri</h2><p>Yeni elan, qeydiyyat və hesaba giriş barədə sayt bağlı olanda da bildiriş alın.</p><p class="muted" data-push-status role="status">Yoxlanılır…</p><div class="form-actions"><button type="button" class="btn primary" data-push-enable>Bildirişləri aktiv et</button><button type="button" class="btn" data-push-local>Telefonda sına</button><button type="button" class="btn" data-push-test hidden>Sınaq bildirişi göndər</button><button type="button" class="btn" data-push-disable hidden>Bu cihazda söndür</button></div><p class="muted">Bildiriş üçün telefonun interneti və brauzerin bildiriş icazəsi açıq olmalıdır.</p></section>';
+ const status=root.querySelector('[data-push-status]'),enable=root.querySelector('[data-push-enable]'),test=root.querySelector('[data-push-test]'),disable=root.querySelector('[data-push-disable]'),local=root.querySelector('[data-push-local]');
  const setStatus=text=>{status.textContent=text;};
+ local.hidden=true;
  if(ios()&&!standalone()){setStatus('iPhone-da Safari → Paylaş → Ana ekrana əlavə et seçin. Sonra ana ekrandakı SosAvto işarəsindən açın.');enable.hidden=true;return;}
  if(!supported()){setStatus('Bu brauzer telefon bildirişlərini dəstəkləmir. Android-də Chrome ilə açın.');enable.hidden=true;return;}
+ local.hidden=false;
+ local.onclick=()=>task(local,async()=>{
+  setStatus('Telefonun bildiriş göstərməsi yoxlanılır…');
+  try{
+   if(Notification.permission!=='granted')throw Error('Əvvəl bildirişləri aktiv edib brauzerin icazəsini təsdiqləyin.');
+   const reg=await worker();
+   await bounded(reg.showNotification('SosAvto — telefon sınağı',{body:'Bu bildirişi görürsünüzsə, telefonun bildiriş göstərməsi işləyir.',icon:'/assets/push-icon-192.png',tag:'sosavto-local-test',data:{url:'/admin.html'}}),12000,'Telefon sınağı cavab vermədi. Chrome-u yenidən açın.');
+   setStatus('Telefon sınağı başladıldı. '+phoneHelp);
+  }catch(error){setStatus(failureMessage(error));}
+ });
  let settings;
  const active=()=>{enable.hidden=true;test.hidden=false;disable.hidden=false;setStatus('Bu cihazda bildirişlər aktivdir. Sınaq bildirişi ilə yoxlayın.');};
  const reset=()=>{enable.hidden=false;test.hidden=true;disable.hidden=true;setStatus('Bu cihazda bildirişlər bağlıdır. Aktivləşdirmək üçün düyməyə toxunun.');};
@@ -77,6 +92,19 @@ export async function mountAdminPush(root,{api,toast,task}){
    }
   });
  };
- test.onclick=()=>task(test,async()=>{const sub=await subscription();if(!sub){reset();return;}await api('/admin/push','PUT',{endpoint:sub.endpoint});setStatus('Sınaq bildirişi göndərildi. Telefonun bildirişlərini yoxlayın.');});
+ test.onclick=()=>task(test,async()=>{
+  setStatus('Sınaq bildirişi serverdən göndərilir…');
+  const label=test.textContent;test.textContent='Göndərilir…';
+  try{
+   const sub=await bounded(subscription(),12000,'Telefonun bildiriş bağlantısı cavab vermədi. Chrome-u yenidən açın.');
+   if(!sub){reset();setStatus('Telefonun bildiriş bağlantısı tapılmadı. Bildirişləri yenidən aktiv edin.');return;}
+   const result=await bounded(api('/admin/push','PUT',{endpoint:sub.endpoint}),15000,'Serverin cavabı gecikir. İnterneti yoxlayıb bir qədər sonra yenidən cəhd edin.');
+   if(result.sent!==1)throw Error('Bildiriş xidmətindən göndərmə təsdiqi alınmadı. Yenidən cəhd edin.');
+   setStatus('Bildiriş xidməti sınağı qəbul etdi. Bu, telefonun onu göstərdiyini təsdiqləmir. Gəlməyibsə “Telefonda sına” düyməsinə basın. '+phoneHelp);
+  }catch(error){
+   if(error.status===409){reset();}
+   const message=failureMessage(error);setStatus(message);toast(message);
+  }finally{test.textContent=label;}
+ });
  disable.onclick=()=>task(disable,async()=>{await disableAdminPush(api);reset();toast('Bu cihazda bildirişlər söndürüldü.');});
 }

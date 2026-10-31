@@ -6,15 +6,15 @@ import vm from 'node:vm';
 const source=(await readFile(new URL('../assets/admin-push.js',import.meta.url),'utf8')).replaceAll('export async function','async function')+';return {mountAdminPush,disableAdminPush};';
 function harness({ios=false,denied=false,failures=0,pushError="AbortError",existingKey=null,offline=false,saveFails=false}={}){
  const dom=new JSDOM('<div id="panel"></div>',{url:'https://sosavto.test/admin.html'}),w=dom.window,calls=[];
- let current=null,permissionCalls=0,subscribeCalls=0,unsubscribes=0;const sub={endpoint:'https://fcm.googleapis.com/fcm/send/ui-test',options:{},toJSON(){return {endpoint:this.endpoint,keys:{}};},async unsubscribe(){unsubscribes++;current=null;return true;}};
+ const localNotifications=[];let current=null,permissionCalls=0,subscribeCalls=0,unsubscribes=0;const sub={endpoint:'https://fcm.googleapis.com/fcm/send/ui-test',options:{},toJSON(){return {endpoint:this.endpoint,keys:{}};},async unsubscribe(){unsubscribes++;current=null;return true;}};
  if(existingKey){current=sub;sub.options.applicationServerKey=Uint8Array.from(existingKey).buffer;}
- const reg={pushManager:{async getSubscription(){return current;},async subscribe(){subscribeCalls++;if(subscribeCalls<=failures)throw Object.assign(Error('Registration failed - push service error'),{name:pushError});current=sub;return sub;}}};
+ const reg={async showNotification(title,options){localNotifications.push({title,options});},pushManager:{async getSubscription(){return current;},async subscribe(){subscribeCalls++;if(subscribeCalls<=failures)throw Object.assign(Error('Registration failed - push service error'),{name:pushError});current=sub;return sub;}}};
  const nav={onLine:!offline,userAgent:ios?'iPhone':'Android Chrome',serviceWorker:{async register(){return reg;},ready:Promise.resolve(reg),async getRegistration(){return reg;}}};
  const notification={permission:denied?'denied':'default',requestPermission(){permissionCalls++;this.permission='granted';return Promise.resolve('granted');}};
  Object.defineProperty(w,'isSecureContext',{value:true});w.PushManager=function(){};w.Notification=notification;
  const run=new Function('window','navigator','Notification','atob','setTimeout',source),exports=run(w,nav,notification,atob,(fn,ms)=>{if(ms<12000)queueMicrotask(fn);return 0;});
- const api=async(path,method='GET',data)=>{calls.push({path,method,data});if(saveFails&&method==='POST')throw Error('Server bağlantısı alınmadı.');return {enabled:true,publicKey:'BA'};};
- return {w,root:w.document.querySelector('#panel'),calls,exports,api,permissionCalls:()=>permissionCalls,subscribeCalls:()=>subscribeCalls,unsubscribes:()=>unsubscribes,task:async(_,fn)=>fn(),toast:()=>{},close:()=>w.close()};
+ const api=async(path,method='GET',data)=>{calls.push({path,method,data});if(saveFails&&method==='POST')throw Error('Server bağlantısı alınmadı.');return {enabled:true,publicKey:'BA',...(method==='PUT'?{sent:1,failed:0}:{})};};
+ return {localNotifications,w,root:w.document.querySelector('#panel'),calls,exports,api,permissionCalls:()=>permissionCalls,subscribeCalls:()=>subscribeCalls,unsubscribes:()=>unsubscribes,task:async(_,fn)=>fn(),toast:()=>{},close:()=>w.close()};
 }
 test('push activation requires a tap and test delivery targets this phone; disabling unregisters',async()=>{
  const h=harness();try{await h.exports.mountAdminPush(h.root,h);assert.equal(h.permissionCalls(),0);const enable=h.root.querySelector('[data-push-enable]');assert.equal(enable.hidden,false);await enable.onclick();assert.equal(h.permissionCalls(),1);assert.equal(enable.hidden,true);assert.ok(h.calls.some(c=>c.method==='POST'));await h.root.querySelector('[data-push-test]').onclick();assert.equal(h.calls.at(-1).method,'PUT');assert.match(h.calls.at(-1).data.endpoint,/ui-test$/);await h.root.querySelector('[data-push-disable]').onclick();assert.equal(h.calls.at(-1).method,'DELETE');assert.equal(enable.hidden,false);}finally{h.close();}
@@ -41,4 +41,18 @@ test('permission errors do not retry and offline activation never contacts the p
 });
 test('server save failure never reports activation and retries reuse the existing subscription',async()=>{
  const h=harness({saveFails:true});try{await h.exports.mountAdminPush(h.root,h);const button=h.root.querySelector('[data-push-enable]');await button.onclick();assert.equal(button.hidden,false);assert.match(h.root.querySelector('[data-push-status]').textContent,/Server bağlantısı/);await button.onclick();assert.equal(h.subscribeCalls(),1);assert.equal(h.calls.filter(c=>c.method==='POST').length,2);}finally{h.close();}
+});
+
+test('server test shows immediate progress and distinguishes service acceptance from phone display',async()=>{
+ const h=harness();let finish;const original=h.api;h.api=async(path,method,data)=>method==='PUT'?new Promise(resolve=>{finish=resolve;}):original(path,method,data);
+ try{await h.exports.mountAdminPush(h.root,h);await h.root.querySelector('[data-push-enable]').onclick();const button=h.root.querySelector('[data-push-test]');const pending=button.onclick();assert.match(h.root.querySelector('[data-push-status]').textContent,/göndərilir/);assert.equal(button.textContent,'Göndərilir…');while(!finish)await Promise.resolve();finish({sent:1});await pending;assert.match(h.root.querySelector('[data-push-status]').textContent,/telefonun onu göstərdiyini təsdiqləmir/);assert.equal(button.textContent,'Sınaq bildirişi göndər');}finally{h.close();}
+});
+test('server test errors remain in the panel and an expired server subscription permits reactivation',async()=>{
+ for(const status of [429,503,409]){const h=harness(),original=h.api;h.api=async(path,method,data)=>{if(method==='PUT')throw Object.assign(Error('Sınaq çatdırılmadı.'),{status});return original(path,method,data);};try{await h.exports.mountAdminPush(h.root,h);await h.root.querySelector('[data-push-enable]').onclick();await h.root.querySelector('[data-push-test]').onclick();assert.equal(h.root.querySelector('[data-push-status]').textContent,'Sınaq çatdırılmadı.');if(status===409)assert.equal(h.root.querySelector('[data-push-enable]').hidden,false);}finally{h.close();}}
+});
+test('local phone test shows a real worker notification without contacting remote delivery',async()=>{
+ const h=harness();try{await h.exports.mountAdminPush(h.root,h);await h.root.querySelector('[data-push-enable]').onclick();await h.root.querySelector('[data-push-local]').onclick();assert.equal(h.localNotifications.length,1);assert.match(h.localNotifications[0].title,/telefon sınağı/);assert.equal(h.calls.filter(c=>c.method==='PUT').length,0);assert.match(h.root.querySelector('[data-push-status]').textContent,/Tətbiqlər → Chrome/);}finally{h.close();}
+});
+test('missing remote delivery confirmation is never reported as a successful send',async()=>{
+ const h=harness(),original=h.api;h.api=async(path,method,data)=>method==='PUT'?{ok:true}:original(path,method,data);try{await h.exports.mountAdminPush(h.root,h);await h.root.querySelector('[data-push-enable]').onclick();await h.root.querySelector('[data-push-test]').onclick();assert.match(h.root.querySelector('[data-push-status]').textContent,/təsdiqi alınmadı/);}finally{h.close();}
 });

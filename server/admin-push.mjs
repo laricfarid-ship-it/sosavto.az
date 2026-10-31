@@ -60,6 +60,7 @@ export async function pushApi(req,user,method){
   const rows=(await query('SELECT * FROM admin_push_subscriptions WHERE user_id=$1 AND endpoint=$2',[user.id,typeof b.endpoint==='string'?b.endpoint:''])).rows;
   if(!rows.length)fail(409,'Əvvəl bu cihazda bildirişləri aktiv edin.');
   const result=await deliverPush(rows,{title:'SosAvto — sınaq bildirişi',body:'Telefon bildirişləri işləyir. Yeni elanları buradan yoxlaya bilərsiniz.',url:'/admin.html',tag:randomUUID()});
+  console.info(JSON.stringify({event:'admin_push_test_result',...result}));
   if(!result.sent)fail(503,'Sınaq bildirişi göndərilmədi. Bildirişləri yenidən aktiv edin.');
   return {ok:true,...result};
  }
