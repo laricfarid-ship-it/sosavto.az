@@ -177,3 +177,25 @@ test('detail exposes 360 only for a complete sequence and keeps ordinary gallery
  const d=await load('elan.html?id='+listing.id,null,{['/listings/'+listing.id]:{listing:{...listing,spin_frames,images:[{id:'cover',url:'https://example.test/cover.webp'}]}}});
  try{assert.equal(d.doc.querySelectorAll('[data-gallery]').length,1);const spin=d.doc.querySelector('#vehicle-spin');assert.equal(spin.hidden,false);assert.equal(spin.querySelector('img').getAttribute('src'),null);spin.querySelector('.spin-start').click();assert.equal(spin.querySelector('img').src,spin_frames[0].url);assert.equal(d.doc.querySelector('#gallery-main').src,'https://example.test/cover.webp');}finally{d.close();}
 });
+
+test('failed AI question stays editable and can be resubmitted successfully',async()=>{
+ const result={error:'AI xidməti müvəqqəti yüklənib.'};
+ const d=await load('ai.html',user,{'/config':{ai:true,aiProvider:'openai'},'/assistant':result});
+ try{
+  const form=d.doc.querySelector('#chat-form'),input=form.elements.message,button=form.querySelector('button');
+  input.value='Hyundai Elantra alanda nəyi yoxlayım?';const draft=input.value;
+  const event={preventDefault(){},target:form,submitter:button};
+  const pending=form.onsubmit(event);
+  assert.equal(button.disabled,true);assert.equal(input.readOnly,true);assert.equal(input.value,draft);
+  assert.equal(form.getAttribute('aria-busy'),'true');
+  assert.ok([...d.doc.querySelectorAll('[data-prompt]')].every(b=>b.disabled));
+  form.onsubmit(event);await pending;
+  assert.equal(d.calls.filter(c=>c.url==='/api/assistant').length,1);
+  assert.equal(input.value,draft);assert.equal(input.readOnly,false);assert.equal(button.disabled,false);assert.equal(button.textContent,'Yenidən göndər');
+  assert.equal(form.hasAttribute('aria-busy'),false);
+  delete result.error;result.answer='Avtomobilə baxış etdirin.';
+  await form.onsubmit(event);
+  assert.equal(d.calls.filter(c=>c.url==='/api/assistant').length,2);assert.equal(input.value,'');assert.equal(button.textContent,'Göndər');
+  assert.match(d.doc.querySelector('#chat-history').textContent,/Avtomobilə baxış etdirin/);
+ }finally{d.close();}
+});
