@@ -8,24 +8,40 @@ export function assistantConfig(env=process.env){
  if(provider==='openai')return {enabled:!!(env.OPENAI_API_KEY&&env.OPENAI_MODEL),provider:'openai',model:env.OPENAI_MODEL};
  return {enabled:false,provider:null};
 }
-export async function assistantAnswer(input,{env=process.env,request=fetch,consent=false}={}){
+export async function assistantAnswer(input,{env=process.env,request=fetch,consent=false,wait=ms=>new Promise(resolve=>setTimeout(resolve,ms)),now=Date.now}={}){
  const c=assistantConfig(env);if(!c.enabled)fail(503,'AI köməkçisi hələ aktivləşdirilməyib.');
  if(c.provider==='gemini'&&consent!==true)fail(400,'Mesajın Google Gemini xidmətinə göndərilməsinə razılıq tələb olunur.');
  const gemini=c.provider==='gemini';
  let response,data;
+ // Keep all Gemini attempts inside the 30s function budget. Quota/auth errors
+ // never retry; neither the provider nor the model/billing configuration changes.
+ const deadline=now()+22000;
+ for(let attempt=0;;attempt++){
  try{
   response=await request(gemini?`https://generativelanguage.googleapis.com/v1beta/models/${c.model}:generateContent`:'https://api.openai.com/v1/responses',{
-   method:'POST',headers:{'Content-Type':'application/json',...(gemini?{'x-goog-api-key':env.GEMINI_API_KEY}:{Authorization:`Bearer ${env.OPENAI_API_KEY}`})},signal:AbortSignal.timeout(20000),
+   method:'POST',headers:{'Content-Type':'application/json',...(gemini?{'x-goog-api-key':env.GEMINI_API_KEY}:{Authorization:`Bearer ${env.OPENAI_API_KEY}`})},signal:AbortSignal.timeout(gemini?Math.max(1,Math.min(12000,deadline-now())):20000),
    body:JSON.stringify(gemini?{systemInstruction:{parts:[{text:instructions}]},contents:[{role:'user',parts:[{text:input}]}],generationConfig:{maxOutputTokens:700,temperature:0.3}}:{model:c.model,store:false,max_output_tokens:700,instructions,input})
   });
- }catch{fail(503,'AI ilə əlaqə alınmadı. Bir qədər sonra yenidən sınayın.');}
- // Never retry or switch providers/models automatically. Never return provider errors/secrets.
+ }catch{
+  response=null;
+ }
+ const transient=!response||[500,502,503,504].includes(response.status);
+ const delay=500*2**attempt;
+ if(gemini&&transient&&attempt<2&&deadline-now()>delay+1000){
+  try{await response?.body?.cancel();}catch{}
+  await wait(delay);
+  continue;
+ }
+ if(!response)fail(503,'AI ilə əlaqə alınmadı. Sualınız saxlanılıb, yenidən göndərə bilərsiniz.');
+ break;
+ }
+ // Never return provider errors/secrets or retry quota failures.
  if(response.status===429)fail(429,'AI sorğu limiti bitib. Bir qədər sonra yenidən sınayın. Ödənişli xidmətə keçid edilmir.');
  if(!response.ok){
   let error;try{error=(await response.json())?.error;}catch{}
   const message=typeof error?.message==='string'?error.message:'';
   const reasons=new Set((Array.isArray(error?.details)?error.details:[]).map(d=>d?.reason));
-  let reason='UPSTREAM_ERROR',notice='AI xidməti hazırda cavab vermir. Sonra yenidən sınayın.';
+  let reason='UPSTREAM_ERROR',notice='AI xidməti müvəqqəti yüklənib. Bir qədər sonra yenidən sınayın.';
   if(reasons.has('API_KEY_INVALID')||/api key not valid|api key expired|api key.*leaked/i.test(message)){reason='KEY_INVALID';notice='Gemini API açarı Google tərəfindən qəbul edilmədi. Açarın ayarını yoxlamaq lazımdır.';}
   else if(/user location is not supported|not available in your country|region.*not supported/i.test(message)){reason='REGION_UNSUPPORTED';notice='Gemini bu server bölgəsi üçün əlçatan deyil. Ödəniş aktivləşdirilməyib.';}
   else if(/free tier.*not available|billing.*required|enable billing/i.test(message)){reason='FREE_TIER_UNAVAILABLE';notice='Google bu layihə üçün pulsuz istifadəni qəbul etmir. Ödəniş aktivləşdirilməyib.';}

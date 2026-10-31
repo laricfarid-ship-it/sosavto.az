@@ -280,7 +280,21 @@ async function mapPage(){
 async function assistant(){
  main.innerHTML=`<section class="chat"><p class="eyebrow">${icon('spark')} SosAvto AI</p><h1>Avtomobil barədə<br><span class="accent">sualın var?</span></h1><p class="muted">Seçimləri müqayisə et, elan təsviri hazırla, qulluq barədə məlumat al.</p>${!config.ai?'<div class="notice">AI xidməti hələ aktivləşdirilməyib. Qoşulduqdan sonra burada sual verə biləcəksiniz. <a href="index.html" class="accent">Elan axtarışına keç</a></div>':!me?'<div class="notice">AI köməkçidən istifadə üçün <a href="giris.html" class="accent">hesabınıza daxil olun</a>.</div>':''}${config.aiProvider==='gemini'?'<p class="notice">Cavabları Google Gemini hazırlayır. Pulsuz xidmətdə mətnlər Google məhsullarının təkmilləşdirilməsi üçün istifadə oluna bilər. Şəxsi və məxfi məlumat göndərməyin.</p>':''}<div class="chat-prompts" style="margin-top:22px">${['İşlənmiş avtomobil alanda nələri yoxlamalıyam?','Hibrid və benzin mühərrikini müqayisə et','Elan təsviri yazmağa kömək et'].map(t=>`<button class="btn small" data-prompt="${esc(t)}" ${config.ai&&me?'':'disabled'}>${esc(t)}</button>`).join('')}</div><div class="chat-history" id="chat-history" aria-live="polite"><div class="bubble">Salam! Avtomobil və ya xidmət barədə sualınızı yazın. Real elanlara və canlı bazar qiymətlərinə çıxışım yoxdur.</div></div><form id="chat-form" class="panel"><label class="field">Sualınız<textarea name="message" required minlength="3" maxlength="1500" rows="3" placeholder="Məsələn: şəhər içi istifadə üçün hibrid avtomobil seçərkən nəyə baxım?" ${config.ai&&me?'':'disabled'}></textarea></label><div class="form-actions"><small class="muted">AI səhv edə bilər. Vacib məlumatı yoxlayın.</small><button class="btn primary" ${config.ai&&me?'':'disabled'}>${icon('spark')} Göndər</button></div></form></section>`;
  $$('[data-prompt]').forEach(b=>b.onclick=()=>{$('#chat-form').elements.message.value=b.dataset.prompt;$('#chat-form').elements.message.focus();});
- $('#chat-form').onsubmit=e=>{e.preventDefault();task(e.submitter,async()=>{const input=e.target.elements.message;const value=input.value;const bubble=document.createElement('div');bubble.className='bubble user';bubble.textContent=value;$('#chat-history').append(bubble);input.value='';const response=document.createElement('div');response.className='bubble';response.textContent='Cavab hazırlanır…';$('#chat-history').append(response);try{const r=await api('/assistant','POST',{message:value});response.textContent=r.answer;}catch(err){response.textContent=err.message;}});};
+ let sending=false;
+ $('#chat-form').onsubmit=e=>{
+  e.preventDefault();if(sending||!config.ai||!me)return;sending=true;
+  const form=e.target,input=form.elements.message,button=form.querySelector('button'),value=input.value;
+  input.readOnly=true;form.setAttribute('aria-busy','true');
+  $$('[data-prompt]').forEach(b=>b.disabled=true);
+  button.textContent='Gözləyin…';
+  return task(button,async()=>{
+   const bubble=document.createElement('div');bubble.className='bubble user';bubble.textContent=value;$('#chat-history').append(bubble);
+   const response=document.createElement('div');response.className='bubble';response.textContent='Cavab hazırlanır… Bağlantı zəifdirsə, bu bir qədər çəkə bilər.';$('#chat-history').append(response);
+   try{const r=await api('/assistant','POST',{message:value});response.textContent=r.answer;input.value='';button.textContent='Göndər';}
+   catch(err){response.textContent=err.message;button.textContent='Yenidən göndər';}
+   finally{sending=false;input.readOnly=false;form.removeAttribute('aria-busy');$$('[data-prompt]').forEach(b=>b.disabled=false);}
+  });
+ };
 }
 async function renderAdmin2FA(){
  const previous=$('#admin-2fa-panel');previous?.remove();const section=document.createElement('section');section.className='panel form-section';section.id='admin-2fa-panel';section.innerHTML='<h2>İki mərhələli doğrulama (2FA)</h2><p class="muted">Google Authenticator ilə admin girişini əlavə kodla qoruyun.</p><div id="admin-2fa-body">'+loader()+'</div>';

@@ -23,3 +23,27 @@ test('provider diagnostics classify failures without leaking raw error or creden
  assert.equal(logs.some(x=>x.includes('test-secret')||x.includes('private prompt')),false);
  }finally{console.warn=original;}
 });
+
+test('Gemini recovers from transient server errors with bounded backoff',async()=>{
+ for(const status of [500,502,503,504]){
+  let calls=0;const delays=[];
+  const r=await assistantAnswer('Salam',{env,consent:true,wait:async ms=>delays.push(ms),request:async()=>++calls<3?reply({},status):reply({candidates:[{content:{parts:[{text:'Cavab'}]}}]})});
+  assert.equal(r.answer,'Cavab');assert.equal(calls,3);assert.deepEqual(delays,[500,1000]);
+ }
+});
+test('persistent overload stops after three attempts and exposes only a safe error',async()=>{
+ let calls=0;await assert.rejects(assistantAnswer('Salam',{env,consent:true,wait:async()=>{},request:async()=>{calls++;return reply({error:{message:'test-secret'}},503);}}),e=>e.status===502&&!e.message.includes('test-secret'));
+ assert.equal(calls,3);
+});
+test('Gemini retries a network interruption but never permanent or quota failures',async()=>{
+ let calls=0;const r=await assistantAnswer('Salam',{env,consent:true,wait:async()=>{},request:async()=>{if(++calls===1)throw Error('network');return reply({candidates:[{content:{parts:[{text:'Cavab'}]}}]});}});assert.equal(calls,2);assert.equal(r.answer,'Cavab');
+ for(const status of [400,401,403,404,429]){calls=0;await assert.rejects(assistantAnswer('Salam',{env,consent:true,wait:async()=>assert.fail('no wait'),request:async()=>{calls++;return reply({},status);}}));assert.equal(calls,1);}
+});
+test('all Gemini attempts share a deadline and a reduced final timeout',async()=>{
+ let clock=0,calls=0;const signals=[];
+ await assert.rejects(assistantAnswer('Salam',{env,consent:true,now:()=>clock,wait:async ms=>{clock+=ms;},request:async(url,options)=>{signals.push(options.signal);calls++;clock+=12000;throw Error('timeout');}}),e=>e.status===503);
+ assert.equal(calls,2);assert.equal(signals.length,2);assert.equal(signals.every(s=>s instanceof AbortSignal),true);
+});
+test('explicit OpenAI configuration is not retried or replaced',async()=>{
+ let calls=0;await assert.rejects(assistantAnswer('Salam',{env:{AI_PROVIDER:'openai',OPENAI_API_KEY:'test',OPENAI_MODEL:'test'},wait:async()=>assert.fail('no wait'),request:async()=>{calls++;return reply({},503);}}));assert.equal(calls,1);
+});

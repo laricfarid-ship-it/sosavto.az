@@ -6,7 +6,9 @@ never put it in Git, chat, browser assets or logs.
 
 This branch is based on main, independent of the paused PR #9 photo analysis.
 Only text questions and listing descriptions are supported. No search, images,
-tools, attachments, automatic model fallback or request retry. The assistant has
+tools, attachments, automatic model fallback. Temporary Gemini network failures and HTTP 500/502/503/504
+responses are retried at most twice, with 500/1000ms backoff and a shared 22-second
+deadline (12 seconds maximum per attempt). Quota and permanent failures never retry. The assistant has
 no access to listings/accounts and does not retain conversation context.
 
 Preview chooses Gemini when GEMINI_API_KEY exists. The fixed pilot model is
@@ -18,7 +20,7 @@ but errors from Gemini never fall back to it.
 
 Before sending text the UI explains Google free-tier data use and asks consent;
 the API also requires consent=true for Gemini. Credentials are in request headers,
-never URLs. Only sanitized provider errors are returned. Timeout is 20 seconds,
+never URLs. Only sanitized provider errors are returned. Gemini requests share the bounded retry deadline; OpenAI timeout stays 20 seconds,
 output limit is 700 tokens. Existing auth/CSRF and 20 requests/account/day,
 200 globally/day remain, plus 5 global requests/minute. These application limits
 are not Google quota guarantees and cannot enforce Google billing status. Keep
@@ -49,3 +51,7 @@ Live response with the replacement model still requires verification.
 Production approval: only signed-in active accounts may send assistant requests.
 Guest UI is disabled and direct unauthenticated API calls return 401 without
 contacting Gemini. Photo-analysis PR #9 remains paused and excluded.
+
+2026-10-31: production Gemini returned 503 twice. Added bounded transient retries,
+kept quota/auth errors non-retryable, and preserved failed chat drafts for manual
+resubmission. A pending chat blocks duplicate submissions and prompt replacement.
