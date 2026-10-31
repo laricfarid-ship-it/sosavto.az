@@ -1,5 +1,5 @@
 import {adminEvent,pushApi} from '../server/admin-push.mjs';
-import {socialSharePreview} from '../server/social-share.mjs';
+import {socialSharePreview,publishSocial,socialConfigured} from '../server/social-share.mjs';
 import {resetEnabled,requestReset,completeReset} from '../server/password-reset.mjs';
 import {imagesFor} from '../server/listing-media.mjs';
 import {priceHistogram} from '../server/price-histogram.mjs';
@@ -134,6 +134,27 @@ export default async function handler(req,res){
  }
  if(path.startsWith('/api/admin')){
  requireAdmin(user);
+ if(path==='/api/admin/social-publish'&&method==='POST'){
+  const b=await body(req);const id=uuid(b.id);const platform=b.platform;
+  if(!['instagram','facebook'].includes(platform))fail(400,'Sosial şəbəkə düzgün seçilməyib.');
+  if(process.env.SOCIAL_SHARE_ENABLED!=='true'||!socialConfigured(platform))fail(503,'Meta paylaşım bağlantısı aktiv deyil.');
+  await rateLimit('social:admin:'+user.id,12,3600);
+  const key=platform==='instagram'?'instagram':'facebook';
+  const locked=await query("UPDATE listings SET details=jsonb_set(details,ARRAY['social_shares',$2],jsonb_build_object('status','publishing','started_at',now()),true) WHERE id=$1 AND status='active' AND NOT COALESCE((details->>'_deleted')::boolean,false) AND COALESCE(details#>>ARRAY['social_shares',$2,'status'],'') NOT IN ('publishing','sent') RETURNING id,title,brand,model,year,price,city",( [id,key]));
+  if(!locked.rows.length)fail(409,'Elan aktiv deyil, artıq paylaşılıb və ya paylaşım davam edir.');
+  const row=locked.rows[0];
+  const photo=await query('SELECT url FROM images WHERE listing_id=$1 ORDER BY sort_order,created_at LIMIT 1',[id]);
+  const preview=socialSharePreview(row,photo.rows[0]?.url||'');
+  try{
+   const postId=await publishSocial(platform,preview);
+   await query("UPDATE listings SET details=jsonb_set(details,ARRAY['social_shares',$2],jsonb_build_object('status','sent','post_id',$3::text,'sent_at',now()),true) WHERE id=$1",[id,key,postId]);
+   await query('INSERT INTO audit_logs(id,admin_id,action,entity_id) VALUES($1,$2,$3,$4)',[randomUUID(),user.id,'social_'+platform,id]);
+   return json(res,200,{ok:true,platform,postId});
+  }catch(e){
+   await query("UPDATE listings SET details=jsonb_set(details,ARRAY['social_shares',$2],jsonb_build_object('status','failed','error',$3::text,'failed_at',now()),true) WHERE id=$1",[id,key,String(e.message||e).slice(0,240)]);
+   fail(502,'Meta paylaşımı alınmadı. Yenidən cəhd etməzdən əvvəl Meta hesabında postu yoxlayın.');
+  }
+ }
  if(path==='/api/admin/social-preview'&&method==='GET'){
   const id=uuid(url.searchParams.get('id'));
   const result=await query("SELECT l.id,l.title,l.brand,l.model,l.year,l.price,l.city,l.status,(SELECT i.url FROM images i WHERE i.listing_id=l.id ORDER BY i.sort_order,i.created_at LIMIT 1) AS image_url FROM listings l WHERE l.id=$1",[id]);
