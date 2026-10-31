@@ -1,4 +1,5 @@
 import {adminEvent,pushApi} from '../server/admin-push.mjs';
+import {socialSharePreview,publishSocial,socialConfigured} from '../server/social-share.mjs';
 import {resetEnabled,requestReset,completeReset} from '../server/password-reset.mjs';
 import {imagesFor} from '../server/listing-media.mjs';
 import {priceHistogram} from '../server/price-histogram.mjs';
@@ -133,13 +134,41 @@ export default async function handler(req,res){
  }
  if(path.startsWith('/api/admin')){
  requireAdmin(user);
+ if(path==='/api/admin/social-publish'&&method==='POST'){
+  const b=await body(req);const id=uuid(b.id);const platform=b.platform;
+  if(!['instagram','facebook'].includes(platform))fail(400,'Sosial şəbəkə düzgün seçilməyib.');
+  if(process.env.SOCIAL_SHARE_ENABLED!=='true'||!socialConfigured(platform))fail(503,'Meta paylaşım bağlantısı aktiv deyil.');
+  await rateLimit('social:admin:'+user.id,12,3600);
+  const key=platform==='instagram'?'instagram':'facebook';
+  const locked=await query("UPDATE listings SET details=jsonb_set(details,ARRAY['social_shares',$2],jsonb_build_object('status','publishing','started_at',now()),true) WHERE id=$1 AND status='active' AND NOT COALESCE((details->>'_deleted')::boolean,false) AND COALESCE(details#>>ARRAY['social_shares',$2,'status'],'') NOT IN ('publishing','sent') RETURNING id,title,brand,model,year,price,city",( [id,key]));
+  if(!locked.rows.length)fail(409,'Elan aktiv deyil, artıq paylaşılıb və ya paylaşım davam edir.');
+  const row=locked.rows[0];
+  const photo=await query('SELECT url FROM images WHERE listing_id=$1 ORDER BY sort_order,created_at LIMIT 1',[id]);
+  const preview=socialSharePreview(row,photo.rows[0]?.url||'');
+  try{
+   const postId=await publishSocial(platform,preview);
+   await query("UPDATE listings SET details=jsonb_set(details,ARRAY['social_shares',$2],jsonb_build_object('status','sent','post_id',$3::text,'sent_at',now()),true) WHERE id=$1",[id,key,postId]);
+   await query('INSERT INTO audit_logs(id,admin_id,action,entity_id) VALUES($1,$2,$3,$4)',[randomUUID(),user.id,'social_'+platform,id]);
+   return json(res,200,{ok:true,platform,postId});
+  }catch(e){
+   await query("UPDATE listings SET details=jsonb_set(details,ARRAY['social_shares',$2],jsonb_build_object('status','failed','error',$3::text,'failed_at',now()),true) WHERE id=$1",[id,key,String(e.message||e).slice(0,240)]);
+   fail(502,'Meta paylaşımı alınmadı. Yenidən cəhd etməzdən əvvəl Meta hesabında postu yoxlayın.');
+  }
+ }
+ if(path==='/api/admin/social-preview'&&method==='GET'){
+  const id=uuid(url.searchParams.get('id'));
+  const result=await query("SELECT l.id,l.title,l.brand,l.model,l.year,l.price,l.city,l.status,(SELECT i.url FROM images i WHERE i.listing_id=l.id ORDER BY i.sort_order,i.created_at LIMIT 1) AS image_url FROM listings l WHERE l.id=$1",[id]);
+  if(!result.rows.length||result.rows[0].status!=='active')fail(404,'Yalnız təsdiqlənmiş elanı paylaşmaq olar.');
+  return json(res,200,{preview:socialSharePreview(result.rows[0],result.rows[0].image_url||'')});
+ }
  if(path==='/api/admin'&&method==='GET'){
- const [stats,pending,reports,users,logs]=await Promise.all([
+ const [stats,pending,activeListings,reports,users,logs]=await Promise.all([
  query("SELECT count(*)::integer total,count(*) FILTER(WHERE status='active')::integer active,count(*) FILTER(WHERE status='pending')::integer pending FROM listings"),
  query(`SELECT ${projection} FROM listings l WHERE l.status='pending' ORDER BY l.created_at`),
+ query(`SELECT l.id,l.title,l.price,l.city,l.brand,l.model,l.year,l.details->'social_shares' AS social_shares FROM listings l WHERE l.status='active' AND NOT COALESCE((l.details->>'_deleted')::boolean,false) ORDER BY l.updated_at DESC LIMIT 40`),
  query("SELECT r.*,l.title FROM reports r JOIN listings l ON l.id=r.listing_id WHERE r.status='open' ORDER BY r.created_at DESC LIMIT 100"),
  query('SELECT id,fullname,email,role,status,created_at FROM users ORDER BY created_at DESC LIMIT 100'),query('SELECT a.*,u.fullname FROM audit_logs a JOIN users u ON u.id=a.admin_id ORDER BY a.created_at DESC LIMIT 100')]);
- return json(res,200,{stats:stats.rows[0],pending:pending.rows,reports:reports.rows,users:users.rows,logs:logs.rows});
+ return json(res,200,{stats:stats.rows[0],pending:pending.rows,activeListings:activeListings.rows,socialEnabled:process.env.SOCIAL_SHARE_ENABLED==='true',socialConfigured:{instagram:socialConfigured('instagram'),facebook:socialConfigured('facebook')},reports:reports.rows,users:users.rows,logs:logs.rows});
  }
  if(path==='/api/admin/moderate'&&method==='POST'){
  const b=await body(req);const id=uuid(b.id);if(!['active','rejected'].includes(b.status))fail(400,'Status düzgün deyil.');const reason=b.status==='rejected'?text(b.reason,'Rədd səbəbi',5,1000):'';
