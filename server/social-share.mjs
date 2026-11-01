@@ -60,29 +60,41 @@ async function credentials(platform, deadline) {
   (process.env.META_IG_USER_ID && process.env.META_IG_USER_ID !== igId))) throw new Error('META_INSTAGRAM_NOT_LINKED_OR_MISMATCH');
  return {token: explicit || page.access_token || base, id: platform === 'facebook' ? pageId : igId};
 }
+async function permissionReport(token, deadline) {
+ try {
+  const permissions = await graph('me/permissions', {}, token, {deadline});
+  if (!Array.isArray(permissions.data)) throw new Error('META_PERMISSIONS_UNAVAILABLE');
+  return {valid: true, scopes: permissions.data.filter(p => p.status === 'granted').map(p => p.permission)};
+ } catch {
+  const debug = (await graph('debug_token', {input_token: token}, token, {deadline})).data;
+  return {valid: debug?.is_valid === true, scopes: Array.isArray(debug?.scopes) ? debug.scopes : []};
+ }
+}
+const diagnosticError = e => ({error: /^META_[A-Z_0-9]+$/.test(e.message) ? e.message : 'META_CHECK_FAILED', reason: e.diagnostic});
 export async function socialConnectionReport() {
  const report = {enabled: socialShareEnabled(), graphVersion: version, tokenStored: Boolean(process.env.META_ACCESS_TOKEN), platforms: {}};
- const deadline = Date.now() + 22000;
+ const deadline = Date.now() + 25000;
+ let basePermissions;
  if (process.env.META_ACCESS_TOKEN) {
   try {
-   const data = (await graph('debug_token', {input_token: process.env.META_ACCESS_TOKEN}, process.env.META_ACCESS_TOKEN, {deadline})).data;
+   basePermissions = await permissionReport(process.env.META_ACCESS_TOKEN, deadline);
    const relevant = [...new Set([...required.facebook, ...required.instagram, 'pages_show_list', 'business_management'])];
-   report.systemToken = {valid: data?.is_valid === true, type: ['SYSTEM_USER','USER','PAGE'].includes(data?.type) ? data.type : 'UNKNOWN',
-    permissions: relevant.filter(scope => data?.scopes?.includes(scope)), expiresAt: Number(data?.expires_at) || 0};
-  } catch (e) { report.systemToken = {error: /^META_[A-Z_0-9]+$/.test(e.message) ? e.message : 'META_CHECK_FAILED', reason: e.diagnostic}; }
+   report.systemToken = {valid: basePermissions.valid, permissions: relevant.filter(scope => basePermissions.scopes.includes(scope))};
+  } catch (e) { report.systemToken = diagnosticError(e); }
  }
  for (const platform of platforms) {
+  let c;
+  try { c = await credentials(platform, deadline); }
+  catch (e) { report.platforms[platform] = {reachable: false, ...diagnosticError(e)}; continue; }
+  const result = {accountId: c.id, reachable: true, readyForManualTest: false};
   try {
-   const c = await credentials(platform, deadline);
-   // Debug this same token; only fixed scope names and validity leave this module.
-   const debug = await graph('debug_token', {input_token: c.token}, c.token, {deadline});
-   const scopes = Array.isArray(debug.data?.scopes) ? debug.data.scopes : [];
-   const missing = required[platform].filter(scope => !scopes.includes(scope));
-   report.platforms[platform] = {accountId: c.id, reachable: true, valid: debug.data?.is_valid === true,
-    missingPermissions: missing, readyForManualTest: debug.data?.is_valid === true && !missing.length};
-  } catch (e) {
-   report.platforms[platform] = {reachable: false, error: /^META_[A-Z_0-9]+$/.test(e.message) ? e.message : 'META_CHECK_FAILED', reason: e.diagnostic};
-  }
+   const explicit = platform === 'facebook' ? process.env.META_FB_PAGE_ACCESS_TOKEN : process.env.META_IG_ACCESS_TOKEN;
+   const permissions = !explicit && basePermissions ? basePermissions : await permissionReport(c.token, deadline);
+   result.valid = permissions.valid;
+   result.missingPermissions = required[platform].filter(scope => !permissions.scopes.includes(scope));
+   result.readyForManualTest = permissions.valid && !result.missingPermissions.length;
+  } catch (e) { result.permissionCheck = diagnosticError(e); }
+  report.platforms[platform] = result;
  }
  return report;
 }
