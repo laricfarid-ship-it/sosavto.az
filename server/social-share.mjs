@@ -101,10 +101,14 @@ export async function socialConnectionReport() {
 export async function publishSocial(platform, preview, checkpoint = async () => {}) {
  if (!socialShareEnabled()) throw new Error('SOCIAL_SHARE_DISABLED');
  if (!platforms.includes(platform)) throw new Error('META_PLATFORM_INVALID');
- const image = new URL(preview.imageUrl);
+ let image = new URL(preview.imageUrl);
  const allowed = [process.env.S3_PUBLIC_URL, process.env.SOCIAL_IMAGE_ORIGIN].filter(Boolean).map(v => new URL(v).origin);
  if (image.protocol !== 'https:' || image.username || image.password || image.search || image.hash || !allowed.includes(image.origin)) throw new Error('META_IMAGE_NOT_PUBLIC_STORAGE');
  const deadline = Date.now() + 23000;
+ if (!/\.jpe?g$/i.test(image.pathname)) {
+  const {prepareSocialImage} = await import('./social-image.mjs');
+  image = new URL(await prepareSocialImage(image.href, preview.listingId));
+ }
  const c = await credentials(platform, deadline);
  if (platform === 'facebook') {
   const data = await graph(c.id + '/photos', {url: image.href, caption: preview.caption}, c.token, {method:'POST', deadline});
