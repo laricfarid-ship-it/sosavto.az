@@ -23,7 +23,7 @@ export function socialSharePreview(listing, imageUrl = '') {
  const caption = [title, priceLabel, listing.city, 'Elana bax: ' + link, '#SosAvto'].filter(Boolean).join('\n');
  return {listingId: listing.id, title, caption, link, imageUrl, platforms: ['instagram','facebook'], published: false};
 }
-// Never relay Meta messages, response bodies, request URLs or tokens to logs/UI.
+// Never relay raw Meta messages, response bodies, request URLs or tokens to logs/UI.
 async function graph(path, params, token, {method = 'GET', deadline = Date.now() + 22000} = {}) {
  if (!token || Date.now() >= deadline) throw new Error('META_REQUEST_UNAVAILABLE');
  const url = new URL('https://graph.facebook.com/' + version + '/' + path);
@@ -38,7 +38,11 @@ async function graph(path, params, token, {method = 'GET', deadline = Date.now()
  } catch { throw new Error('META_NETWORK_OR_RESPONSE_ERROR'); }
  if (!response.ok || data.error) {
   const code = Number.isInteger(data.error?.code) ? data.error.code : response.status;
-  throw new Error('META_API_' + code);
+  const error = new Error('META_API_' + code);
+  let reason = String(data.error?.message || '');
+  for (const secret of [token, ...Object.entries(process.env).filter(([k]) => /^META_.*TOKEN$/.test(k)).map(([,v]) => v)].filter(Boolean)) reason = reason.split(secret).join('[redacted]');
+  error.diagnostic = reason.replace(/https?:\/\/\S+/gi, '[url]').replace(/[A-Za-z0-9_|.-]{35,}/g, '[redacted]').slice(0, 220);
+  throw error;
  }
  return data;
 }
@@ -65,7 +69,7 @@ export async function socialConnectionReport() {
    const relevant = [...new Set([...required.facebook, ...required.instagram, 'pages_show_list', 'business_management'])];
    report.systemToken = {valid: data?.is_valid === true, type: ['SYSTEM_USER','USER','PAGE'].includes(data?.type) ? data.type : 'UNKNOWN',
     permissions: relevant.filter(scope => data?.scopes?.includes(scope)), expiresAt: Number(data?.expires_at) || 0};
-  } catch (e) { report.systemToken = {error: /^META_[A-Z_0-9]+$/.test(e.message) ? e.message : 'META_CHECK_FAILED'}; }
+  } catch (e) { report.systemToken = {error: /^META_[A-Z_0-9]+$/.test(e.message) ? e.message : 'META_CHECK_FAILED', reason: e.diagnostic}; }
  }
  for (const platform of platforms) {
   try {
@@ -77,7 +81,7 @@ export async function socialConnectionReport() {
    report.platforms[platform] = {accountId: c.id, reachable: true, valid: debug.data?.is_valid === true,
     missingPermissions: missing, readyForManualTest: debug.data?.is_valid === true && !missing.length};
   } catch (e) {
-   report.platforms[platform] = {reachable: false, error: /^META_[A-Z_0-9]+$/.test(e.message) ? e.message : 'META_CHECK_FAILED'};
+   report.platforms[platform] = {reachable: false, error: /^META_[A-Z_0-9]+$/.test(e.message) ? e.message : 'META_CHECK_FAILED', reason: e.diagnostic};
   }
  }
  return report;
