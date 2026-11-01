@@ -1,3 +1,4 @@
+import {serviceDirectory} from '../server/service-directory.mjs';
 import {adminEvent,pushApi} from '../server/admin-push.mjs';
 import {resetEnabled,requestReset,completeReset} from '../server/password-reset.mjs';
 import {imagesFor} from '../server/listing-media.mjs';
@@ -28,6 +29,7 @@ export default async function handler(req,res){
  await rateLimit(`api:ip:${address}`,300,60);
  if(['/sitemap.xml','/elan'].includes(path)&&['GET','HEAD'].includes(method))return seoPage(req,res,path,url);
  const user=await session(req);
+ if(path==='/api/service-businesses'||path==='/api/admin/service-businesses')return json(res,200,await serviceDirectory(req,user,path,method,url));
  if(path==='/api/admin/push')return json(res,200,await pushApi(req,user,method));
  if(path==='/api/admin/2fa/verify-login'&&method==='POST'){
   const pending=await challengeUser(req);if(!pending)fail(401,'Giriş müddəti bitdi. Yenidən daxil olun.');
