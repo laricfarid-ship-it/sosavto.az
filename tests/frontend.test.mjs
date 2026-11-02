@@ -10,7 +10,7 @@ import * as catalog from '../assets/catalog.js';
 import {mountBrandPicker} from '../assets/brand-picker.js';
 import * as credit from '../assets/credit.js';
 import * as discovery from '../assets/discovery.js';
-const source=(await readFile(new URL('../assets/app.js',import.meta.url),'utf8')).replace("import {mountAdminPush,disableAdminPush} from './admin-push.js';",'const mountAdminPush=async()=>{};const disableAdminPush=async()=>{};').replace("import {cardGalleryMarkup,mountCardGalleries} from './card-gallery.js';",'').replace("import {mountPriceHistogram} from './price-histogram.js';",'const mountPriceHistogram=()=>{};').replace("import {mountBrandPicker} from './brand-picker.js';",'').replace("import {creditMarkup,mountCredit} from './credit.js';",'const {creditMarkup,mountCredit}=credit;').replace("import {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights} from './discovery.js';",'const {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights}=discovery;').replace("import {mountDemoListings} from './demo-listings.js';",'const mountDemoListings=()=>{};').replace("import {groupMapListings,mapKinds} from './service-map.js';",'').replace("import {cars} from './cars.js';",'').replace("import {initLanguage} from './i18n.js';",'const initLanguage=()=>{};').replace("import {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys} from './catalog.js';",'const {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys}=catalog;').replace("import {technolAds} from './technol-ads.js';",'const technolAds=()=>"";').replace("import {mountSpinViewer} from './spin-viewer.js';",'').replace("import {mountSpinUploader} from './spin-uploader.js';",'').replace('init().catch(e=>errorBox(main,e));','return init();');
+const source=(await readFile(new URL('../assets/app.js',import.meta.url),'utf8')).replace("import {roadside} from './sos.js';","const roadside=async({main})=>{main.innerHTML='<h1>SOS preview</h1>';};").replace("import {carwash} from './wash.js';","const carwash=async({main})=>{main.innerHTML='<h1>Wash preview</h1>';};").replace("import {mountAdminPush,disableAdminPush} from './admin-push.js';",'const mountAdminPush=async()=>{};const disableAdminPush=async()=>{};').replace("import {cardGalleryMarkup,mountCardGalleries} from './card-gallery.js';",'').replace("import {mountPriceHistogram} from './price-histogram.js';",'const mountPriceHistogram=()=>{};').replace("import {mountBrandPicker} from './brand-picker.js';",'').replace("import {creditMarkup,mountCredit} from './credit.js';",'const {creditMarkup,mountCredit}=credit;').replace("import {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights} from './discovery.js';",'const {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights}=discovery;').replace("import {mountDemoListings} from './demo-listings.js';",'const mountDemoListings=()=>{};').replace("import {groupMapListings,mapKinds} from './service-map.js';",'').replace("import {cars} from './cars.js';",'').replace("import {initLanguage} from './i18n.js';",'const initLanguage=()=>{};').replace("import {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys} from './catalog.js';",'const {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys}=catalog;').replace("import {technolAds} from './technol-ads.js';",'const technolAds=()=>"";').replace("import {mountSpinViewer} from './spin-viewer.js';",'').replace("import {mountSpinUploader} from './spin-uploader.js';",'').replace('init().catch(e=>errorBox(main,e));','return init();');
 const user={id:'11111111-1111-4111-8111-111111111111',fullname:'Test Owner',username:'owner',email:'owner@example.test',phone:'',role:'user'};
 const listing={id:'22222222-2222-4222-8222-222222222222',user_id:user.id,title:'BMW <script>alert(1)</script>',category:'car',description:'Test avtomobil haqqında ətraflı məlumat.',brand:'BMW',model:'5 Series',year:2018,mileage:90000,city:'Bakı',phone:'+994501234567',price:23000,status:'active',views:4,favorite_count:1,images:[],details:{},created_at:new Date().toISOString(),seller:'Test Owner'};
 async function load(path,me=null,responses={}){
@@ -198,4 +198,19 @@ test('failed AI question stays editable and can be resubmitted successfully',asy
   assert.equal(d.calls.filter(c=>c.url==='/api/assistant').length,2);assert.equal(input.value,'');assert.equal(button.textContent,'Göndər');
   assert.match(d.doc.querySelector('#chat-history').textContent,/Avtomobilə baxış etdirin/);
  }finally{d.close();}
+});
+
+test('maintenance routes stay closed to guests, members and other admins even with feature flags',async()=>{
+ for(const me of [null,user,{...user,role:'admin',servicePreview:false}])for(const page of ['sos.html','sos-usta.html','avtoyuma.html','avtoyuma-panel.html']){
+ const d=await load(page,me,{'/config':{sos:true,wash:true}});
+ assert.match(d.doc.querySelector('#main').textContent,/təmir işləri gedir/);
+ assert.ok(!d.calls.some(c=>/\/api\/(sos|wash)\//.test(c.url)));d.close();
+ }
+});
+test('server-authorized founder sees service views and private navigation even with rollout disabled',async()=>{
+ for(const page of ['sos.html','sos-usta.html','avtoyuma.html','avtoyuma-panel.html']){
+ const d=await load(page,{...user,role:'admin',servicePreview:true},{'/config':{sos:false,wash:false}});
+ assert.match(d.doc.querySelector('#main').textContent,/preview/);assert.match(d.doc.querySelector('#main').textContent,/Təsisçi baxışı/);
+ assert.ok(d.doc.querySelector('#header nav a[href="sos.html"]'));assert.ok(d.doc.querySelector('#header nav a[href="avtoyuma.html"]'));d.close();
+ }
 });

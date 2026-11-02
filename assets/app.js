@@ -1,3 +1,5 @@
+import {roadside} from './sos.js';
+import {carwash} from './wash.js';
 import {mountAdminPush,disableAdminPush} from './admin-push.js';
 import {technolAds} from './technol-ads.js';
 import {mountSpinViewer} from './spin-viewer.js';
@@ -327,10 +329,16 @@ async function init(){
  // Remove obsolete browser credentials from the original prototype. They never authorize API access.
  try{for(const k of ['isLoggedIn','sosavto_logged_user','sosavto_user_name','sosavto_users','redirectAfterLogin'])localStorage.removeItem(k);sessionStorage.removeItem('sosavto_logged');}catch{}
  const [authState,settings]=await Promise.allSettled([api('/me'),api('/config')]);if(authState.status==='fulfilled')me=authState.value.user;if(settings.status==='fulfilled')config=settings.value;
- header();if(me){try{favorites=new Set((await api('/favorites')).listings.map(l=>l.id));}catch{}}
+ if(me?.servicePreview===true){config={...config,sos:true,wash:true};}
+ header();if(me?.servicePreview===true){const nav=document.querySelector('#header nav');if(nav)nav.insertAdjacentHTML('beforeend','<a href="sos.html">SOS</a><a href="avtoyuma.html">Avtoyuma</a>');}if(me){try{favorites=new Set((await api('/favorites')).listings.map(l=>l.id));}catch{}}
  const maintenancePage=()=>{main.innerHTML=`<section class="panel" style="max-width:740px;margin:45px auto;padding:clamp(24px,5vw,55px);text-align:center"><div style="font-size:54px;margin-bottom:14px" aria-hidden="true">🛠️</div><p class="eyebrow">SOSAVTO.AZ</p><h1>Bu bölmədə təmir işləri gedir</h1><p class="muted" style="font-size:17px;line-height:1.8">Xidmət hələ istifadəyə açılmayıb. Hazırlıq işləri tamamlandıqdan sonra burada aktiv olacaq.</p><a class="btn primary" href="index.html" style="margin-top:24px">Əsas səhifəyə qayıt</a></section>`;};
- const sosPage=maintenancePage;
- const washPage=maintenancePage;
+ const founderPage=async render=>{
+ if(me?.servicePreview!==true)return maintenancePage();
+ await render({main,me,config,api,esc,toast,task,mapLibrary});
+ const notice=document.createElement('p');notice.className='notice';notice.textContent='Təsisçi baxışı — bu bölmə yalnız sizin hesabınıza açıqdır. Digər istifadəçilər təmir ekranını görür.';main.prepend(notice);
+ };
+ const sosPage=()=>founderPage(roadside);
+ const washPage=()=>founderPage(carwash);
  const routes={'kredit.html':()=>{main.innerHTML='<p><a href="index.html">← Elanlara qayıt</a></p>'+creditMarkup();mountCredit(main);},'avtoyuma.html':washPage,'avtoyuma-panel.html':washPage,'sos.html':sosPage,'sos-usta.html':sosPage,'index.html':home,'muqayise.html':comparisonPage,'sifre-berpa.html':passwordRecovery,'giris.html':()=>auth(false),'qeydiyyat.html':()=>auth(true),'kabinet.html':profile,'menim-elanlarim.html':()=>collection('my-listings'),'favoriler.html':()=>collection('favorites'),'elan-ver.html':listingForm,'elan.html':detail,'haqqinda.html':()=>legalRoute(),'elaqe.html':()=>legalRoute(),'qaydalar.html':()=>legalRoute(),'mexfiyyet.html':()=>legalRoute(),'xarita.html':mapPage,'ai.html':assistant,'admin.html':admin,'bildirisler.html':notifications};
  await (routes[page]||(()=>{main.innerHTML=empty('Səhifə tapılmadı','Axtardığınız səhifə mövcud deyil.','<a href="index.html" class="btn primary">Ana səhifəyə qayıt</a>');}))();
  window.__sosavtoRefreshLanguage?.();

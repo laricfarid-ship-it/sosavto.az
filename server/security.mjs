@@ -1,10 +1,11 @@
+import {founderServiceAccess} from './service-access.mjs';
 import {randomBytes,createHash} from 'node:crypto';
 import {isIP} from 'node:net';
 import {query} from './db.mjs';
 export class HttpError extends Error {constructor(status,message){super(message);this.status=status;}}
 export const fail=(status,message)=>{throw new HttpError(status,message);};
 export const hash=t=>createHash('sha256').update(t).digest('hex');
-export const safeUser=u=>u?{id:u.id,fullname:u.fullname,username:u.username,email:u.email,phone:u.phone,role:u.role}:null;
+export const safeUser=u=>u?{id:u.id,fullname:u.fullname,username:u.username,email:u.email,phone:u.phone,role:u.role,servicePreview:founderServiceAccess(u)}:null;
 export async function session(req){
  const token=(req.headers.cookie||'').split(';').map(v=>v.trim()).find(v=>v.startsWith('sosavto_session='))?.slice(16);
  if(!token || !/^[a-f0-9]{64}$/.test(token))return null;

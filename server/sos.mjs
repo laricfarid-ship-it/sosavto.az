@@ -1,3 +1,4 @@
+import {founderServiceAccess,serviceAccess} from './service-access.mjs';
 import {randomUUID} from 'node:crypto';
 import {query,transaction} from './db.mjs';
 import {fail,requireUser,requireAdmin,body,text,number,uuid,rateLimit} from './security.mjs';
@@ -35,7 +36,8 @@ async function requestView(c,r,user){
  return result;
 }
 export async function sos(req,user,path,method){
- if(process.env.SOS_ENABLED!=='true')fail(404,'SOS xidməti hələ aktiv deyil.');
+ if(!serviceAccess(user))fail(404,'Bu bölmədə təmir işləri gedir.');
+ if(!founderServiceAccess(user)&&process.env.SOS_ENABLED!=='true')fail(404,'SOS xidməti hələ aktiv deyil.');
  requireUser(user);
  if(method!=='GET')await rateLimit(`sos:${user.id}`,120,60);
  await transaction(expire);
