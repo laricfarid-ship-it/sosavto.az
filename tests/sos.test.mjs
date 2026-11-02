@@ -101,3 +101,22 @@ test('radius, specialty, offline and bans exclude unavailable masters',async()=>
  assert.equal((await call('/inbox',{user:m1})).status,401);
  await post('/requests/'+s.id+'/cancel',driver,{reason:'Test bitdi'});
 });
+
+ test('availability validates input and excludes stale, banned, offline and wrong-specialty accounts',async()=>{
+ assert.equal((await post('/availability',driver,{...data(),latitude:null})).status,400);
+ assert.equal((await post('/availability',driver,{...data(),problem:'fake'})).status,400);
+ assert.equal((await post('/availability',null,data())).status,401);
+ let result=await post('/availability',driver,data());assert.equal(result.availability.count,0);
+ await query("UPDATE users SET status='active' WHERE id=$1",[m1.id]);
+ await post('/presence',m1,{online:true,latitude:40.401,longitude:49.801});
+ const before=(await query('SELECT count(*)::int AS n FROM sos_requests')).rows[0].n;
+ result=await post('/availability',driver,data());assert.equal(result.status,200);assert.equal(result.availability.count,1);assert.equal(result.availability.radius_km,8);assert.equal(typeof result.availability.nearest_km,'number');
+ assert.deepEqual(Object.keys(result.availability).sort(),['checked_at','count','nearest_km','radius_km']);
+ assert.equal((await query('SELECT count(*)::int AS n FROM sos_requests')).rows[0].n,before,'checking does not create a call');
+ assert.equal((await post('/availability',m1,data())).availability.count,0,'does not match oneself');
+ const r=(await post('/requests',m1,data())).request;
+ assert.equal((await post('/availability',driver,data())).availability.count,0,'master currently requesting help is unavailable');
+ await post('/requests/'+r.id+'/cancel',m1,{reason:'Test bitdi'});
+ await query("UPDATE sos_masters SET location_at=now()-interval '2 minutes' WHERE user_id=$1",[m1.id]);
+ assert.equal((await post('/availability',driver,data())).availability.count,0);
+ });
