@@ -1,9 +1,18 @@
 import type { CapacitorConfig } from '@capacitor/cli';
-// Offline-only first APK: no access to production credentials or data.
+
+// Android beta: show the existing live marketplace at its original origin.
+// This preserves same-origin /api calls, cookies and existing access controls.
+// The hosted website remains the source of truth; no server secrets are bundled.
 const config: CapacitorConfig = {
   appId: 'az.sosavto.app',
   appName: 'SosAvto',
   webDir: 'www',
-  android: { allowMixedContent: false }
+  server: {
+    url: 'https://sosavto.az',
+    cleartext: false
+  },
+  android: {
+    allowMixedContent: false
+  }
 };
 export default config;
