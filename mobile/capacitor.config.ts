@@ -12,7 +12,9 @@ const config: CapacitorConfig = {
     cleartext: false
   },
   android: {
-    allowMixedContent: false
+    allowMixedContent: false,
+    // Apply system bar and display-cutout insets on Android 15/16 too.
+    adjustMarginsForEdgeToEdge: 'force'
   },
   plugins: {
     StatusBar: {

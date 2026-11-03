@@ -23,3 +23,12 @@ GitHub Actions workflow: .github/workflows/android-test-apk.yml. Open the latest
 
 ## Safety and release
 This is a debug beta. Do not publish to Play Store or merge to main without testing. The APK uses the real site, not a sandbox. Future native improvements should migrate from remote server.url to a bundled frontend with explicit API configuration, native permissions and robust auth.
+
+## APK interface (0.2)
+- `ui/app.css` and `ui/app.js` are packaged as an Android asset by `scripts/prepare-android.mjs` after Capacitor sync.
+- `native/MainActivity.java` extends Capacitor's WebView client, preserving its navigation, permissions, file chooser and plugin behavior. Presentation runs only at the exact HTTPS production origin, on page commit and page finish; a DOM observer handles asynchronous site rendering.
+- No hosted assets or server routes change. Existing forms, buttons, values, listeners, API calls and backend permissions are retained.
+- Compact eight-category grid, collapsible filters, two-column listings, smaller sponsor banner, persistent five-tab navigation, favorites shortcut, keyboard-aware navigation.
+- Android system bars and cutouts use Capacitor's native edge-to-edge margin handling. Device verification on Redmi remains necessary.
+- Run `node --test --test-force-exit mobile/tests/*.test.mjs` from repository root for presentation behavior checks. Run the preparation script from `mobile` after every `cap sync`.
+- Debug signing on hosted runners may differ between builds. An existing APK can only update in place if its signing certificate matches; keep accounts and credentials available before uninstalling any earlier debug build. Release distribution needs a persistent signing key.
