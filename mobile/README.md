@@ -1,30 +1,25 @@
-# SosAvto Android test app
+# SosAvto Android beta (live website wrapper)
 
-Status: initial Android test configuration (not yet a built APK).
+The Android beta loads https://sosavto.az inside Capacitor. This is a live website wrapper, not an offline demo or a complete native rewrite.
 
-## Goal
-Build an Android test APK for Redmi Note 15 Pro without Play Store publication. Preserve the existing production website and admin-only service access rules.
+## Behavior
+- The original website supplies listings, login, search, AI, maps, and other features.
+- Existing relative /api requests and session cookies stay on the sosavto.az origin.
+- No database credentials, API keys, or server code are bundled in the APK.
+- Admin-only SOS and car wash permissions remain controlled by the website/backend.
+- The APK connects to **production**: submitting listings or editing an account may modify real data. Use a separate test account and avoid test listings unless approved.
 
-## Proposed stack
-Capacitor Android wrapper around a separately built, mobile-compatible frontend. The current Node/Vercel backend must remain hosted; never bundle server code, database credentials, or environment secrets into the APK.
+## Build
+GitHub Actions workflow: .github/workflows/android-test-apk.yml. Open the latest successful workflow run and download the APK artifact, unzip it, then install app-debug.apk.
 
-## Prerequisites
-- Verify mobile navigation, login sessions, upload flows, map permissions, and AI requests against a separate test environment.
-- Build browser assets with the existing build script.
-- Configure a dedicated app ID, e.g. az.sosavto.app (confirm before publishing).
-- Add @capacitor/core, @capacitor/cli, @capacitor/android and capacitor.config.ts after validating the frontend asset routing and backend URL strategy.
-- Generate native Android project and test a debug APK using Android SDK/Gradle.
-- Keep the current admin push service worker and admin manifest behavior unchanged until a separate customer manifest is implemented.
+## Device checks (required before calling this production-ready)
+1. Open the app with an internet connection; confirm homepage, listings, search and detail pages.
+2. Test sign-in/sign-out and back navigation; verify no loop or blank screen.
+3. Test image chooser, camera, map location permission, WhatsApp/telephone external links.
+4. Test AI response and session persistence.
+5. Verify SOS and car wash are still closed to ordinary accounts and admin-only access is enforced by backend.
+6. Verify password recovery email deep links, push notifications, and app restart.
+7. Check performance, accessibility and Android status bar overlap.
 
-## Acceptance tests
-1. Install on Redmi Note 15 Pro.
-2. Launch, browse listings, filter and open details.
-3. Sign in and sign out safely; no credentials exposed.
-4. Select camera/gallery photos and create a test listing.
-5. Verify AI and map flows.
-6. Confirm SOS and car wash permissions differ for admin and ordinary users.
-7. Confirm notification permission behavior.
-8. Confirm no production data mutations during testing.
-
-## Release gate
-Do not merge into main or deploy without explicit approval and passing tests.
+## Safety and release
+This is a debug beta. Do not publish to Play Store or merge to main without testing. The APK uses the real site, not a sandbox. Future native improvements should migrate from remote server.url to a bundled frontend with explicit API configuration, native permissions and robust auth.
