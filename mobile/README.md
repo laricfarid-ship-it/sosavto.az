@@ -32,3 +32,10 @@ This is a debug beta. Do not publish to Play Store or merge to main without test
 - Android system bars and cutouts use Capacitor's native edge-to-edge margin handling. Device verification on Redmi remains necessary.
 - Run `node --test --test-force-exit mobile/tests/*.test.mjs` from repository root for presentation behavior checks. Run the preparation script from `mobile` after every `cap sync`.
 - Debug signing on hosted runners may differ between builds. An existing APK can only update in place if its signing certificate matches; keep accounts and credentials available before uninstalling any earlier debug build. Release distribution needs a persistent signing key.
+
+## Hosted interface and automatic updates
+The approved installed beta can receive presentation changes without reinstalling. The blocking `assets/theme.js` detects Capacitor's Android bridge, claims UI ownership before the old APK's page-commit injection, and requests the same-origin hosted `/assets/mobile-app.js`. The build bundles `mobile/ui/app.css`, `mobile/ui/app.js`, and `mobile/ui/updates.js`; edits to those source files must be published through the production Git/Vercel deployment to reach installed apps. Ordinary desktop browsers never load the mobile runtime.
+
+Every production deployment emits `/assets/mobile-version.json`. An open visible app checks once per minute and when returning to the foreground. An untouched home/map page reloads when the version changes. On other pages, or after input, an update notice waits for a tap; unsaved edits require confirmation before reload. Network/check failures leave the current page usable. The existing push service worker does not cache pages or these assets. Native Android capabilities, permissions, signing, app icons and SDK changes still require an APK update; website/UI changes do not.
+
+Run `node --test --test-force-exit tests/mobile-updates.test.mjs mobile/tests/*.test.mjs` to check legacy takeover, desktop isolation, hosted packaging, update notices and failure handling. Never place generated bundles or `public/` in version control; the build generates them together with the deployment version.

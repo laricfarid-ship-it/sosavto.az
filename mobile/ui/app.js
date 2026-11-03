@@ -1,6 +1,7 @@
 (() => {
-  if (location.origin !== 'https://sosavto.az' || window.__sosavtoAppUI) return;
+  if (location.origin !== 'https://sosavto.az' || window.__sosavtoHostedUI) return;
   window.__sosavtoAppUI = true;
+  window.__sosavtoHostedUI = true;
   document.documentElement.classList.add('sa-app');
   const paths = {
     home:'M3 10 12 3l9 7v11h-6v-7H9v7H3Z',

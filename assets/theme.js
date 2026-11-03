@@ -1,3 +1,18 @@
+/* Claim presentation before legacy APK onPageCommitVisible injection.
+   androidBridge is installed by Capacitor before the document starts. */
+(function () {
+  if (!(window.androidBridge || window.Capacitor?.isNativePlatform?.())) return;
+  window.__sosavtoAppUI = true;
+  var runtime = document.createElement('script');
+  runtime.src = '/assets/mobile-app.js';
+  runtime.async = true;
+  runtime.onerror = function () {
+    // The original website stays usable if the presentation asset is unavailable.
+    document.documentElement.classList.remove('sa-app');
+  };
+  document.head.appendChild(runtime);
+})();
+
 /* Light / dark theme. Loaded as a blocking script in <head> so the page never flashes the wrong colours.
    Order of precedence: the visitor's saved choice, then the device setting (prefers-color-scheme), then light. */
 (function () {
