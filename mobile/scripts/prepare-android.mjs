@@ -1,3 +1,4 @@
+import {installLauncherIcons} from './launcher-icons.mjs';
 import {readFile,writeFile,copyFile,mkdir} from 'node:fs/promises';
 const css=await readFile('ui/app.css','utf8');
 const js=await readFile('ui/app.js','utf8');
@@ -10,3 +11,5 @@ let gradle=await readFile(file,'utf8');
 gradle=gradle.replace(/versionCode 1\b/,'versionCode '+(100+Number(process.env.GITHUB_RUN_NUMBER||1))).replace(/versionName "1.0"/,'versionName "0.2.'+(process.env.GITHUB_RUN_NUMBER||1)+'"');
 await writeFile(file,gradle);
 console.log('Installed APK-only UI and native activity.');
+
+await installLauncherIcons();
