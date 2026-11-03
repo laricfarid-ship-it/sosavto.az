@@ -101,3 +101,5 @@ html.sa-app {font-size:16px;-webkit-text-size-adjust:100%;scroll-padding-top:70p
 .sa-app .footer .container{gap:10px}
 .sa-app .footer .row{flex-wrap:wrap;gap:10px}
 @media(min-width:700px){.sa-app .grid{grid-template-columns:repeat(3,minmax(0,1fr))}.sa-app .category,.sa-app .home-intro .category{font-size:12px}.sa-app .sa-bottom{padding-inline:15%}}
+.sa-app .sa-favorite svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.sa-app #results>.error,.sa-app #results>#retry{grid-column:1/-1}
