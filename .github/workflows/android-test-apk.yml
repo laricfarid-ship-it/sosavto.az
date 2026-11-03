@@ -1,0 +1,47 @@
+name: Android test APK
+on:
+  workflow_dispatch:
+    inputs:
+      staging_url:
+        description: 'Dedicated HTTPS staging URL (never production)'
+        required: true
+        type: string
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - uses: android-actions/setup-android@v3
+      - name: Verify staging URL
+        env:
+          STAGING_URL: ${{ inputs.staging_url }}
+        run: |
+          node -e "const u=new URL(process.env.STAGING_URL);if(u.protocol!=='https:'||['sosavto.az','www.sosavto.az'].includes(u.hostname))process.exit(1)"
+      - name: Install mobile dependencies
+        working-directory: mobile
+        run: npm install --no-audit --no-fund
+      - name: Generate Android project
+        working-directory: mobile
+        env:
+          SOSAVTO_MOBILE_STAGING_URL: ${{ inputs.staging_url }}
+        run: |
+          npx cap add android
+          npx cap sync android
+      - name: Build unsigned debug APK
+        working-directory: mobile/android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Upload APK for private testing
+        uses: actions/upload-artifact@v4
+        with:
+          name: SosAvto-Android-debug
+          path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 7
