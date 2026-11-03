@@ -1,0 +1,45 @@
+name: Android test APK
+on:
+  pull_request:
+    paths:
+      - 'mobile/**'
+      - '.github/workflows/android-test-apk.yml'
+  workflow_dispatch:
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Configure Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_SDK_ROOT" >> "$GITHUB_ENV"
+          yes | sdkmanager --licenses >/dev/null || true
+      - name: Install mobile dependencies
+        working-directory: mobile
+        run: npm ci --no-audit --no-fund
+      - name: Generate Android project
+        working-directory: mobile
+        run: |
+          npx cap add android
+          npx cap sync android
+          node scripts/prepare-android.mjs
+      - name: Build debug APK
+        working-directory: mobile/android
+        run: ./gradlew assembleDebug --no-daemon
+      - name: Upload private test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: SosAvto-Android-beta
+          path: mobile/android/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 30
