@@ -1,3 +1,4 @@
+import {uploadStoryVideo} from '../server/story-video.mjs';
 import {adminEvent,pushApi} from '../server/admin-push.mjs';
 import {resetEnabled,requestReset,completeReset} from '../server/password-reset.mjs';
 import {imagesFor} from '../server/listing-media.mjs';
@@ -43,6 +44,7 @@ export default async function handler(req,res){
  // Business registration is optional: individual accounts can publish in every existing category.
  // Public directory lists only businesses with at least one approved active listing.
 
+ if(path==='/api/story-video'&&method==='POST'){requireUser(user);await rateLimit('story-video:'+user.id,8,3600);return json(res,201,await uploadStoryVideo(user,await body(req)));}
  if(path==='/api/stories'&&method==='GET'){
   const stories=(await query(`SELECT s.id,s.user_id,s.media_url,s.media_type,s.caption,s.created_at,s.expires_at,
    COALESCE(b.business_name,u.username) AS publisher
@@ -56,11 +58,11 @@ export default async function handler(req,res){
   requireUser(user);await rateLimit('story:'+user.id,12,3600);
   const b=await body(req);
   const media_type=text(b.media_type,'Media növü',4,5);
-  if(media_type!=='image')fail(400,'Video storiləri hələ aktiv deyil.');
+  if(!['image','video'].includes(media_type))fail(400,'Şəkil və ya video seçin.');
   const media_url=text(b.media_url,'Media ünvanı',5,1000);
   // Accept only an already uploaded image owned by the authenticated user.
-  const owned=(await query('SELECT id FROM images WHERE user_id=$1 AND url=$2 LIMIT 1',[user.id,media_url])).rows[0];
-  if(!owned)fail(400,'Öz hesabınıza yüklənmiş şəkil seçin.');
+  const owned=(await query(media_type==='image'?'SELECT id FROM images WHERE user_id=$1 AND url=$2 LIMIT 1':'SELECT id FROM story_videos WHERE user_id=$1 AND url=$2 LIMIT 1',[user.id,media_url])).rows[0];
+  if(!owned)fail(400,'Öz hesabınıza yüklənmiş media seçin.');
   const caption=text(b.caption||'','Stori mətni',0,280);
   const id=randomUUID();
   const result=await transaction(async c=>{
