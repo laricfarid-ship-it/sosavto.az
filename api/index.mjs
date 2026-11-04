@@ -1,3 +1,5 @@
+import {cleanupStories} from '../server/story-cleanup.mjs';
+import {uploadStoryVideo} from '../server/story-video.mjs';
 import {adminEvent,pushApi} from '../server/admin-push.mjs';
 import {resetEnabled,requestReset,completeReset} from '../server/password-reset.mjs';
 import {imagesFor} from '../server/listing-media.mjs';
@@ -23,6 +25,7 @@ export default async function handler(req,res){
  try{
  const url=new URL(req.url,'http://localhost'); const path=url.pathname.replace(/\/$/,'');const method=req.method;
  originCheck(req);
+ if(path==='/api/cron/story-cleanup'&&method==='GET'){const secret=process.env.CRON_SECRET;if(!secret||req.headers.authorization!==`Bearer ${secret}`)fail(401,'Unauthorized');return json(res,200,await cleanupStories());}
  if(path==='/api/config'&&method==='GET')return json(res,200,{passwordReset:resetEnabled(),wash:washEnabled(),sos:process.env.SOS_ENABLED==='true',ai:assistantConfig().enabled,aiProvider:assistantConfig().provider,uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
  const address=clientAddress(req);
  await rateLimit(`api:ip:${address}`,300,60);
@@ -42,23 +45,65 @@ export default async function handler(req,res){
 
  // Business registration is optional: individual accounts can publish in every existing category.
  // Public directory lists only businesses with at least one approved active listing.
+
+ if(path==='/api/story-video'&&method==='POST'){requireUser(user);await rateLimit('story-video:'+user.id,8,3600);return json(res,201,await uploadStoryVideo(user,await body(req)));}
+ if(path==='/api/stories'&&method==='GET'){
+  const stories=(await query(`SELECT s.id,s.user_id,s.media_url,s.media_type,s.caption,s.created_at,s.expires_at,
+   COALESCE(b.business_name,u.username) AS publisher
+   FROM stories s JOIN users u ON u.id=s.user_id AND u.status='active'
+   LEFT JOIN business_profiles b ON b.user_id=s.user_id
+   WHERE s.expires_at>now() ORDER BY s.created_at DESC LIMIT 100`)).rows;
+  const trial=user?(await query('SELECT started_at,ends_at FROM story_trials WHERE user_id=$1',[user.id])).rows[0]||null:null;
+  return json(res,200,{stories,trial});
+ }
+ if(path==='/api/stories'&&method==='POST'){
+  requireUser(user);await rateLimit('story:'+user.id,12,3600);
+  const b=await body(req);
+  const media_type=text(b.media_type,'Media növü',4,5);
+  if(!['image','video'].includes(media_type))fail(400,'Şəkil və ya video seçin.');
+  const media_url=text(b.media_url,'Media ünvanı',5,1000);
+  // Accept only an already uploaded image owned by the authenticated user.
+  const owned=(await query(media_type==='image'?'SELECT id FROM images WHERE user_id=$1 AND url=$2 LIMIT 1':'SELECT id FROM story_videos WHERE user_id=$1 AND url=$2 LIMIT 1',[user.id,media_url])).rows[0];
+  if(!owned)fail(400,'Öz hesabınıza yüklənmiş media seçin.');
+  const caption=text(b.caption||'','Stori mətni',0,280);
+  const id=randomUUID();
+  const result=await transaction(async c=>{
+   // Serialize concurrent uploads per user to enforce the three-story limit.
+   await c.query('SELECT id FROM users WHERE id=$1 FOR UPDATE',[user.id]);
+   await c.query("INSERT INTO story_trials(user_id) VALUES($1) ON CONFLICT(user_id) DO NOTHING",[user.id]);
+   const trial=(await c.query('SELECT ends_at FROM story_trials WHERE user_id=$1',[user.id])).rows[0];
+   if(new Date(trial.ends_at).getTime()<=Date.now())fail(403,'3 aylıq pulsuz stori müddətiniz bitib. Avtomatik ödəniş tutulmur.');
+   const count=(await c.query('SELECT count(*)::integer AS n FROM stories WHERE user_id=$1 AND expires_at>now()',[user.id])).rows[0].n;
+   if(count>=3)fail(409,'Eyni vaxtda maksimum 3 aktiv stori yerləşdirə bilərsiniz.');
+   await c.query("INSERT INTO stories(id,user_id,media_url,media_type,caption) VALUES($1,$2,$3,$4,$5)",[id,user.id,media_url,media_type,caption]);
+   return {id,expiresInHours:24};
+  });
+  return json(res,201,result);
+ }
+ const storyDelete=path.match(/^\/api\/stories\/([a-f0-9-]+)$/);
+ if(storyDelete&&method==='DELETE'){
+  requireUser(user);const id=uuid(storyDelete[1]);
+  const result=await query('DELETE FROM stories WHERE id=$1 AND user_id=$2 RETURNING id',[id,user.id]);
+  if(!result.rows.length)fail(404,'Stori tapılmadı.');
+  return json(res,200,{ok:true});
+ }
  if(path==='/api/businesses'&&method==='GET'){
   const type=url.searchParams.get('type')||'';
   if(type&&!['dealer','service','wash','detailing','parts','other'].includes(type))fail(400,'Biznes növü düzgün deyil.');
-  const rows=(await query(`SELECT b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone,
+  const rows=(await query(`SELECT b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone,b.cover_image_url,b.latitude,b.longitude,
    count(l.id)::integer AS listing_count
    FROM business_profiles b JOIN listings l ON l.user_id=b.user_id AND l.status='active'
    AND NOT (l.details @> '{"_deleted":true}'::jsonb)
    JOIN users u ON u.id=b.user_id AND u.status='active'
    WHERE ($1::text='' OR b.business_type=$1)
-   GROUP BY b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone
+   GROUP BY b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone,b.cover_image_url,b.latitude,b.longitude
    ORDER BY listing_count DESC,b.business_name ASC LIMIT 100`,[type])).rows;
   return json(res,200,{businesses:rows});
  }
  const businessDetail=path.match(/^\/api\/businesses\/([a-f0-9-]+)$/);
  if(businessDetail&&method==='GET'){
   const id=uuid(businessDetail[1]);
-  const business=(await query(`SELECT b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone
+  const business=(await query(`SELECT b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone,b.cover_image_url,b.latitude,b.longitude
    FROM business_profiles b JOIN users u ON u.id=b.user_id AND u.status='active'
    WHERE b.user_id=$1 AND EXISTS(SELECT 1 FROM listings l WHERE l.user_id=b.user_id
    AND l.status='active' AND NOT (l.details @> '{"_deleted":true}'::jsonb))`,[id])).rows[0];
@@ -70,7 +115,7 @@ export default async function handler(req,res){
  }
  if(path==='/api/business-profile'&&method==='GET'){
   requireUser(user);
-  const profile=(await query('SELECT business_name,business_type,description,address,phone FROM business_profiles WHERE user_id=$1',[user.id])).rows[0]||null;
+  const profile=(await query('SELECT business_name,business_type,description,address,phone,cover_image_url,latitude,longitude FROM business_profiles WHERE user_id=$1',[user.id])).rows[0]||null;
   return json(res,200,{profile});
  }
  if(path==='/api/business-profile'&&method==='PUT'){
@@ -83,11 +128,15 @@ export default async function handler(req,res){
   const address=text(b.address||'','Ünvan',0,250);
   const phone=text(b.phone||'','Telefon',0,25);
   if(phone&&!/^(\+994|0)\d{9}$/.test(phone.replace(/[\s()-]/g,'')))fail(400,'Telefon nömrəsi düzgün deyil.');
-  await query(`INSERT INTO business_profiles(user_id,business_name,business_type,description,address,phone)
-   VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(user_id) DO UPDATE SET
+  const latitude=b.latitude===''||b.latitude==null?null:Number(b.latitude),longitude=b.longitude===''||b.longitude==null?null:Number(b.longitude);
+  if((latitude===null)!==(longitude===null)||latitude!==null&&(!Number.isFinite(latitude)||latitude < -90||latitude > 90||!Number.isFinite(longitude)||longitude < -180||longitude > 180))fail(400,'Xəritə koordinatları düzgün deyil.');
+  const cover_image_url=text(b.cover_image_url||'','Biznes şəkli',0,1000);
+  if(cover_image_url&&!(await query('SELECT id FROM images WHERE user_id=$1 AND url=$2 LIMIT 1',[user.id,cover_image_url])).rows.length)fail(400,'Yalnız öz yüklədiyiniz şəkli seçin.');
+  await query(`INSERT INTO business_profiles(user_id,business_name,business_type,description,address,phone,cover_image_url,latitude,longitude)
+   VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT(user_id) DO UPDATE SET
    business_name=EXCLUDED.business_name,business_type=EXCLUDED.business_type,
-   description=EXCLUDED.description,address=EXCLUDED.address,phone=EXCLUDED.phone,updated_at=now()`,
-   [user.id,business_name,business_type,description,address,phone]);
+   description=EXCLUDED.description,address=EXCLUDED.address,phone=EXCLUDED.phone,cover_image_url=EXCLUDED.cover_image_url,latitude=EXCLUDED.latitude,longitude=EXCLUDED.longitude,updated_at=now()`,
+   [user.id,business_name,business_type,description,address,phone,cover_image_url,latitude,longitude]);
   return json(res,200,{ok:true});
  }
 

@@ -138,3 +138,19 @@
 @media(max-width:400px){.nav-actions{gap:4px}.nav-actions .btn.primary .icon{display:none}}
 
 .language-switcher select{appearance:auto;min-width:58px;padding:8px 9px;border:1px solid var(--line-strong);border-radius:10px;background:var(--panel);color:var(--text);font-weight:750;font-size:.85rem}.language-switcher{display:flex;align-items:center}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(max-width:900px){.language-switcher select{min-width:52px;padding:7px 5px}.header-inner{gap:8px}}
+
+/* Compact social-style stories, visible without adding navigation clutter. */
+.stories-strip{max-width:1200px;margin:12px auto 6px;padding:0 16px}
+.stories-scroll{display:flex;gap:16px;overflow-x:auto;scrollbar-width:thin;padding:8px 2px 12px;align-items:start}
+.story-tile,.story-add{display:flex;flex:0 0 76px;flex-direction:column;align-items:center;gap:6px;border:0;background:none;color:var(--text);font:inherit;font-size:11px;text-align:center;text-decoration:none;cursor:pointer;padding:0}
+.story-avatar{width:60px;height:60px;display:grid;place-items:center;border-radius:50%;padding:3px;border:2px solid #15b5cc;background:var(--surface,#fff);overflow:hidden}
+.story-avatar img{width:100%;height:100%;border-radius:50%;object-fit:cover}
+.story-add-icon{border:2px dashed #1b9eb7;color:#168cab}
+.story-name,.story-add>span:last-child{max-width:76px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.story-overlay{position:fixed;inset:0;z-index:9999;background:rgba(7,11,19,.94);display:flex;align-items:center;justify-content:center;padding:18px}
+.story-frame{width:min(420px,100%);height:min(740px,86dvh);background:#141b27;color:white;border-radius:18px;display:flex;flex-direction:column;overflow:hidden}
+.story-heading{padding:14px 18px;font-weight:700}
+.story-frame img,.story-frame video{width:100%;min-height:0;flex:1;object-fit:contain;background:#080c12}
+.story-caption{padding:8px 18px 16px;margin:0;overflow-wrap:anywhere}
+.story-close{position:absolute;top:14px;right:18px;color:white;border:0;background:transparent;font-size:38px;cursor:pointer;z-index:1}
+@media(max-width:600px){.stories-strip{margin:8px auto 2px;padding:0 12px}.stories-scroll{gap:10px}.story-avatar{width:54px;height:54px}.story-tile,.story-add{flex-basis:68px}.story-name{max-width:68px}}

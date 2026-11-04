@@ -75,3 +75,34 @@ CREATE TABLE IF NOT EXISTS business_profiles (
  created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS business_profiles_type ON business_profiles(business_type);
+
+-- Stories expire after 24 hours; old rows may be cleaned asynchronously.
+CREATE TABLE IF NOT EXISTS stories (
+ id uuid PRIMARY KEY,
+ user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ media_url text NOT NULL,
+ media_type text NOT NULL CHECK(media_type IN ('image','video')),
+ caption varchar(280) NOT NULL DEFAULT '',
+ created_at timestamptz NOT NULL DEFAULT now(),
+ expires_at timestamptz NOT NULL DEFAULT (now() + interval '24 hours')
+);
+CREATE INDEX IF NOT EXISTS stories_live ON stories(expires_at,created_at DESC);
+CREATE INDEX IF NOT EXISTS stories_owner ON stories(user_id,expires_at);
+
+CREATE TABLE IF NOT EXISTS story_trials (
+ user_id uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+ started_at timestamptz NOT NULL DEFAULT now(),
+ ends_at timestamptz NOT NULL DEFAULT (now() + interval '3 months')
+);
+
+-- Business gallery and map location are optional; never infer coordinates from address.
+ALTER TABLE business_profiles ADD COLUMN IF NOT EXISTS cover_image_url text NOT NULL DEFAULT '';
+ALTER TABLE business_profiles ADD COLUMN IF NOT EXISTS latitude double precision;
+ALTER TABLE business_profiles ADD COLUMN IF NOT EXISTS longitude double precision;
+
+CREATE TABLE IF NOT EXISTS story_videos (
+ id uuid PRIMARY KEY,
+ user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ url text NOT NULL UNIQUE,
+ created_at timestamptz NOT NULL DEFAULT now()
+);
