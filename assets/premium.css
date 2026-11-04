@@ -427,3 +427,40 @@
  .page.home-page .sa-home-search .search-landing .premium-fields>*{min-width:0!important}
  .page.home-page .sa-home-search .search-landing .premium-fields .search-submit{grid-column:span 2!important}
 }
+
+
+/* 2026-11-05 responsive corrections from phone-desktop and notebook screenshots.
+   Hero and filters remain in normal flow; no negative overlap at intermediate widths. */
+@media (min-width:600px) and (max-width:999px){
+ .page.home-page .home-intro>.container{max-width:100%!important}
+ .page.home-page .discovery-hero{height:200px!important;min-height:200px!important;overflow:hidden!important}
+ .page.home-page .discovery-hero .discovery-copy{width:56%!important;max-width:56%!important;padding:17px 14px!important;box-sizing:border-box}
+ .page.home-page .discovery-hero h1{font-size:clamp(23px,3.5vw,33px)!important;line-height:1.1!important;white-space:normal!important}
+ .page.home-page .discovery-hero .eyebrow{font-size:10px!important;letter-spacing:.05em!important}
+ .page.home-page .discovery-hero .muted{font-size:11px!important;max-width:100%!important}
+ .page.home-page .hero-trust{display:flex!important;flex-wrap:wrap!important;gap:5px 11px!important;margin:8px 0!important;font-size:10px!important;max-width:100%!important}
+ .page.home-page .hero-trust li{gap:4px!important}
+ .page.home-page .hero-trust svg{width:13px!important;height:13px!important}
+ .page.home-page .hero-cta{min-height:32px!important;padding:5px 12px!important;font-size:11px!important}
+ .page.home-page .discovery-hero .discovery-visual{inset:0 0 auto auto!important;left:auto!important;right:0!important;top:0!important;bottom:auto!important;width:52%!important;height:100%!important;overflow:hidden!important}
+ .page.home-page .discovery-hero .discovery-visual img{position:absolute!important;inset:0!important;width:100%!important;height:100%!important;object-fit:cover!important;object-position:center top!important;-webkit-mask-image:none!important;mask-image:none!important}
+ .page.home-page .discovery-hero::after{background:linear-gradient(90deg,#051529 0%,rgba(5,21,41,.85) 45%,transparent 67%)!important}
+ .page.home-page .sa-home-search{position:relative!important;z-index:3!important;margin:0 8px 12px!important;padding:8px 12px!important;min-height:0!important;transform:none!important}
+ .page.home-page .sa-home-tabs{margin-bottom:7px!important}
+ .page.home-page .sa-home-search .search-landing .premium-fields{display:grid!important;grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:7px!important;align-items:end!important}
+ .page.home-page .sa-home-search .search-landing .premium-fields>*{min-width:0!important;max-width:100%!important;width:100%!important;grid-column:auto!important}
+ .page.home-page .sa-home-search .search-landing .premium-fields .search-submit{grid-column:span 2!important;min-height:37px!important;height:37px!important}
+ .page.home-page .sa-home-search .search-landing .premium-fields .field select,
+ .page.home-page .sa-home-search .search-landing .premium-fields .field input{height:37px!important;min-height:37px!important;font-size:11px!important}
+ .page.home-page .sa-home-search .search-landing .premium-fields .pair-row{display:flex!important;gap:4px!important}
+ .page.home-page .sa-home-search .search-landing .premium-fields .pair-row input{width:50%!important;min-width:0!important;padding:0 4px!important}
+ .page.home-page .sa-home-search .search-landing .advanced{margin-top:6px!important}
+ .page.home-page .sa-search-links{margin:0!important;position:static!important;pointer-events:auto!important;text-align:right!important}
+}
+@media (min-width:1000px){
+ .page.home-page .discovery-hero .discovery-visual{top:0!important;bottom:auto!important;height:100%!important;overflow:hidden!important}
+ .page.home-page .discovery-hero .discovery-visual img{position:absolute!important;inset:0!important;object-fit:cover!important;object-position:center top!important}
+ .page.home-page .discovery-hero .discovery-copy{max-width:55%!important}
+ .page.home-page .hero-trust{gap:12px!important;font-size:12px!important}
+ .page.home-page .sa-home-search{margin:0 0 14px!important;transform:none!important}
+}
