@@ -1,6 +1,7 @@
 import test,{before,after} from 'node:test';
 import assert from 'node:assert/strict';
 import {Readable} from 'node:stream';
+import {randomUUID} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 process.env.LOCAL_DATABASE='true';
 process.env.LOCAL_DB_PATH='memory://';
@@ -51,7 +52,7 @@ test('public directory exposes only approved businesses and their active listing
  const listing=(await query('SELECT id FROM listings WHERE user_id=$1',[personal])).rows[0];
  assert.ok(listing);
  const ownListing=await query(`INSERT INTO listings(id,user_id,category,title,description,price,city,phone)
- VALUES(gen_random_uuid(),$1,'service','Servis xidməti','Təcrübəli usta və servis xidməti',40,'Bakı','+994501234567') RETURNING id`,[owner]);
+ VALUES($2,$1,'service','Servis xidməti','Təcrübəli usta və servis xidməti',40,'Bakı','+994501234567') RETURNING id`,[owner,randomUUID()]);
  const id=ownListing.rows[0].id;
  assert.equal((await request('/businesses')).body.businesses.length,0);
  await query("UPDATE listings SET status='active' WHERE id=$1",[id]);
