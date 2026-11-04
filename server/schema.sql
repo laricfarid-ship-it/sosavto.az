@@ -99,3 +99,10 @@ CREATE TABLE IF NOT EXISTS story_trials (
 ALTER TABLE business_profiles ADD COLUMN IF NOT EXISTS cover_image_url text NOT NULL DEFAULT '';
 ALTER TABLE business_profiles ADD COLUMN IF NOT EXISTS latitude double precision;
 ALTER TABLE business_profiles ADD COLUMN IF NOT EXISTS longitude double precision;
+
+CREATE TABLE IF NOT EXISTS story_videos (
+ id uuid PRIMARY KEY,
+ user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+ url text NOT NULL UNIQUE,
+ created_at timestamptz NOT NULL DEFAULT now()
+);
