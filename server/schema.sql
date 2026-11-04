@@ -99,4 +99,3 @@ CREATE TABLE IF NOT EXISTS story_trials (
 ALTER TABLE business_profiles ADD COLUMN IF NOT EXISTS cover_image_url text NOT NULL DEFAULT '';
 ALTER TABLE business_profiles ADD COLUMN IF NOT EXISTS latitude double precision;
 ALTER TABLE business_profiles ADD COLUMN IF NOT EXISTS longitude double precision;
-ALTER TABLE business_profiles ADD CONSTRAINT business_location_pair CHECK ((latitude IS NULL) = (longitude IS NULL));
