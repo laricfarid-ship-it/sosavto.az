@@ -6,9 +6,9 @@ function storageKey(url){
  const base=process.env.S3_PUBLIC_URL?.replace(/\/$/,'');
  if(base&&url.startsWith(base+'/')){
   const key=url.slice(base.length+1);
-  if(/^stories\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.(mp4|webm)$/.test(key))return {kind:'s3',key};
+  if(/^(stories|listings)\/[a-f0-9-]{36}\/[a-f0-9-]{36}\.(mp4|webm|webp)$/.test(key))return {kind:'s3',key};
  }
- const match=url.match(/^\/media\/([a-f0-9-]{36})\.(mp4|webm)$/);
+ const match=url.match(/^\/media\/([a-f0-9-]{36})\.(mp4|webm|webp)$/);
  if(match&&process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)return {kind:'local',key:match[1]+'.'+match[2]};
  return null;
 }
