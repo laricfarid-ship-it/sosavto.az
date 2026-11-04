@@ -62,3 +62,16 @@ CREATE TABLE IF NOT EXISTS admin_push_subscriptions (
  updated_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS admin_push_user ON admin_push_subscriptions(user_id);
+
+-- Optional business profile. Personal accounts retain all listing categories.
+CREATE TABLE IF NOT EXISTS business_profiles (
+ user_id uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+ business_name varchar(120) NOT NULL,
+ business_type varchar(30) NOT NULL CHECK (business_type IN ('dealer','service','wash','detailing','parts','other')),
+ description varchar(1500) NOT NULL DEFAULT '',
+ address varchar(250) NOT NULL DEFAULT '',
+ phone varchar(25) NOT NULL DEFAULT '',
+ updated_at timestamptz NOT NULL DEFAULT now(),
+ created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS business_profiles_type ON business_profiles(business_type);
