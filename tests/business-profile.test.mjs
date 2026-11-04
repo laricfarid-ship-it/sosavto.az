@@ -1,0 +1,43 @@
+import test,{before,after} from 'node:test';
+import assert from 'node:assert/strict';
+import {Readable} from 'node:stream';
+import {readFile} from 'node:fs/promises';
+process.env.LOCAL_DATABASE='true';
+process.env.LOCAL_DB_PATH='memory://';
+process.env.APP_ORIGIN='http://localhost:4173';
+delete process.env.DATABASE_URL;
+const {database,query,close}=await import('../server/db.mjs');
+const {default:handler}=await import('../api/index.mjs');
+async function request(path,{method='GET',data,cookie}={}){
+ const req=Readable.from(data===undefined?[]:[JSON.stringify(data)]);
+ req.method=method;req.url='/api'+path;
+ req.headers={...(method==='GET'?{}:{origin:process.env.APP_ORIGIN,'content-type':'application/json'}),...(cookie?{cookie}:{})};
+ const headers={};let output;
+ const res={statusCode:200,setHeader:(k,v)=>headers[k.toLowerCase()]=v,end:v=>output=v};
+ await handler(req,res);
+ return {status:res.statusCode,body:JSON.parse(output),cookie:headers['set-cookie']?.split(';')[0]};
+}
+before(async()=>{await (await database()).exec(await readFile(new URL('../server/schema.sql',import.meta.url),'utf8'));});
+after(async()=>{await close();});
+test('business profile is optional, private, owner-scoped and editable',async()=>{
+ assert.equal((await request('/business-profile')).status,401);
+ assert.equal((await request('/business-profile',{method:'PUT',data:{business_name:'Fake',business_type:'dealer'}})).status,401);
+ const a=await request('/register',{method:'POST',data:{fullname:'Biznes Test',username:'biz_owner',email:'biz@example.test',password:'Password12345!'}});
+ const b=await request('/register',{method:'POST',data:{fullname:'Personal Test',username:'personal_owner',email:'personal@example.test',password:'Password12345!'}});
+ assert.equal(a.status,201);assert.equal(b.status,201);
+ assert.equal((await request('/business-profile',{cookie:a.cookie})).body.profile,null);
+ assert.equal((await request('/business-profile',{cookie:b.cookie})).body.profile,null);
+ const invalid=await request('/business-profile',{method:'PUT',cookie:a.cookie,data:{business_name:'Test servis',business_type:'invalid'}});
+ assert.equal(invalid.status,400);
+ const saved=await request('/business-profile',{method:'PUT',cookie:a.cookie,data:{business_name:'Test servis',business_type:'service',description:'Avtomobil təmiri',address:'Bakı',phone:'+994501234567'}});
+ assert.equal(saved.status,200,JSON.stringify(saved.body));
+ assert.equal((await request('/business-profile',{cookie:a.cookie})).body.profile.business_name,'Test servis');
+ assert.equal((await request('/business-profile',{cookie:b.cookie})).body.profile,null);
+ assert.equal((await query('SELECT count(*)::integer AS count FROM business_profiles')).rows[0].count,1);
+ assert.equal((await request('/business-profile',{method:'PUT',cookie:a.cookie,data:{business_name:'Yeni ad',business_type:'wash'}})).status,200);
+ assert.equal((await request('/business-profile',{cookie:a.cookie})).body.profile.business_type,'wash');
+ assert.equal((await query('SELECT count(*)::integer AS count FROM business_profiles')).rows[0].count,1);
+ const personalListing=await request('/listings',{method:'POST',cookie:b.cookie,data:{category:'service',title:'Fərdi usta xidməti',description:'Mühərrik və asqı sistemlərinin təmiri üzrə xidmət.',price:30,city:'Bakı',phone:'+994501234567',details:{},imageIds:[]}});
+ assert.equal(personalListing.status,201,JSON.stringify(personalListing.body));
+ assert.equal(personalListing.body.status,'pending');
+});
