@@ -1,6 +1,7 @@
 import test,{before,after} from 'node:test';
 import assert from 'node:assert/strict';
 import {Readable} from 'node:stream';
+import {randomUUID} from 'node:crypto';
 import {readFile} from 'node:fs/promises';
 process.env.LOCAL_DATABASE='true';
 process.env.LOCAL_DB_PATH='memory://';
@@ -40,4 +41,32 @@ test('business profile is optional, private, owner-scoped and editable',async()=
  const personalListing=await request('/listings',{method:'POST',cookie:b.cookie,data:{category:'service',title:'Fərdi usta xidməti',description:'Mühərrik və asqı sistemlərinin təmiri üzrə xidmət.',price:30,city:'Bakı',phone:'+994501234567',details:{},imageIds:[]}});
  assert.equal(personalListing.status,201,JSON.stringify(personalListing.body));
  assert.equal(personalListing.body.status,'pending');
+});
+
+test('public directory exposes only approved businesses and their active listings',async()=>{
+ const owner=(await query("SELECT id FROM users WHERE username='biz_owner'")).rows[0].id;
+ const personal=(await query("SELECT id FROM users WHERE username='personal_owner'")).rows[0].id;
+ const before=await request('/businesses');
+ assert.equal(before.status,200);
+ assert.equal(before.body.businesses.length,0);
+ const listing=(await query('SELECT id FROM listings WHERE user_id=$1',[personal])).rows[0];
+ assert.ok(listing);
+ const ownListing=await query(`INSERT INTO listings(id,user_id,category,title,description,price,city,phone)
+ VALUES($2,$1,'service','Servis xidməti','Təcrübəli usta və servis xidməti',40,'Bakı','+994501234567') RETURNING id`,[owner,randomUUID()]);
+ const id=ownListing.rows[0].id;
+ assert.equal((await request('/businesses')).body.businesses.length,0);
+ await query("UPDATE listings SET status='active' WHERE id=$1",[id]);
+ const directory=await request('/businesses?type=wash');
+ assert.equal(directory.status,200);
+ assert.equal(directory.body.businesses.length,1);
+ assert.equal(directory.body.businesses[0].business_name,'Yeni ad');
+ assert.equal((await request('/businesses?type=dealer')).body.businesses.length,0);
+ assert.equal((await request('/businesses?type=invalid')).status,400);
+ const detail=await request('/businesses/'+owner);
+ assert.equal(detail.status,200);
+ assert.equal(detail.body.listings.length,1);
+ assert.equal(detail.body.listings[0].id,id);
+ assert.equal((await request('/businesses/'+personal)).status,404);
+ await query("UPDATE listings SET status='archived' WHERE id=$1",[id]);
+ assert.equal((await request('/businesses')).body.businesses.length,0);
 });

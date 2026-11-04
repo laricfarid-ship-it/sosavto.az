@@ -41,6 +41,33 @@ export default async function handler(req,res){
  if(path==='/api/me'&&method==='GET')return json(res,200,{user:safeUser(user)});
 
  // Business registration is optional: individual accounts can publish in every existing category.
+ // Public directory lists only businesses with at least one approved active listing.
+ if(path==='/api/businesses'&&method==='GET'){
+  const type=url.searchParams.get('type')||'';
+  if(type&&!['dealer','service','wash','detailing','parts','other'].includes(type))fail(400,'Biznes növü düzgün deyil.');
+  const rows=(await query(`SELECT b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone,
+   count(l.id)::integer AS listing_count
+   FROM business_profiles b JOIN listings l ON l.user_id=b.user_id AND l.status='active'
+   AND NOT (l.details @> '{"_deleted":true}'::jsonb)
+   JOIN users u ON u.id=b.user_id AND u.status='active'
+   WHERE ($1::text='' OR b.business_type=$1)
+   GROUP BY b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone
+   ORDER BY listing_count DESC,b.business_name ASC LIMIT 100`,[type])).rows;
+  return json(res,200,{businesses:rows});
+ }
+ const businessDetail=path.match(/^\/api\/businesses\/([a-f0-9-]+)$/);
+ if(businessDetail&&method==='GET'){
+  const id=uuid(businessDetail[1]);
+  const business=(await query(`SELECT b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone
+   FROM business_profiles b JOIN users u ON u.id=b.user_id AND u.status='active'
+   WHERE b.user_id=$1 AND EXISTS(SELECT 1 FROM listings l WHERE l.user_id=b.user_id
+   AND l.status='active' AND NOT (l.details @> '{"_deleted":true}'::jsonb))`,[id])).rows[0];
+  if(!business)fail(404,'Biznes profili tapılmadı.');
+  const listings=(await query(`SELECT ${projection} FROM listings l WHERE l.user_id=$1
+   AND l.status='active' AND NOT (l.details @> '{"_deleted":true}'::jsonb)
+   ORDER BY l.created_at DESC LIMIT 48`,[id])).rows;
+  return json(res,200,{business,listings});
+ }
  if(path==='/api/business-profile'&&method==='GET'){
   requireUser(user);
   const profile=(await query('SELECT business_name,business_type,description,address,phone FROM business_profiles WHERE user_id=$1',[user.id])).rows[0]||null;
