@@ -214,3 +214,56 @@
   .cat-card .cat-text{max-width:64%}
 }
 @media(prefers-reduced-motion:reduce){.cat-card,.card{transition:none}}
+
+
+/* Approved 04 Nov homepage reference: one integrated, edge-to-edge premium composition. */
+:root[data-theme=dark] .page.home-page{max-width:1200px;margin-inline:auto;padding-top:0}
+.page.home-page .home-intro{padding-top:0!important;margin:0!important}
+.page.home-page .home-intro>.container{max-width:none;padding:0}
+.page.home-page .discovery-hero{min-height:300px;border-radius:0;border-left:0;border-right:0;border-top:0;background:#051529!important}
+.page.home-page .discovery-hero .discovery-copy{padding:30px 26px 20px;max-width:65%}
+.page.home-page .discovery-hero .discovery-visual{width:100%}
+.page.home-page .discovery-hero .discovery-visual img{object-position:center center;-webkit-mask-image:linear-gradient(90deg,#071528 0%,rgba(7,21,40,.86) 23%,transparent 58%);mask-image:linear-gradient(90deg,#071528 0%,rgba(7,21,40,.86) 23%,transparent 58%)}
+.page.home-page .discovery-hero h1{font-size:clamp(2.1rem,4vw,3.35rem)}
+.page.home-page .search-landing{position:relative;margin:-3px 18px 12px;z-index:2;border:1px solid #397aa9!important;border-radius:18px!important;background:linear-gradient(130deg,#082a42,#07192d)!important;box-shadow:0 6px 25px #0007;padding:15px 18px}
+.page.home-page .premium-fields{grid-template-columns:repeat(5,minmax(0,1fr)) auto;gap:10px}
+.page.home-page .premium-search .field select,.page.home-page .premium-search .field input{background:#102b40;border:1px solid #32536a}
+.page.home-page .stories-strip{max-width:none;margin:4px 0 20px;padding:12px 16px;border:1px solid #1b4e70;border-radius:17px;background:linear-gradient(105deg,#06243d,#081b32)}
+.page.home-page .stories-scroll{justify-content:flex-start;gap:22px;min-height:91px}
+.page.home-page .story-avatar{width:67px;height:67px;border:2px solid #66caff;box-shadow:0 0 0 3px #06213b,0 0 13px #009fe755}
+.page.home-page .story-add-icon{border-color:#00cafa;box-shadow:0 0 0 3px #06213b,0 0 18px #00bde966}
+.page.home-page .story-tile,.page.home-page .story-add{flex-basis:86px}
+.page.home-page .premium-cats{max-width:none;margin:0 0 16px;padding:0 3px}
+.page.home-page .cat-cards{gap:10px}
+.page.home-page .cat-card{min-height:130px;border:1px solid #3574a0;box-shadow:inset 0 0 30px #00aeff0b}
+.page.home-page .ai-banner.sa-capabilities{display:block!important;max-width:none;padding:15px 20px;border:1px solid #4a9bcc;background:linear-gradient(100deg,#0b3955,#071e37);border-radius:18px;margin:12px 0 20px}
+.sa-capabilities>h2{font-size:1.2rem;margin:0 0 12px}
+.sa-capability-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:0}
+.sa-capability-grid .ai-item{display:flex;gap:10px;align-items:center;padding:7px 14px;border-right:1px solid #3c6881}
+.sa-capability-grid .ai-item:last-child{border-right:0}
+.sa-capability-grid .ai-item>svg{flex:none;width:34px;height:34px;color:#00d5f6}
+.sa-capability-grid .ai-item h3{font-size:.88rem;margin:0 0 3px}
+.sa-capability-grid .ai-item p{font-size:.74rem;margin:0;line-height:1.35}
+@media(max-width:850px){
+ .page.home-page .premium-fields{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .sa-capability-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .sa-capability-grid .ai-item:nth-child(2){border-right:0}
+ .page.home-page .discovery-hero .discovery-copy{max-width:78%}
+}
+@media(max-width:600px){
+ .page.home-page .discovery-hero{min-height:320px}
+ .page.home-page .discovery-hero .discovery-copy{padding:20px 16px;max-width:100%}
+ .page.home-page .discovery-hero h1{white-space:normal;font-size:2rem}
+ .page.home-page .discovery-hero .discovery-visual img{-webkit-mask-image:linear-gradient(180deg,#071528 0%,transparent 60%);mask-image:linear-gradient(180deg,#071528 0%,transparent 60%)}
+ .page.home-page .search-landing{margin:0 8px 12px;padding:10px}
+ .page.home-page .premium-fields{grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .page.home-page .premium-fields .search-submit{grid-column:span 2}
+ .page.home-page .stories-strip{margin:0 8px 15px;padding:10px}
+ .page.home-page .stories-scroll{gap:8px}
+ .page.home-page .story-avatar{width:54px;height:54px}
+ .page.home-page .story-tile,.page.home-page .story-add{flex-basis:66px}
+ .page.home-page .cat-cards{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .page.home-page .cat-card{min-height:120px}
+ .sa-capability-grid .ai-item{padding:8px 4px}
+ .sa-capability-grid .ai-item>svg{width:25px;height:25px}
+}
