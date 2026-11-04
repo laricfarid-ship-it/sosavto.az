@@ -88,3 +88,9 @@ CREATE TABLE IF NOT EXISTS stories (
 );
 CREATE INDEX IF NOT EXISTS stories_live ON stories(expires_at,created_at DESC);
 CREATE INDEX IF NOT EXISTS stories_owner ON stories(user_id,expires_at);
+
+CREATE TABLE IF NOT EXISTS story_trials (
+ user_id uuid PRIMARY KEY REFERENCES users(id) ON DELETE CASCADE,
+ started_at timestamptz NOT NULL DEFAULT now(),
+ ends_at timestamptz NOT NULL DEFAULT (now() + interval '3 months')
+);
