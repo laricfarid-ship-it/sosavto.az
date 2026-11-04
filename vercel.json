@@ -65,5 +65,11 @@
   ],
   "buildCommand": "sh scripts/vercel-build.sh",
   "outputDirectory": "public",
-  "framework": null
+  "framework": null,
+  "crons": [
+    {
+      "path": "/api/cron/story-cleanup",
+      "schedule": "0 3 * * *"
+    }
+  ]
 }
