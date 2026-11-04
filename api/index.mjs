@@ -55,7 +55,7 @@ export default async function handler(req,res){
   const description=text(b.description||'','Biznes haqqında',0,1500);
   const address=text(b.address||'','Ünvan',0,250);
   const phone=text(b.phone||'','Telefon',0,25);
-  if(phone&&!/^(\\+994|0)\\d{9}$/.test(phone.replace(/[\\s()-]/g,'')))fail(400,'Telefon nömrəsi düzgün deyil.');
+  if(phone&&!/^(\+994|0)\d{9}$/.test(phone.replace(/[\s()-]/g,'')))fail(400,'Telefon nömrəsi düzgün deyil.');
   await query(`INSERT INTO business_profiles(user_id,business_name,business_type,description,address,phone)
    VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(user_id) DO UPDATE SET
    business_name=EXCLUDED.business_name,business_type=EXCLUDED.business_type,
