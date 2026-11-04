@@ -43,19 +43,17 @@ export default async function handler(req,res){
  // Business registration is optional: individual accounts can publish in every existing category.
  // Public directory lists only businesses with at least one approved active listing.
 
- // Free story launch window starts at deployment; configurable via STORY_FREE_UNTIL.
- const storyFreeUntil=process.env.STORY_FREE_UNTIL||null;
  if(path==='/api/stories'&&method==='GET'){
   const stories=(await query(`SELECT s.id,s.user_id,s.media_url,s.media_type,s.caption,s.created_at,s.expires_at,
    COALESCE(b.business_name,u.username) AS publisher
    FROM stories s JOIN users u ON u.id=s.user_id AND u.status='active'
    LEFT JOIN business_profiles b ON b.user_id=s.user_id
    WHERE s.expires_at>now() ORDER BY s.created_at DESC LIMIT 100`)).rows;
-  return json(res,200,{stories,freeUntil:storyFreeUntil});
+  const trial=user?(await query('SELECT started_at,ends_at FROM story_trials WHERE user_id=$1',[user.id])).rows[0]||null:null;
+  return json(res,200,{stories,trial});
  }
  if(path==='/api/stories'&&method==='POST'){
   requireUser(user);await rateLimit('story:'+user.id,12,3600);
-  if(!storyFreeUntil||!Number.isFinite(Date.parse(storyFreeUntil))||Date.now()>=Date.parse(storyFreeUntil))fail(403,'Pulsuz stori müddəti bitib. Ödənişli xidmət hələ aktiv deyil.');
   const b=await body(req);
   const media_type=text(b.media_type,'Media növü',4,5);
   if(media_type!=='image')fail(400,'Video storiləri hələ aktiv deyil.');
@@ -68,6 +66,9 @@ export default async function handler(req,res){
   const result=await transaction(async c=>{
    // Serialize concurrent uploads per user to enforce the three-story limit.
    await c.query('SELECT id FROM users WHERE id=$1 FOR UPDATE',[user.id]);
+   await c.query("INSERT INTO story_trials(user_id) VALUES($1) ON CONFLICT(user_id) DO NOTHING",[user.id]);
+   const trial=(await c.query('SELECT ends_at FROM story_trials WHERE user_id=$1',[user.id])).rows[0];
+   if(new Date(trial.ends_at).getTime()<=Date.now())fail(403,'3 aylıq pulsuz stori müddətiniz bitib. Avtomatik ödəniş tutulmur.');
    const count=(await c.query('SELECT count(*)::integer AS n FROM stories WHERE user_id=$1 AND expires_at>now()',[user.id])).rows[0].n;
    if(count>=3)fail(409,'Eyni vaxtda maksimum 3 aktiv stori yerləşdirə bilərsiniz.');
    await c.query("INSERT INTO stories(id,user_id,media_url,media_type,caption) VALUES($1,$2,$3,$4,$5)",[id,user.id,media_url,media_type,caption]);
