@@ -92,7 +92,7 @@ export default async function handler(req,res){
    AND NOT (l.details @> '{"_deleted":true}'::jsonb)
    JOIN users u ON u.id=b.user_id AND u.status='active'
    WHERE ($1::text='' OR b.business_type=$1)
-   GROUP BY b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone,b.cover_image_url,b.latitude,b.longitude,b.cover_image_url,b.latitude,b.longitude
+   GROUP BY b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone,b.cover_image_url,b.latitude,b.longitude
    ORDER BY listing_count DESC,b.business_name ASC LIMIT 100`,[type])).rows;
   return json(res,200,{businesses:rows});
  }
