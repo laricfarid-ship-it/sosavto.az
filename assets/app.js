@@ -251,6 +251,24 @@ async function businessDetailPage(){
  main.innerHTML=`<p><a href="biznesler.html">← Biznes kataloqu</a></p><section class="panel form-section"><p class="eyebrow">${esc(businessKinds[b.business_type]||'Biznes')}</p><h1>${esc(b.business_name)}</h1><p>${esc(b.description||'')}</p><p class="muted">${esc(b.address||'Ünvan göstərilməyib')}</p>${b.phone?`<a class="btn" href="tel:${esc(b.phone.replace(/[^+0-9]/g,''))}">Zəng et: ${esc(b.phone)}</a>`:''}</section><div class="section-head"><h2>Aktiv elanlar (${listings.length})</h2></div><div class="grid cards">${listings.map(l=>`<article class="panel form-section"><h3><a href="elan.html?id=${encodeURIComponent(l.id)}">${esc(l.title)}</a></h3><p class="muted">${esc(categories[l.category]?.[0]||l.category)} · ${esc(l.city)}</p><p>${money(l.price)}</p><a href="elan.html?id=${encodeURIComponent(l.id)}">Elana bax</a></article>`).join('')}</div>`;
  }catch(e){main.innerHTML=empty('Biznes profili tapılmadı',e.message,'<a class="btn" href="biznesler.html">Kataloqa qayıt</a>');}
 }
+async function saveBusinessProfile(form){
+ const data=Object.fromEntries(new FormData(form));
+ const photo=form.querySelector('input[type="file"]');
+ if(photo?.files?.length){
+  const file=photo.files[0];
+  if(file.size>3145728||!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('Şəkil JPEG, PNG və ya WebP formatında və maksimum 3 MB olmalıdır.');
+  const encoded=await new Promise((resolve,reject)=>{
+   const reader=new FileReader();
+   reader.onload=()=>resolve(reader.result);
+   reader.onerror=()=>reject(new Error('Şəkil oxunmadı.'));
+   reader.readAsDataURL(file);
+  });
+  const result=await api('/uploads','POST',{data:encoded});
+  data.cover_image_url=result.url;
+  form.elements.cover_image_url.value=result.url;
+ }
+ await api('/business-profile','PUT',data);
+}
 async function profile(){
  if(!requireLogin())return;main.innerHTML=`<div class="layout">${sidebar()}<section><p class="eyebrow">Şəxsi kabinet</p><h1 style="font-size:2rem">Salam, ${esc(me.fullname.split(' ')[0])}.</h1><div id="stats" class="stats">${loader()}</div><form id="profile" class="panel form-section"><h2>Profil məlumatları</h2><div class="fields">${input('fullname','Ad və soyad','text','','required minlength="2" maxlength="100"')}${input('phone','Telefon','tel','+994501234567','maxlength="25"')}<label class="field half">Email<input value="${esc(me.email)}" readonly aria-readonly="true"></label></div><div class="form-actions"><button class="btn primary">Dəyişiklikləri saxla</button></div></form><section class="panel form-section"><h2>Biznes hesabı (istəyə bağlı)</h2><p class="muted">Avtosalon, servis, avtoyuma və digər bizneslər üçün profil yaradın. Biznes hesabı açmadan da bütün kateqoriyalarda fərdi elan yerləşdirə bilərsiniz.</p><form id="business-profile"><div class="fields"><label class="field">Biznes adı<input name="business_name" minlength="2" maxlength="120" required></label><label class="field">Fəaliyyət növü<select name="business_type" required><option value="dealer">Avtosalon</option><option value="service">Usta və servis</option><option value="wash">Avtoyuma</option><option value="detailing">Detailing</option><option value="parts">Ehtiyat hissələri</option><option value="other">Digər avtomobil xidməti</option></select></label><label class="field">Ünvan<input name="address" maxlength="250"></label><label class="field">Əlaqə telefonu<input name="phone" type="tel" maxlength="25" placeholder="+994501234567"></label><label class="field">Haqqında<textarea name="description" maxlength="1500" rows="3"></textarea></label><label class="field">Biznes şəkli<input name="cover_image_url" placeholder="Öz yüklədiyiniz şəkil ünvanı"></label><label class="field">Enlik<input name="latitude" type="number" step="any" min="-90" max="90"></label><label class="field">Uzunluq<input name="longitude" type="number" step="any" min="-180" max="180"></label></div><div class="form-actions"><button class="btn primary" type="submit">Biznes profilini saxla</button></div></form></section><form id="password" class="panel"><h2>Şifrəni dəyiş</h2><div class="fields">${input('current','Cari şifrə','password','','required autocomplete="current-password"')}${input('password','Yeni şifrə','password','Ən azı 10 simvol','required minlength="10" maxlength="72" autocomplete="new-password"')}</div><div class="form-actions"><small class="muted">Digər cihazlardakı girişlər bağlanacaq.</small><button class="btn">Şifrəni yenilə</button></div></form></section></div>`;wireLogout();$('#profile').elements.fullname.value=me.fullname;$('#profile').elements.phone.value=me.phone;
  try{const b=await api('/business-profile');if(b.profile){for(const [k,v] of Object.entries(b.profile)){const el=$('#business-profile').elements.namedItem(k);if(el)el.value=v??'';}}}catch(e){toast('Biznes profili yüklənmədi: '+e.message);}
