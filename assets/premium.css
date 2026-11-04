@@ -329,3 +329,55 @@
  .page.home-page .sa-home-search .search-landing .premium-fields .search-submit{grid-column:span 2}
  .page.home-page .stories-strip,.page.home-page .premium-cats,.page.home-page .ai-banner.sa-capabilities,.page.home-page .results-sec{margin-left:8px!important;margin-right:8px!important}
 }
+
+
+/* Approved 1169px reference: homepage-only layout, isolated from other pages. */
+@media(min-width:1000px){
+ .page.home-page{width:min(1169px,100%);max-width:1169px;padding:0 24px 24px;margin:0 auto}
+ .page.home-page .home-intro{padding-top:0!important}
+ .page.home-page .home-intro>.container{width:100%;max-width:none}
+ .page.home-page .discovery-hero{height:275px;min-height:275px;border:0!important;border-radius:0!important;box-shadow:none!important}
+ .page.home-page .discovery-hero .discovery-copy{padding:26px 24px;max-width:65%}
+ .page.home-page .discovery-hero h1{font-size:clamp(35px,3.8vw,46px);font-weight:800;line-height:1.12;letter-spacing:-.045em}
+ .page.home-page .discovery-hero .eyebrow{font-size:14px;letter-spacing:.035em;color:#fff}
+ .page.home-page .discovery-hero .muted{font-size:16px;color:#fff}
+ .page.home-page .hero-trust{margin:12px 0 13px;gap:25px;color:#fff}
+ .page.home-page .hero-trust svg{color:#00d9ff}
+ .page.home-page .hero-cta{min-width:194px;min-height:43px;border-radius:13px}
+ .page.home-page .sa-home-search{margin:-25px 0 15px!important;padding:10px 22px 12px!important;border-radius:19px!important;min-height:170px}
+ .page.home-page .sa-home-tabs{gap:8px;margin-bottom:11px;padding-bottom:8px}
+ .page.home-page .sa-home-tabs a{min-height:40px;font-size:15px}
+ .page.home-page .sa-home-search .search-landing .premium-fields{gap:12px;grid-template-columns:1fr 1fr 1fr 1fr 1fr 1fr}
+ .page.home-page .sa-home-search .search-landing .premium-fields>.field{font-size:13px}
+ .page.home-page .sa-home-search .search-landing .premium-fields .pair-row{display:flex}
+ .page.home-page .sa-home-search .search-landing .premium-fields .field input,.page.home-page .sa-home-search .search-landing .premium-fields .field select{height:47px;min-height:47px}
+ .page.home-page .sa-home-search .search-landing .premium-fields .search-submit{height:47px;min-height:47px}
+ .page.home-page .sa-home-search .search-landing .form-actions{display:none}
+ .page.home-page .sa-home-search .search-landing .advanced{margin-top:10px}
+ .page.home-page .sa-search-links{margin-top:-18px;pointer-events:none}
+ .page.home-page .sa-search-links a{pointer-events:auto}
+ .page.home-page .stories-strip{margin:0 0 18px!important;padding:13px 22px!important;border:1px solid #216a96;border-radius:17px;background:linear-gradient(100deg,#06213b,#082b47)}
+ .page.home-page .stories-scroll{min-height:91px!important;justify-content:space-between;gap:15px;align-items:center;padding:0!important}
+ .page.home-page .premium-cats{margin:0 0 16px!important}
+ .page.home-page .cat-cards{gap:10px 13px}
+ .page.home-page .cat-card{height:119px;min-height:119px;border-radius:16px;padding:14px 24px}
+ .page.home-page .cat-card h3{font-size:21px}
+ .page.home-page .cat-card p{font-size:13px}
+ .page.home-page .ai-banner.sa-capabilities{margin:0 0 18px!important;padding:13px 22px!important}
+ .page.home-page .results-sec{margin:0!important}
+ .page.home-page .results-sec .section-head{margin-bottom:14px}
+ .page.home-page .results-sec #results:has(.empty){display:block;grid-template-columns:none}
+ .page.home-page .results-sec #results>.empty{min-height:142px;padding:20px}
+}
+@media(max-width:999px){
+ .page.home-page{width:min(100%,calc(100% - 24px));padding:0}
+ .page.home-page .discovery-hero .discovery-copy{max-width:75%}
+ .page.home-page .sa-home-search{margin:-12px 8px 12px!important}
+ .page.home-page .stories-strip,.page.home-page .premium-cats,.page.home-page .ai-banner.sa-capabilities,.page.home-page .results-sec{margin-left:8px!important;margin-right:8px!important}
+}
+@media(max-width:600px){
+ .page.home-page .discovery-hero .discovery-copy{max-width:100%}
+ .page.home-page .discovery-hero h1{white-space:normal}
+ .page.home-page .sa-home-search{margin:0 0 12px!important}
+ .page.home-page .stories-strip,.page.home-page .premium-cats,.page.home-page .ai-banner.sa-capabilities,.page.home-page .results-sec{margin-left:0!important;margin-right:0!important}
+}
