@@ -1,3 +1,4 @@
+import {cleanupStories} from '../server/story-cleanup.mjs';
 import {uploadStoryVideo} from '../server/story-video.mjs';
 import {adminEvent,pushApi} from '../server/admin-push.mjs';
 import {resetEnabled,requestReset,completeReset} from '../server/password-reset.mjs';
@@ -24,6 +25,7 @@ export default async function handler(req,res){
  try{
  const url=new URL(req.url,'http://localhost'); const path=url.pathname.replace(/\/$/,'');const method=req.method;
  originCheck(req);
+ if(path==='/api/cron/story-cleanup'&&method==='GET'){const secret=process.env.CRON_SECRET;if(!secret||req.headers.authorization!==`Bearer ${secret}`)fail(401,'Unauthorized');return json(res,200,await cleanupStories());}
  if(path==='/api/config'&&method==='GET')return json(res,200,{passwordReset:resetEnabled(),wash:washEnabled(),sos:process.env.SOS_ENABLED==='true',ai:assistantConfig().enabled,aiProvider:assistantConfig().provider,uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
  const address=clientAddress(req);
  await rateLimit(`api:ip:${address}`,300,60);
