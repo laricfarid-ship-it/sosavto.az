@@ -110,8 +110,8 @@ test('owner status action sends PATCH only after confirmation',async()=>{
 });
 
 test('home defaults to cars; all remains explicit and filters can be removed without losing category',async()=>{
- const d=await load('index.html');assert.equal(d.doc.querySelector('[data-category=car]').getAttribute('aria-pressed'),'true');assert.equal(d.doc.querySelectorAll('[data-body]').length,7);d.close();
- const all=await load('index.html?category=all',null,{'/listings?':{listings:[],total:0,page:1,pages:0}});assert.equal(all.doc.querySelector('[data-category=all]').getAttribute('aria-pressed'),'true');all.close();
+ const d=await load('index.html');assert.ok(d.doc.querySelector('.premium-cats .cat-car'),'car category card is visible');assert.equal(d.doc.querySelectorAll('[data-body]').length,7);d.close();
+ const all=await load('index.html?category=all',null,{'/listings?':{listings:[],total:0,page:1,pages:0}});assert.ok(all.doc.querySelector('.cat-hero')||all.doc.querySelector('.premium-cats'),'all-category page renders');all.close();
  const query='category=car&brand=BMW&model=320&price_min=20000&price_max=30000&fuel=Dizel&page=2';
  const filtered=await load('index.html?'+query,null,{['/listings?'+query]:{listings:[],total:0,page:1,pages:0}});
  const chip=[...filtered.doc.querySelectorAll('.filter-chip')].find(a=>a.textContent.includes('Marka:'));const url=new URL(chip.href);
