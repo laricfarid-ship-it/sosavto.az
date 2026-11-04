@@ -464,3 +464,36 @@
  .page.home-page .hero-trust{gap:12px!important;font-size:12px!important}
  .page.home-page .sa-home-search{margin:0 0 14px!important;transform:none!important}
 }
+
+
+/* Approved dark navy / electric cyan reference palette and four-card desktop row. */
+:root{--sa-neon:#00cfff;--sa-deep:#031527;--sa-panel:#08243c}
+body:has(.page.home-page){background:radial-gradient(ellipse at 50% 28%,#063451 0%,#03192c 45%,#020d1b 100%)!important;color:#f6fbff}
+#header .brand-sa .brand-emblem{filter:brightness(1.08) saturate(1.35);width:56px!important;height:36px!important}
+#header .brand-sa .brand-wordmark{font-weight:850!important;letter-spacing:-.055em!important;color:#fff}
+.page.home-page .sa-home-search{background:linear-gradient(135deg,#0b344e 0%,#061b30 57%,#061b30 100%)!important;border-color:#68bde6!important;box-shadow:0 10px 35px #0007,inset 0 1px 24px #10a8e512!important}
+.page.home-page .sa-home-tabs a.active,.page.home-page .hero-cta,.page.home-page .search-submit{background:linear-gradient(135deg,#03d6fa 0%,#0374e7 70%,#0052bb 100%)!important;border:1px solid #31dcff!important;box-shadow:inset 0 1px 10px #a4f8ff66,0 0 15px #00baff33!important;color:#fff!important}
+.page.home-page .stories-strip{background:linear-gradient(105deg,#092e49,#062039)!important;border-color:#276c98!important;box-shadow:inset 0 0 22px #08b6ef0a!important}
+.page.home-page .cat-card{background:linear-gradient(90deg,rgba(5,27,46,.96) 0%,rgba(5,27,46,.86) 32%,rgba(5,27,46,.10) 70%,rgba(5,27,46,0) 100%),var(--img) right center/auto 100% no-repeat,#06223b!important;border:1px solid #59b1e1!important;box-shadow:inset 0 1px 18px #0b92df1c,0 5px 17px #0005!important;transition:transform .18s ease,box-shadow .18s ease}
+.page.home-page .cat-card:hover{transform:translateY(-2px);box-shadow:inset 0 1px 24px #0ac3ff28,0 9px 20px #0008!important}
+.page.home-page .cat-card .cat-text{position:relative;z-index:1;max-width:72%}
+.page.home-page .cat-card .cat-text h3{color:#fff!important;font-weight:800!important;text-shadow:0 1px 7px #00111d}
+.page.home-page .cat-card .cat-text p{color:#f0f7ff!important;text-shadow:0 1px 6px #00111d}
+.page.home-page .cat-card .cat-go{position:relative;z-index:1;align-self:flex-start;border-color:#00cfff!important;color:#fff!important;background:#032039!important}
+@media(min-width:1200px){
+ .page.home-page .cat-cards{grid-template-columns:repeat(4,minmax(0,1fr))!important;gap:12px!important}
+ .page.home-page .cat-card{height:156px!important;min-height:156px!important;padding:16px 18px!important}
+ .page.home-page .cat-card .cat-text h3{font-size:19px!important}
+ .page.home-page .cat-card .cat-text p{font-size:12px!important}
+}
+@media(min-width:700px) and (max-width:1199px){
+ .page.home-page .cat-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .page.home-page .cat-card{min-height:135px!important}
+}
+@media(max-width:699px){
+ #header .brand-sa .brand-emblem{width:38px!important;height:26px!important}
+ .page.home-page .cat-cards{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+ .page.home-page .cat-card{min-height:106px!important;padding:11px!important}
+ .page.home-page .cat-card .cat-text h3{font-size:14px!important}
+ .page.home-page .cat-card .cat-text p{font-size:10px!important}
+}
