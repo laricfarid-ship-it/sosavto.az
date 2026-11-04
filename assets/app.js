@@ -231,7 +231,7 @@ async function storiesPage(){
   await api('/stories','POST',{media_type:isVideo?'video':'image',media_url:uploaded.url,caption:e.target.elements.caption.value});
   toast('Stori paylaşıldı.');await storiesPage();
  });};
- try{const r=await api('/stories');$('#story-list').innerHTML=r.stories.length?`<div class="grid cards">${r.stories.map(st=>`<article class="panel form-section"><strong>${esc(st.publisher)}</strong><p class="muted">${date(st.created_at)}</p><img src="${esc(imageUrl(st.media_url))}" alt="Stori şəkli" loading="lazy" style="width:100%;max-height:400px;object-fit:contain"><p>${esc(st.caption)}</p>${me?.id===st.user_id?`<button class="btn ghost" data-story-delete="${esc(st.id)}">Sil</button>`:''}</article>`).join('')}</div>`:empty('Hələ aktiv stori yoxdur','Yeni paylaşımlar burada görünəcək.');
+ try{const r=await api('/stories');$('#story-list').innerHTML=r.stories.length?`<div class="grid cards">${r.stories.map(st=>`<article class="panel form-section"><strong>${esc(st.publisher)}</strong><p class="muted">${date(st.created_at)}</p>${st.media_type==="video"?`<video src="${esc(imageUrl(st.media_url))}" controls playsinline preload="metadata" style="width:100%;max-height:400px"></video>`:`<img src="${esc(imageUrl(st.media_url))}" alt="Stori şəkli" loading="lazy" style="width:100%;max-height:400px;object-fit:contain">`}<p>${esc(st.caption)}</p>${me?.id===st.user_id?`<button class="btn ghost" data-story-delete="${esc(st.id)}">Sil</button>`:''}</article>`).join('')}</div>`:empty('Hələ aktiv stori yoxdur','Yeni paylaşımlar burada görünəcək.');
  $$('[data-story-delete]').forEach(b=>b.onclick=()=>task(b,async()=>{await api('/stories/'+b.dataset.storyDelete,'DELETE',{});await storiesPage();}));
  }catch(e){errorBox($('#story-list'),e);}
 }
