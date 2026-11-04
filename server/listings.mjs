@@ -1,17 +1,17 @@
 import {spinSelection} from './listing-media.mjs';
 import {text,number,fail,uuid} from './security.mjs';
 import {partTypes,insuranceTypes,serviceTypes,detailFields,filterKeys,normalizeCode,normalizePlate} from '../assets/catalog.js';
-export const categories=['car','parts','service','wash','detailing','insurance','plates'];
+export const categories=['car','motorcycle','parts','service','wash','detailing','insurance','plates'];
 export function listingInput(b){
  if(!categories.includes(b.category))fail(400,'Kateqoriya seçin.');
  const phone=text(b.phone,'Telefon',9,25).replace(/[\s()-]/g,'');if(!/^(\+994|0)\d{9}$/.test(phone))fail(400,'Azərbaycan telefon nömrəsini düzgün daxil edin.');
  const v={category:b.category,title:text(b.title,'Başlıq',5,120),description:text(b.description,'Təsvir',20,5000),price:number(b.price,'Qiymət',0,999999999),city:text(b.city,'Şəhər',2,80),brand:text(b.brand||'','Marka',0,60),model:text(b.model||'','Model',0,80),year:number(b.year,'İl',1886,new Date().getFullYear()+1,true),mileage:number(b.mileage,'Yürüş',0,9999999,true),phone,address:text(b.address||'','Ünvan',0,250),latitude:number(b.latitude,'Enlik',-90,90,true),longitude:number(b.longitude,'Uzunluq',-180,180,true)};
  if((v.latitude===null)!==(v.longitude===null))fail(400,'Xəritə koordinatlarını birlikdə daxil edin.');
- if(v.category==='car'&&(!v.brand||!v.model||!Number.isInteger(v.year)||v.mileage===null||!Number.isInteger(v.mileage)))fail(400,'Avtomobil üçün marka, model, il və yürüşü doldurun.');
+ if(['car','motorcycle'].includes(v.category)&&(!v.brand||!v.model||!Number.isInteger(v.year)||v.mileage===null||!Number.isInteger(v.mileage)))fail(400,'Nəqliyyat vasitəsi üçün marka, model, il və yürüşü doldurun.');
  const details={};
  for(const k of detailFields[v.category])details[k]=['credit','barter','map_visible'].includes(k)?b.details?.[k]===true:text(b.details?.[k]||'',k,0,k==='fitment'?250:80);
- if(!['car','parts'].includes(v.category)){v.brand='';v.model='';}
- if(v.category!=='car'){v.year=null;v.mileage=null;}
+ if(!['car','motorcycle','parts'].includes(v.category)){v.brand='';v.model='';}
+ if(!['car','motorcycle'].includes(v.category)){v.year=null;v.mileage=null;}
  for(const [k,values]of [['part_type',partTypes],['insurance_type',insuranceTypes],['service_type',serviceTypes[v.category]],['condition',['Yeni','İşlənmiş']]])if(details[k]&&values&&!values.includes(details[k]))fail(400,'Seçilən növ kateqoriyaya uyğun deyil.');
  if(details.oem)details.oem=normalizeCode(details.oem);
  if(v.category==='plates'){details.plate_number=normalizePlate(details.plate_number);if(!/^\d{2}-[A-Z]{2}-\d{3}$/.test(details.plate_number))fail(400,'Nömrəni 10-AA-123 formatında yazın.');}
