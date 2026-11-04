@@ -221,9 +221,17 @@ async function collection(type){
 }
 const businessKinds={dealer:'Avtosalon',service:'Usta və servis',wash:'Avtoyuma',detailing:'Detailing',parts:'Ehtiyat hissələri',other:'Digər xidmət'};
 async function storiesPage(){
- main.innerHTML=`<div class="section-head"><div><p class="eyebrow">SosAvto</p><h1>24 saatlıq storilər</h1><p class="muted">Stori 24 saatdan sonra avtomatik görünməz olur. Bir hesabda maksimum 3 aktiv stori.</p></div></div><div id="story-list">${loader()}</div>`;
+ main.innerHTML=`<div class="section-head"><div><p class="eyebrow">SosAvto</p><h1>24 saatlıq storilər</h1><p class="muted">Bir hesabda maksimum 3 aktiv stori. Paylaşımlar 24 saatdan sonra görünmür.</p></div></div>${me?`<form id="story-form" class="panel form-section"><h2>Yeni şəkilli stori</h2><p class="muted">İlk stori paylaşdığınız tarixdən 3 ay pulsuzdur. Sonra avtomatik ödəniş tutulmur.</p><div class="fields"><label class="field">Şəkil (JPEG, PNG, WebP — maksimum 3 MB)<input type="file" name="photo" accept="image/jpeg,image/png,image/webp" required></label><label class="field">Qısa mətn<input name="caption" maxlength="280"></label></div><button class="btn primary" type="submit">Stori paylaş</button></form>`:'<p><a class="btn primary" href="giris.html?next=storiler.html">Stori paylaşmaq üçün daxil ol</a></p>'}<div id="story-list">${loader()}</div>`;
+ if(me)$('#story-form').onsubmit=e=>{e.preventDefault();task(e.submitter,async()=>{
+  const file=e.target.elements.photo.files?.[0];
+  if(!file||file.size>3*1024*1024||!['image/jpeg','image/png','image/webp'].includes(file.type))throw Error('JPEG, PNG və ya WebP şəkli seçin (maksimum 3 MB).');
+  const data=await new Promise((resolve,reject)=>{const reader=new FileReader();reader.onload=()=>resolve(reader.result);reader.onerror=()=>reject(new Error('Şəkil oxunmadı.'));reader.readAsDataURL(file);});
+  const uploaded=await api('/uploads','POST',{data});
+  await api('/stories','POST',{media_type:'image',media_url:uploaded.url,caption:e.target.elements.caption.value});
+  toast('Stori paylaşıldı.');await storiesPage();
+ });};
  try{const r=await api('/stories');$('#story-list').innerHTML=r.stories.length?`<div class="grid cards">${r.stories.map(st=>`<article class="panel form-section"><strong>${esc(st.publisher)}</strong><p class="muted">${date(st.created_at)}</p><img src="${esc(imageUrl(st.media_url))}" alt="Stori şəkli" loading="lazy" style="width:100%;max-height:400px;object-fit:contain"><p>${esc(st.caption)}</p>${me?.id===st.user_id?`<button class="btn ghost" data-story-delete="${esc(st.id)}">Sil</button>`:''}</article>`).join('')}</div>`:empty('Hələ aktiv stori yoxdur','Yeni paylaşımlar burada görünəcək.');
- $('[data-story-delete]').forEach(b=>b.onclick=()=>task(b,async()=>{await api('/stories/'+b.dataset.storyDelete,'DELETE',{});await storiesPage();}));
+ $$('[data-story-delete]').forEach(b=>b.onclick=()=>task(b,async()=>{await api('/stories/'+b.dataset.storyDelete,'DELETE',{});await storiesPage();}));
  }catch(e){errorBox($('#story-list'),e);}
 }
 async function businessDirectory(){
