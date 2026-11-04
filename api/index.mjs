@@ -42,6 +42,45 @@ export default async function handler(req,res){
 
  // Business registration is optional: individual accounts can publish in every existing category.
  // Public directory lists only businesses with at least one approved active listing.
+
+ // Free story launch window starts at deployment; configurable via STORY_FREE_UNTIL.
+ const storyFreeUntil=process.env.STORY_FREE_UNTIL||'2027-02-04T00:00:00+04:00';
+ if(path==='/api/stories'&&method==='GET'){
+  const stories=(await query(`SELECT s.id,s.user_id,s.media_url,s.media_type,s.caption,s.created_at,s.expires_at,
+   COALESCE(b.business_name,u.username) AS publisher
+   FROM stories s JOIN users u ON u.id=s.user_id AND u.status='active'
+   LEFT JOIN business_profiles b ON b.user_id=s.user_id
+   WHERE s.expires_at>now() ORDER BY s.created_at DESC LIMIT 100`)).rows;
+  return json(res,200,{stories,freeUntil:storyFreeUntil});
+ }
+ if(path==='/api/stories'&&method==='POST'){
+  requireUser(user);await rateLimit('story:'+user.id,12,3600);
+  if(Date.now()>=Date.parse(storyFreeUntil))fail(403,'Pulsuz stori müddəti bitib. Ödənişli xidmət hələ aktiv deyil.');
+  const b=await body(req);
+  const media_type=text(b.media_type,'Media növü',4,5);
+  if(!['image','video'].includes(media_type))fail(400,'Media növü düzgün deyil.');
+  const media_url=text(b.media_url,'Media ünvanı',5,1000);
+  // Only trusted hosted media; no arbitrary remote URL or data payload.
+  if(!/^https:\/\/[a-z0-9.-]+\/[a-zA-Z0-9_./%-]+$/i.test(media_url) && !/^\/media\/[a-zA-Z0-9_./%-]+$/.test(media_url))fail(400,'Media ünvanı düzgün deyil.');
+  const caption=text(b.caption||'','Stori mətni',0,280);
+  const id=randomUUID();
+  const result=await transaction(async c=>{
+   // Serialize concurrent uploads per user to enforce the three-story limit.
+   await c.query('SELECT id FROM users WHERE id=$1 FOR UPDATE',[user.id]);
+   const count=(await c.query('SELECT count(*)::integer AS n FROM stories WHERE user_id=$1 AND expires_at>now()',[user.id])).rows[0].n;
+   if(count>=3)fail(409,'Eyni vaxtda maksimum 3 aktiv stori yerləşdirə bilərsiniz.');
+   await c.query("INSERT INTO stories(id,user_id,media_url,media_type,caption) VALUES($1,$2,$3,$4,$5)",[id,user.id,media_url,media_type,caption]);
+   return {id,expiresInHours:24};
+  });
+  return json(res,201,result);
+ }
+ const storyDelete=path.match(/^\/api\/stories\/([a-f0-9-]+)$/);
+ if(storyDelete&&method==='DELETE'){
+  requireUser(user);const id=uuid(storyDelete[1]);
+  const result=await query('DELETE FROM stories WHERE id=$1 AND user_id=$2 RETURNING id',[id,user.id]);
+  if(!result.rows.length)fail(404,'Stori tapılmadı.');
+  return json(res,200,{ok:true});
+ }
  if(path==='/api/businesses'&&method==='GET'){
   const type=url.searchParams.get('type')||'';
   if(type&&!['dealer','service','wash','detailing','parts','other'].includes(type))fail(400,'Biznes növü düzgün deyil.');
