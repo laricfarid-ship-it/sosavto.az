@@ -55,7 +55,7 @@ export default async function handler(req,res){
    ORDER BY listing_count DESC,b.business_name ASC LIMIT 100`,[type])).rows;
   return json(res,200,{businesses:rows});
  }
- const businessDetail=path.match(/^\\/api\\/businesses\\/([a-f0-9-]+)$/);
+ const businessDetail=path.match(/^\/api\/businesses\/([a-f0-9-]+)$/);
  if(businessDetail&&method==='GET'){
   const id=uuid(businessDetail[1]);
   const business=(await query(`SELECT b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone
