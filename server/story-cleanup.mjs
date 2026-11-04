@@ -32,6 +32,28 @@ export async function cleanupStories({limit=100}={}){
    deleted++;
   }catch(e){failed++;console.error('Story cleanup failed',v.id,e.message);}
  }
+ const images=(await query(`SELECT i.id,i.url FROM images i
+ WHERE i.listing_id IS NULL AND i.created_at<now()-interval '48 hours'
+ AND EXISTS(SELECT 1 FROM stories s WHERE s.media_url=i.url AND s.expires_at<=now())
+ AND NOT EXISTS(SELECT 1 FROM stories s WHERE s.media_url=i.url AND s.expires_at>now())
+ AND NOT EXISTS(SELECT 1 FROM business_profiles b WHERE b.cover_image_url=i.url)
+ ORDER BY i.created_at LIMIT $1`,[limit])).rows;
+ let deletedImages=0,failedImages=0;
+ for(const i of images){
+  try{
+   const loc=storageKey(i.url);
+   if(!loc||!loc.key.endsWith('.webp'))throw Error('Unknown image location');
+   if(loc.kind==='s3'){
+    if(!client)throw Error('S3 not configured');
+    await client.send(new DeleteObjectCommand({Bucket:process.env.S3_BUCKET,Key:loc.key}));
+    const original=loc.key.replace(/^listings\//,'originals/');
+    await client.send(new DeleteObjectCommand({Bucket:process.env.S3_BUCKET,Key:original}));
+   }else await unlink('.data/uploads/'+loc.key).catch(e=>{if(e.code!=='ENOENT')throw e;});
+   await query('DELETE FROM stories WHERE media_url=$1 AND expires_at<=now()',[i.url]);
+   await query('DELETE FROM images WHERE id=$1 AND listing_id IS NULL AND NOT EXISTS(SELECT 1 FROM business_profiles WHERE cover_image_url=$2)',[i.id,i.url]);
+   deletedImages++;
+  }catch(e){failedImages++;console.error('Story image cleanup failed',i.id,e.message);}
+ }
  const expired=(await query(`DELETE FROM stories WHERE expires_at<=now() AND media_type='image' RETURNING id`)).rows.length;
- return {deletedVideos:deleted,failedVideos:failed,expiredImageRecords:expired};
+ return {deletedVideos:deleted,failedVideos:failed,deletedImages,failedImages,expiredImageRecords:expired};
 }
