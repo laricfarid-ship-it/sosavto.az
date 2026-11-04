@@ -14,7 +14,7 @@
 })();
 
 /* Light / dark theme. Loaded as a blocking script in <head> so the page never flashes the wrong colours.
-   Order of precedence: the visitor's saved choice, then the device setting (prefers-color-scheme), then light. */
+   Order of precedence: the visitor's saved choice, then dark (the SosAvto premium default). */
 (function () {
   var KEY = 'sosavto-theme';
   var root = document.documentElement;
@@ -54,7 +54,7 @@
     return root.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
   }
 
-  apply(saved() || (query && query.matches ? 'dark' : 'light'));
+  apply(saved() || 'dark');
 
   /* The header is drawn by app.js after this script runs, so clicks are handled on the document. */
   document.addEventListener('click', function (event) {
@@ -69,7 +69,7 @@
   /* Visitors who never chose follow the device when it changes (for example automatic dark mode at night). */
   if (query) {
     var follow = function (event) {
-      if (!saved()) apply(event.matches ? 'dark' : 'light');
+      /* premium design is dark by default; only an explicit choice switches it */
     };
     if (query.addEventListener) query.addEventListener('change', follow);
     else if (query.addListener) query.addListener(follow);
