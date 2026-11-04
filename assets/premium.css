@@ -267,3 +267,28 @@
  .sa-capability-grid .ai-item{padding:8px 4px}
  .sa-capability-grid .ai-item>svg{width:25px;height:25px}
 }
+
+
+/* Fix preview defects identified from the real desktop screenshot. */
+.page.home-page{width:min(1200px,calc(100% - 32px));margin-inline:auto}
+.page.home-page .discovery-hero{height:290px;min-height:290px;overflow:hidden;background:#061528!important}
+.page.home-page .discovery-hero .discovery-visual{position:absolute;inset:0;width:100%;height:100%;z-index:0}
+.page.home-page .discovery-hero .discovery-visual img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center 57%;-webkit-mask-image:none;mask-image:none;opacity:1}
+.page.home-page .discovery-hero::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;background:linear-gradient(90deg,rgba(2,12,25,.90) 0%,rgba(3,17,34,.74) 33%,rgba(4,18,34,.10) 72%,rgba(4,18,34,.12) 100%)}
+.page.home-page .discovery-hero .discovery-copy{position:relative;z-index:2;max-width:67%;padding:26px 30px}
+.page.home-page .discovery-hero h1{color:white;text-shadow:0 2px 12px #00101e}
+.page.home-page .discovery-hero .eyebrow,.page.home-page .discovery-hero .muted,.page.home-page .hero-trust{color:#eef8ff}
+.page.home-page .search-landing{margin-top:-12px!important;padding:11px 14px!important}
+.page.home-page .search-landing .form-actions{display:none}
+.page.home-page .search-landing .premium-fields{gap:8px}
+.page.home-page .search-landing .field{margin:0}
+.page.home-page .stories-strip{padding:8px 14px!important;margin-bottom:12px!important}
+.page.home-page .stories-scroll{min-height:70px;align-items:center;padding:3px 2px 6px}
+.page.home-page .premium-cats{margin-top:4px}
+@media(max-width:600px){
+ .page.home-page{width:100%}
+ .page.home-page .discovery-hero{height:310px;min-height:310px}
+ .page.home-page .discovery-hero .discovery-copy{max-width:100%;padding:20px 18px}
+ .page.home-page .discovery-hero::after{background:linear-gradient(180deg,rgba(2,12,25,.88),rgba(2,12,25,.52) 65%,rgba(2,12,25,.1))}
+ .page.home-page .search-landing{margin-top:0!important}
+}
