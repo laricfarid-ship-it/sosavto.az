@@ -35,7 +35,7 @@
       actions.before(link);
     }
     const form=document.getElementById('search');
-    if (form && !form.querySelector('.sa-filters')) {
+    if (form && !form.classList.contains('premium-search') && !form.querySelector('.sa-filters')) {
       const details=document.createElement('details'); details.className='sa-filters';
       const summary=document.createElement('summary'); summary.textContent='Filtrlər · marka, qiymət, kuzov'; details.append(summary);
       const query=new URLSearchParams(location.search);
