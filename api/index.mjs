@@ -44,7 +44,7 @@ export default async function handler(req,res){
  // Public directory lists only businesses with at least one approved active listing.
 
  // Free story launch window starts at deployment; configurable via STORY_FREE_UNTIL.
- const storyFreeUntil=process.env.STORY_FREE_UNTIL||'2027-02-04T00:00:00+04:00';
+ const storyFreeUntil=process.env.STORY_FREE_UNTIL||null;
  if(path==='/api/stories'&&method==='GET'){
   const stories=(await query(`SELECT s.id,s.user_id,s.media_url,s.media_type,s.caption,s.created_at,s.expires_at,
    COALESCE(b.business_name,u.username) AS publisher
@@ -55,13 +55,14 @@ export default async function handler(req,res){
  }
  if(path==='/api/stories'&&method==='POST'){
   requireUser(user);await rateLimit('story:'+user.id,12,3600);
-  if(Date.now()>=Date.parse(storyFreeUntil))fail(403,'Pulsuz stori müddəti bitib. Ödənişli xidmət hələ aktiv deyil.');
+  if(!storyFreeUntil||!Number.isFinite(Date.parse(storyFreeUntil))||Date.now()>=Date.parse(storyFreeUntil))fail(403,'Pulsuz stori müddəti bitib. Ödənişli xidmət hələ aktiv deyil.');
   const b=await body(req);
   const media_type=text(b.media_type,'Media növü',4,5);
-  if(!['image','video'].includes(media_type))fail(400,'Media növü düzgün deyil.');
+  if(media_type!=='image')fail(400,'Video storiləri hələ aktiv deyil.');
   const media_url=text(b.media_url,'Media ünvanı',5,1000);
-  // Only trusted hosted media; no arbitrary remote URL or data payload.
-  if(!/^https:\/\/[a-z0-9.-]+\/[a-zA-Z0-9_./%-]+$/i.test(media_url) && !/^\/media\/[a-zA-Z0-9_./%-]+$/.test(media_url))fail(400,'Media ünvanı düzgün deyil.');
+  // Accept only an already uploaded image owned by the authenticated user.
+  const owned=(await query('SELECT id FROM images WHERE user_id=$1 AND url=$2 LIMIT 1',[user.id,media_url])).rows[0];
+  if(!owned)fail(400,'Öz hesabınıza yüklənmiş şəkil seçin.');
   const caption=text(b.caption||'','Stori mətni',0,280);
   const id=randomUUID();
   const result=await transaction(async c=>{
