@@ -94,3 +94,9 @@ CREATE TABLE IF NOT EXISTS story_trials (
  started_at timestamptz NOT NULL DEFAULT now(),
  ends_at timestamptz NOT NULL DEFAULT (now() + interval '3 months')
 );
+
+-- Business gallery and map location are optional; never infer coordinates from address.
+ALTER TABLE business_profiles ADD COLUMN IF NOT EXISTS cover_image_url text NOT NULL DEFAULT '';
+ALTER TABLE business_profiles ADD COLUMN IF NOT EXISTS latitude double precision;
+ALTER TABLE business_profiles ADD COLUMN IF NOT EXISTS longitude double precision;
+ALTER TABLE business_profiles ADD CONSTRAINT business_location_pair CHECK ((latitude IS NULL) = (longitude IS NULL));
