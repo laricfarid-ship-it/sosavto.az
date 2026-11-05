@@ -211,6 +211,21 @@ test('server-authorized founder sees service views and private navigation even w
  for(const page of ['sos.html','sos-usta.html','avtoyuma.html','avtoyuma-panel.html']){
  const d=await load(page,{...user,role:'admin',servicePreview:true},{'/config':{sos:false,wash:false}});
  assert.match(d.doc.querySelector('#main').textContent,/preview/);assert.match(d.doc.querySelector('#main').textContent,/Təsisçi baxışı/);
- assert.ok(d.doc.querySelector('#header nav a[href="sos.html"]'));assert.ok(d.doc.querySelector('#header nav a[href="avtoyuma.html"]'));d.close();
+ assert.ok(d.doc.querySelector('#header nav a[href="sos.html"]'));assert.ok(d.doc.querySelector('#header nav .nav-pop a[href="avtoyuma-panel.html"]'));d.close();
  }
+});
+
+test('premium navigation keeps founder management inside services without duplicate menu entries',async()=>{
+ const d=await load('index.html',{...user,servicePreview:true});
+ const nav=d.doc.querySelector('#navigation');
+ assert.equal(nav.querySelectorAll(':scope > a[href="sos.html"]').length,1);
+ assert.equal(nav.querySelectorAll(':scope > a[href^="avtoyuma"]').length,0);
+ assert.ok(nav.querySelector('.nav-pop a[href="avtoyuma-panel.html"]'));
+ d.close();
+});
+test('motorcycle form retains required year and mileage without car body controls',async()=>{
+ const d=await load('elan-ver.html?category=motorcycle',user);const form=d.doc.querySelector('#listing-form');
+ assert.equal(form.elements.category.value,'motorcycle');assert.equal(form.elements.year.required,true);assert.equal(form.elements.mileage.required,true);
+ for(const key of ['body','drive','fuel','transmission']){assert.equal(form.elements[key].disabled,true);assert.equal(form.elements[key].closest('.field').hidden,true);}
+ d.close();
 });
