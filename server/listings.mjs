@@ -33,9 +33,9 @@ export function search(input){
  for(const k of ['category','city','brand','model'])if(params.get(k))add(`l.${k}=?`,text(params.get(k),k,1,80));
  if(params.get('q')){add("(l.title ILIKE ? OR l.description ILIKE ?)",`%${text(params.get('q'),'Axtarış',1,160)}%`);where[where.length-1]=where.at(-1).replace('?',`$${args.length}`);}
  for(const [k,col,op]of [['year_min','year','>='],['year_max','year','<='],['price_min','price','>='],['price_max','price','<='],['mileage_max','mileage','<=']])if(params.get(k))add(`l.${col}${op}?`,number(params.get(k),k,0,999999999));
- for(const k of ['fuel','transmission','body','condition','drive','color'])if(params.get(k))add(`l.details->>'${k}'=?`,text(params.get(k),k,1,80));
+ for(const k of ['fuel','transmission','body','condition','drive','color','engine'])if(params.get(k))add(`l.details->>'${k}'=?`,text(params.get(k),k,1,80));
  for(const k of ['part_type','insurance_type','service_type'])if(params.get(k))add(`l.details->>'${k}'=?`,text(params.get(k),k,1,80));
- if(params.get('vehicle_type')){const type=text(params.get('vehicle_type'),'Nəqliyyat növü',1,40);if(!vehicleTypes.includes(type))fail(400,'Nəqliyyat növü düzgün deyil.');args.push(type);where.push(`(l.details->>'vehicle_type'=${args.length} OR l.details->>'vehicle_type'='Hər ikisi üçün')`);}
+ if(params.get('vehicle_type')){const type=text(params.get('vehicle_type'),'Nəqliyyat növü',1,40);if(!vehicleTypes.includes(type))fail(400,'Nəqliyyat növü düzgün deyil.');args.push(type);where.push(`(l.details->>'vehicle_type'=$${args.length} OR l.details->>'vehicle_type'='Hər ikisi üçün')`);}
  if(params.get('oem'))add("regexp_replace(upper(l.details->>'oem'),'[[:space:]-]','','g')=?",normalizeCode(text(params.get('oem'),'Detal kodu',1,80)));
  if(params.get('insurer'))add("l.details->>'insurer' ILIKE ?",'%'+text(params.get('insurer'),'Sığorta şirkəti',1,80).replace(/[\\%_]/g,'\\$&')+'%');
  for(const [k,pos,len,pattern]of [['plate_region',1,2,/^\d{2}$/],['plate_letters',4,2,/^[A-Z]{1,2}$/],['plate_digits',7,3,/^\d{1,3}$/]])if(params.get(k)){const v=text(params.get(k),k,1,len).toUpperCase();if(!pattern.test(v))fail(400,'Nömrə filtrini düzgün yazın.');add(`substring(l.details->>'plate_number' from ${pos} for ${len}) LIKE ?`,v+'%');}

@@ -106,3 +106,7 @@ CREATE TABLE IF NOT EXISTS story_videos (
  url text NOT NULL UNIQUE,
  created_at timestamptz NOT NULL DEFAULT now()
 );
+
+-- Premium business profile contact fields; additive migration only.
+ALTER TABLE business_profiles ADD COLUMN IF NOT EXISTS city varchar(80) NOT NULL DEFAULT '';
+ALTER TABLE business_profiles ADD COLUMN IF NOT EXISTS whatsapp varchar(25) NOT NULL DEFAULT '';

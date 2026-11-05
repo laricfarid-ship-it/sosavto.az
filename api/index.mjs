@@ -90,20 +90,20 @@ export default async function handler(req,res){
  if(path==='/api/businesses'&&method==='GET'){
   const type=url.searchParams.get('type')||'';
   if(type&&!['dealer','service','wash','detailing','parts','other'].includes(type))fail(400,'Biznes növü düzgün deyil.');
-  const rows=(await query(`SELECT b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone,b.cover_image_url,b.latitude,b.longitude,
+  const rows=(await query(`SELECT b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone,b.cover_image_url,b.latitude,b.longitude,b.city,b.whatsapp,
    count(l.id)::integer AS listing_count
    FROM business_profiles b JOIN listings l ON l.user_id=b.user_id AND l.status='active'
    AND NOT (l.details @> '{"_deleted":true}'::jsonb)
    JOIN users u ON u.id=b.user_id AND u.status='active'
    WHERE ($1::text='' OR b.business_type=$1)
-   GROUP BY b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone,b.cover_image_url,b.latitude,b.longitude
+   GROUP BY b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone,b.cover_image_url,b.latitude,b.longitude,b.city,b.whatsapp
    ORDER BY listing_count DESC,b.business_name ASC LIMIT 100`,[type])).rows;
   return json(res,200,{businesses:rows});
  }
  const businessDetail=path.match(/^\/api\/businesses\/([a-f0-9-]+)$/);
  if(businessDetail&&method==='GET'){
   const id=uuid(businessDetail[1]);
-  const business=(await query(`SELECT b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone,b.cover_image_url,b.latitude,b.longitude
+  const business=(await query(`SELECT b.user_id,b.business_name,b.business_type,b.description,b.address,b.phone,b.cover_image_url,b.latitude,b.longitude,b.city,b.whatsapp
    FROM business_profiles b JOIN users u ON u.id=b.user_id AND u.status='active'
    WHERE b.user_id=$1 AND EXISTS(SELECT 1 FROM listings l WHERE l.user_id=b.user_id
    AND l.status='active' AND NOT (l.details @> '{"_deleted":true}'::jsonb))`,[id])).rows[0];
@@ -115,7 +115,7 @@ export default async function handler(req,res){
  }
  if(path==='/api/business-profile'&&method==='GET'){
   requireUser(user);
-  const profile=(await query('SELECT business_name,business_type,description,address,phone,cover_image_url,latitude,longitude FROM business_profiles WHERE user_id=$1',[user.id])).rows[0]||null;
+  const profile=(await query('SELECT business_name,business_type,description,address,phone,cover_image_url,latitude,longitude,city,whatsapp FROM business_profiles WHERE user_id=$1',[user.id])).rows[0]||null;
   return json(res,200,{profile});
  }
  if(path==='/api/business-profile'&&method==='PUT'){
@@ -128,15 +128,18 @@ export default async function handler(req,res){
   const address=text(b.address||'','Ünvan',0,250);
   const phone=text(b.phone||'','Telefon',0,25);
   if(phone&&!/^(\+994|0)\d{9}$/.test(phone.replace(/[\s()-]/g,'')))fail(400,'Telefon nömrəsi düzgün deyil.');
+  const city=text(b.city||'','Şəhər',0,80);
+  const whatsapp=text(b.whatsapp||'','WhatsApp',0,25).replace(/[\s()-]/g,'');
+  if(whatsapp&&!/^(\+994|0)\d{9}$/.test(whatsapp))fail(400,'WhatsApp nömrəsi düzgün deyil.');
   const latitude=b.latitude===''||b.latitude==null?null:Number(b.latitude),longitude=b.longitude===''||b.longitude==null?null:Number(b.longitude);
   if((latitude===null)!==(longitude===null)||latitude!==null&&(!Number.isFinite(latitude)||latitude < -90||latitude > 90||!Number.isFinite(longitude)||longitude < -180||longitude > 180))fail(400,'Xəritə koordinatları düzgün deyil.');
   const cover_image_url=text(b.cover_image_url||'','Biznes şəkli',0,1000);
   if(cover_image_url&&!(await query('SELECT id FROM images WHERE user_id=$1 AND url=$2 LIMIT 1',[user.id,cover_image_url])).rows.length)fail(400,'Yalnız öz yüklədiyiniz şəkli seçin.');
-  await query(`INSERT INTO business_profiles(user_id,business_name,business_type,description,address,phone,cover_image_url,latitude,longitude)
-   VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9) ON CONFLICT(user_id) DO UPDATE SET
+  await query(`INSERT INTO business_profiles(user_id,business_name,business_type,description,address,phone,cover_image_url,latitude,longitude,city,whatsapp)
+   VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11) ON CONFLICT(user_id) DO UPDATE SET
    business_name=EXCLUDED.business_name,business_type=EXCLUDED.business_type,
-   description=EXCLUDED.description,address=EXCLUDED.address,phone=EXCLUDED.phone,cover_image_url=EXCLUDED.cover_image_url,latitude=EXCLUDED.latitude,longitude=EXCLUDED.longitude,updated_at=now()`,
-   [user.id,business_name,business_type,description,address,phone,cover_image_url,latitude,longitude]);
+   description=EXCLUDED.description,address=EXCLUDED.address,phone=EXCLUDED.phone,cover_image_url=EXCLUDED.cover_image_url,latitude=EXCLUDED.latitude,longitude=EXCLUDED.longitude,city=EXCLUDED.city,whatsapp=EXCLUDED.whatsapp,updated_at=now()`,
+   [user.id,business_name,business_type,description,address,phone,cover_image_url,latitude,longitude,city,whatsapp]);
   return json(res,200,{ok:true});
  }
 
