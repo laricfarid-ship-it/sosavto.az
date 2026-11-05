@@ -30,8 +30,11 @@ test('business profile is optional, private, owner-scoped and editable',async()=
  assert.equal((await request('/business-profile',{cookie:b.cookie})).body.profile,null);
  const invalid=await request('/business-profile',{method:'PUT',cookie:a.cookie,data:{business_name:'Test servis',business_type:'invalid'}});
  assert.equal(invalid.status,400);
- const saved=await request('/business-profile',{method:'PUT',cookie:a.cookie,data:{business_name:'Test servis',business_type:'service',description:'Avtomobil təmiri',address:'Bakı',phone:'+994501234567'}});
+ const saved=await request('/business-profile',{method:'PUT',cookie:a.cookie,data:{business_name:'Test servis',business_type:'service',description:'Avtomobil təmiri',address:'Bakı',phone:'+994501234567',city:'Bakı',whatsapp:'+994 (50) 123-45-67'}});
  assert.equal(saved.status,200,JSON.stringify(saved.body));
+ const contact=(await request('/business-profile',{cookie:a.cookie})).body.profile;
+ assert.equal(contact.city,'Bakı');assert.equal(contact.whatsapp,'+994501234567');
+ assert.equal((await request('/business-profile',{method:'PUT',cookie:a.cookie,data:{business_name:'Test servis',business_type:'service',whatsapp:'invalid'}})).status,400);
  assert.equal((await request('/business-profile',{cookie:a.cookie})).body.profile.business_name,'Test servis');
  assert.equal((await request('/business-profile',{cookie:b.cookie})).body.profile,null);
  assert.equal((await query('SELECT count(*)::integer AS count FROM business_profiles')).rows[0].count,1);
