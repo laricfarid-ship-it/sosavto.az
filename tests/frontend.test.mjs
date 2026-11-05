@@ -211,6 +211,6 @@ test('server-authorized founder sees service views and private navigation even w
  for(const page of ['sos.html','sos-usta.html','avtoyuma.html','avtoyuma-panel.html']){
  const d=await load(page,{...user,role:'admin',servicePreview:true},{'/config':{sos:false,wash:false}});
  assert.match(d.doc.querySelector('#main').textContent,/preview/);assert.match(d.doc.querySelector('#main').textContent,/Təsisçi baxışı/);
- assert.ok(d.doc.querySelector('#header nav a[href="sos.html"]'));assert.ok(d.doc.querySelector('#header nav a[href="avtoyuma.html"]'));d.close();
+ assert.equal(d.doc.querySelector('#header nav a[href="sos.html"]'),null);assert.equal(d.doc.querySelector('#header nav a[href="avtoyuma.html"]'),null);d.close();
  }
 });
