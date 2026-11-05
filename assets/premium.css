@@ -517,3 +517,4 @@ body:has(.page.home-page){background:radial-gradient(ellipse at 50% 28%,#063451 
 .page.home-page .cat-filters .premium-fields,.page.home-page .cat-filters .adv-body .fields{display:grid!important;grid-template-columns:minmax(0,1fr)!important;gap:12px!important}
 .page.home-page .cat-filters .premium-fields>*{width:100%!important;min-width:0!important;grid-column:1!important}
 .page.home-page .cat-filters .pair-row{display:flex;gap:6px}.page.home-page .cat-filters .pair-row input{width:50%;min-width:0}.page.home-page .cat-filters .search-submit{width:100%;min-width:0}
+.premium-services .categories{display:flex;gap:8px;margin:0 0 16px;padding:0 0 6px}.premium-services .category{display:flex;flex-direction:row;align-items:center;gap:8px;min-height:42px;padding:10px 14px;font-size:12px}.premium-services .category svg{width:18px;height:18px}
