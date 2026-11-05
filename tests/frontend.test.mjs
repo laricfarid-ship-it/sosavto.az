@@ -207,10 +207,10 @@ test('maintenance routes stay closed to guests, members and other admins even wi
  assert.ok(!d.calls.some(c=>/\/api\/(sos|wash)\//.test(c.url)));d.close();
  }
 });
-test('server-authorized founder sees service views and private navigation even with rollout disabled',async()=>{
+test('server-authorized founder sees service views even with rollout disabled; SOS and Avtoyuma links stay out of top navigation',async()=>{
  for(const page of ['sos.html','sos-usta.html','avtoyuma.html','avtoyuma-panel.html']){
  const d=await load(page,{...user,role:'admin',servicePreview:true},{'/config':{sos:false,wash:false}});
  assert.match(d.doc.querySelector('#main').textContent,/preview/);assert.match(d.doc.querySelector('#main').textContent,/Təsisçi baxışı/);
- assert.ok(d.doc.querySelector('#header nav a[href="sos.html"]'));assert.ok(d.doc.querySelector('#header nav a[href="avtoyuma.html"]'));d.close();
+ assert.ok(!d.doc.querySelector('#header nav a[href="sos.html"]'));assert.ok(!d.doc.querySelector('#header nav a[href="avtoyuma.html"]'));d.close();
  }
 });
