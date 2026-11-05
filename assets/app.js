@@ -330,7 +330,7 @@ async function init(){
  try{for(const k of ['isLoggedIn','sosavto_logged_user','sosavto_user_name','sosavto_users','redirectAfterLogin'])localStorage.removeItem(k);sessionStorage.removeItem('sosavto_logged');}catch{}
  const [authState,settings]=await Promise.allSettled([api('/me'),api('/config')]);if(authState.status==='fulfilled')me=authState.value.user;if(settings.status==='fulfilled')config=settings.value;
  if(me?.servicePreview===true){config={...config,sos:true,wash:true};}
- header();if(me?.servicePreview===true){const nav=document.querySelector('#header nav');if(nav)nav.insertAdjacentHTML('beforeend','<a href="sos.html">SOS</a><a href="avtoyuma.html">Avtoyuma</a>');}if(me){try{favorites=new Set((await api('/favorites')).listings.map(l=>l.id));}catch{}}
+ header();if(me){try{favorites=new Set((await api('/favorites')).listings.map(l=>l.id));}catch{}}
  const maintenancePage=()=>{main.innerHTML=`<section class="panel" style="max-width:740px;margin:45px auto;padding:clamp(24px,5vw,55px);text-align:center"><div style="font-size:54px;margin-bottom:14px" aria-hidden="true">🛠️</div><p class="eyebrow">SOSAVTO.AZ</p><h1>Bu bölmədə təmir işləri gedir</h1><p class="muted" style="font-size:17px;line-height:1.8">Xidmət hələ istifadəyə açılmayıb. Hazırlıq işləri tamamlandıqdan sonra burada aktiv olacaq.</p><a class="btn primary" href="index.html" style="margin-top:24px">Əsas səhifəyə qayıt</a></section>`;};
  const founderPage=async render=>{
  if(me?.servicePreview!==true)return maintenancePage();
