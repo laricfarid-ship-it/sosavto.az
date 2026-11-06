@@ -138,3 +138,5 @@
 @media(max-width:400px){.nav-actions{gap:4px}.nav-actions .btn.primary .icon{display:none}}
 
 .language-switcher select{appearance:auto;min-width:58px;padding:8px 9px;border:1px solid var(--line-strong);border-radius:10px;background:var(--panel);color:var(--text);font-weight:750;font-size:.85rem}.language-switcher{display:flex;align-items:center}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(max-width:900px){.language-switcher select{min-width:52px;padding:7px 5px}.header-inner{gap:8px}}
+/* Website: body type belongs in the expanded filters, not above search. Android app manages its own filter layout. */
+html:not(.sa-app) .home-intro #search > .body-choices{display:none!important}
