@@ -13,6 +13,31 @@
   document.head.appendChild(runtime);
 })();
 
+/* Recover search fields hidden by older APK-bundled presentation scripts.
+   The Android package may retain an old UI observer until the APK is upgraded. */
+(function () {
+  if (!(window.androidBridge || window.Capacitor?.isNativePlatform?.())) return;
+  function restore() {
+    var form = document.getElementById('search');
+    if (!form) return;
+    var legacy = form.querySelector('.sa-filters');
+    if (legacy) {
+      if (!legacy.open) legacy.open = true;
+      var summary = legacy.querySelector(':scope > summary');
+      if (summary) { summary.textContent = 'Əsas axtarış filtrləri'; summary.style.display = 'none'; }
+    }
+  }
+  var pending = false;
+  var observer = new MutationObserver(function () {
+    if (pending) return;
+    pending = true;
+    requestAnimationFrame(function () { pending = false; restore(); });
+  });
+  observer.observe(document.documentElement, { childList: true, subtree: true });
+  document.addEventListener('DOMContentLoaded', restore);
+  restore();
+})();
+
 /* Light / dark theme. Loaded as a blocking script in <head> so the page never flashes the wrong colours.
    Order of precedence: the visitor's saved choice, then the device setting (prefers-color-scheme), then light. */
 (function () {
