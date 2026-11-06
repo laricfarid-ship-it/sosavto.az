@@ -50,13 +50,13 @@
     // APK-only: keep the full category list on the website, but use 4x2 in the app.
     if (location.pathname === '/' || location.pathname.endsWith('/index.html')) {
       document.querySelectorAll('.home-intro .categories .category, .categories .category').forEach(category => {
-        const label = category.textContent.replace(/\\s+/g, ' ').trim().toLocaleLowerCase('az');
+        const label = category.textContent.replace(/\s+/g, ' ').trim().toLocaleLowerCase('az');
         category.classList.toggle('sa-app-all-category', label === 'bütün elanlar');
         if (label === 'avtomobillər' && !category.querySelector('.car-front-premium')) {
-          const oldIcon=category.querySelector('svg.icon'); if(oldIcon) oldIcon.outerHTML=carPremium();
+          const oldIcon=category.querySelector('svg'); if(oldIcon) oldIcon.outerHTML=carPremium();
         }
         if (label === 'motosikletlər' && !category.querySelector('.moto-side-icon')) {
-          const oldIcon=category.querySelector('svg.icon'); if(oldIcon) oldIcon.outerHTML=motorcyclePremium();
+          const oldIcon=category.querySelector('svg'); if(oldIcon) oldIcon.outerHTML=motorcyclePremium();
         }
       });
       const grid=document.querySelector('.home-intro .categories, .categories');
