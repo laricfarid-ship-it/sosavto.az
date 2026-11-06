@@ -34,16 +34,15 @@
       const link = document.createElement('a'); link.className='sa-favorite'; link.href='/favoriler.html'; link.setAttribute('aria-label','Seçilmişlər'); link.innerHTML=icon('heart');
       actions.before(link);
     }
+    // Keep the primary search fields visible in the Android app, just like the website.
+    // The site already renders secondary controls inside its own "Əlavə filtrlər" disclosure.
     const form=document.getElementById('search');
-    if (form && !form.querySelector('.sa-filters')) {
-      const details=document.createElement('details'); details.className='sa-filters';
-      const summary=document.createElement('summary'); summary.textContent='Filtrlər · marka, qiymət, kuzov'; details.append(summary);
-      const query=new URLSearchParams(location.search);
-      details.open=[...query.keys()].some(key=>!['q','category','sort','page'].includes(key));
-      for (const node of [...form.children]) if(node.matches('.body-choices,.fields,.price-distribution,.advanced')) details.append(node);
-      form.querySelector('.search-line').after(details);
-      // Retain native browser validation for fields inside a collapsed disclosure.
-      form.addEventListener('invalid',()=>{details.open=true;},true);
+    if (form) {
+      const legacy=form.querySelector(':scope > .sa-filters');
+      if (legacy) {
+        for (const child of [...legacy.children]) if(child.tagName!=='SUMMARY') legacy.before(child);
+        legacy.remove();
+      }
     }
     const intro=document.querySelector('.home-intro');
     const ad=document.querySelector('.technol-left');
