@@ -207,20 +207,21 @@ test('maintenance routes stay closed to guests, members and other admins even wi
  assert.ok(!d.calls.some(c=>/\/api\/(sos|wash)\//.test(c.url)));d.close();
  }
 });
-test('server-authorized founder sees service views and private navigation even with rollout disabled',async()=>{
+test('server-authorized founder retains service views while header links stay hidden',async()=>{
  for(const page of ['sos.html','sos-usta.html','avtoyuma.html','avtoyuma-panel.html']){
  const d=await load(page,{...user,role:'admin',servicePreview:true},{'/config':{sos:false,wash:false}});
  assert.match(d.doc.querySelector('#main').textContent,/preview/);assert.match(d.doc.querySelector('#main').textContent,/Təsisçi baxışı/);
- assert.ok(d.doc.querySelector('#header nav a[href="sos.html"]'));assert.ok(d.doc.querySelector('#header nav .nav-pop a[href="avtoyuma-panel.html"]'));d.close();
+ assert.equal(d.doc.querySelector('#header nav a[href="sos.html"]'),null);assert.equal(d.doc.querySelector('#header nav .nav-pop a[href="avtoyuma-panel.html"]'),null);d.close();
  }
 });
 
-test('premium navigation keeps founder management inside services without duplicate menu entries',async()=>{
+test('premium header keeps SOS and wash links hidden for founder too',async()=>{
  const d=await load('index.html',{...user,servicePreview:true});
  const nav=d.doc.querySelector('#navigation');
- assert.equal(nav.querySelectorAll(':scope > a[href="sos.html"]').length,1);
+ assert.equal(nav.querySelectorAll(':scope > a[href="sos.html"]').length,0);
  assert.equal(nav.querySelectorAll(':scope > a[href^="avtoyuma"]').length,0);
- assert.ok(nav.querySelector('.nav-pop a[href="avtoyuma-panel.html"]'));
+ assert.equal(nav.querySelector('.nav-pop a[href="avtoyuma-panel.html"]'),null);
+ assert.equal(nav.querySelector('.nav-pop a[href="index.html?category=wash"]'),null);
  d.close();
 });
 test('motorcycle form retains required year and mileage without car body controls',async()=>{
