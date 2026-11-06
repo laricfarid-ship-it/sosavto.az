@@ -113,3 +113,6 @@ html.sa-app {font-size:16px;-webkit-text-size-adjust:100%;scroll-padding-top:70p
 /* Android-only premium category illustrations. */
 .sa-app .categories .category .car-front-premium,.sa-app .categories .category .moto-side-icon{width:48px;height:35px;max-width:100%;flex-shrink:0;stroke:none}
 .sa-app .categories .category.sa-app-motorcycle{display:flex;align-items:center;text-align:center}
+
+/* Premium illustrations for all remaining Android-only category tiles. */
+.sa-app .categories .category .sa-dimensional-icon{width:45px;height:36px;max-width:100%;flex-shrink:0;overflow:visible}
