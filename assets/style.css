@@ -156,3 +156,12 @@
 .home-services-grid strong{display:block;font-size:.9rem}
 .home-page .advanced .price-distribution{margin:14px 0}
 @media(max-width:600px){.home-story{padding:15px;flex-wrap:wrap}.home-services{padding:17px}.home-services-grid{gap:9px}.home-services-grid a{padding:10px;gap:7px}.home-services-grid strong{font-size:.82rem}.home-services-grid small{font-size:.72rem}.home-page .search-submit-row .btn{width:100%}}
+
+/* Shared premium dimensional category pictograms; inherits light/dark theme. */
+.category .category-art{position:relative;isolation:isolate;display:inline-grid;place-items:center;flex:0 0 auto;width:43px;height:39px;border-radius:13px;background:linear-gradient(150deg,rgba(255,255,255,.26),rgba(52,162,235,.11) 45%,rgba(8,33,66,.24));border:1px solid color-mix(in srgb,var(--accent) 34%,var(--line));box-shadow:inset 0 2px 2px #ffffff42,inset 0 -4px 8px #031d3740,0 6px 10px #00000024;transform:translateZ(0);transition:transform .2s ease,box-shadow .2s ease;overflow:hidden}
+.category .category-art-glint{position:absolute;inset:1px 2px auto;height:46%;border-radius:12px 12px 55% 55%;background:linear-gradient(180deg,#ffffff50,#ffffff00);pointer-events:none}
+.category .category-art-glyph{position:relative;z-index:1;display:block;font-family:"Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",system-ui,sans-serif;font-size:27px;line-height:1;filter:drop-shadow(0 2px 1px #0007) drop-shadow(0 0 3px #64d6ff42);transform:translateY(-1px)}
+.category-art--all .category-art-glyph{font-family:system-ui,sans-serif;font-size:28px;font-weight:900;color:#5bd9ff;text-shadow:0 1px 0 #fff8,0 3px 4px #003c66}
+.category:hover .category-art,.category.active .category-art{transform:translateY(-2px);box-shadow:inset 0 2px 3px #ffffff55,inset 0 -4px 9px #00365355,0 8px 18px #009ee650}
+.category.active .category-art{border-color:var(--accent)}
+@media(max-width:720px){.category .category-art{width:38px;height:35px;border-radius:11px}.category .category-art-glyph{font-size:24px}.category-art--all .category-art-glyph{font-size:25px}}
