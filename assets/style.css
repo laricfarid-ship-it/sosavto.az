@@ -170,3 +170,9 @@
 .category .category-art-svg{position:relative;z-index:1;display:block;width:40px;height:40px;overflow:visible;filter:drop-shadow(0 3px 2px #0006) drop-shadow(0 0 3px #46cfff55)}
 .category .category-art{overflow:visible}
 @media(max-width:720px){.category .category-art-svg{width:35px;height:35px}}
+
+/* Photorealistic motorcycle image: no emoji, no vector drawing. */
+.category .category-art-photo{background:transparent!important;border:0!important;box-shadow:none!important;width:68px!important;height:51px!important;padding:0!important;display:flex;align-items:center;justify-content:center;overflow:hidden!important}
+.category .category-art-photo::before,.category .category-art-photo::after{display:none!important}
+.category .category-art-photo img{width:100%;height:100%;object-fit:contain;display:block;filter:drop-shadow(0 3px 4px #0005)}
+@media(max-width:720px){.category .category-art-photo{width:55px!important;height:42px!important}}
