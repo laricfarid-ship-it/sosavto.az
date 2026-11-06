@@ -45,6 +45,13 @@
       // Retain native browser validation for fields inside a collapsed disclosure.
       form.addEventListener('invalid',()=>{details.open=true;},true);
     }
+    // APK-only: keep the full category list on the website, but use 4x2 in the app.
+    if (location.pathname === '/' || location.pathname.endsWith('/index.html')) {
+      document.querySelectorAll('.home-intro .categories .category, .categories .category').forEach(category => {
+        const label = category.textContent.replace(/\\s+/g, ' ').trim().toLocaleLowerCase('az');
+        category.classList.toggle('sa-app-all-category', label === 'bütün elanlar');
+      });
+    }
     const intro=document.querySelector('.home-intro');
     const ad=document.querySelector('.technol-left');
     if(intro && ad && intro.nextElementSibling!==ad) intro.after(ad);
