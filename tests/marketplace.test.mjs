@@ -152,3 +152,33 @@ test('360 media is owner-scoped, separate from gallery, moderated, ordered and p
  assert.equal((await request('/listings',{method:'POST',cookie:login.cookie,data:{...ad,imageIds:[r.body.id]}})).status,400,'spin frame cannot enter ordinary gallery');
  }finally{process.chdir(original);await rm(temp,{recursive:true,force:true});}
 });
+
+test('manual social publishing is admin-only, atomically claimed and survives edits',async()=>{
+ await query('DELETE FROM rate_limits');
+ const owner=await request('/register',{method:'POST',data:{fullname:'Social Owner',username:'social_owner',email:'social_owner@example.test',password:'Test-password-123'}});
+ const other=await request('/register',{method:'POST',data:{fullname:'Social Other',username:'social_other',email:'social_other@example.test',password:'Test-password-123'}});
+ const admin=await request('/register',{method:'POST',data:{fullname:'Social Admin',username:'social_admin',email:'social_admin@example.test',password:'Test-password-123'}});await query("UPDATE users SET role='admin' WHERE id=$1",[admin.body.user.id]);
+ const saved={...process.env},original=global.fetch;let posts=0;
+ try{
+  process.env.SOCIAL_SHARE_ENABLED='true';delete process.env.VERCEL_ENV;process.env.META_FB_PAGE_ID='1479681408553895';process.env.META_ACCESS_TOKEN='dummy-only';process.env.SOCIAL_IMAGE_ORIGIN='https://images.example.test';
+  delete process.env.META_FB_PAGE_ACCESS_TOKEN;delete process.env.META_IG_ACCESS_TOKEN;
+  const id=(await request('/listings',{method:'POST',cookie:owner.cookie,data:ad})).body.id;
+  const publish=cookie=>request('/admin/social-publish',{method:'POST',cookie,data:{id,platform:'facebook'}});
+  assert.equal((await publish(other.cookie)).status,403);
+  assert.equal((await publish(admin.cookie)).status,409);
+  await query("UPDATE listings SET status='active' WHERE id=$1",[id]);
+  await query("INSERT INTO images(id,listing_id,user_id,url,sort_order) VALUES(gen_random_uuid(),$1,$2,'https://images.example.test/car.jpg',0)",[id,owner.body.user.id]);
+  global.fetch=async(url,opts)=>{if(opts.method==='POST'){posts++;return {ok:true,json:async()=>({id:'112233'})};}return {ok:true,json:async()=>({id:'1479681408553895',access_token:'page-dummy'})};};
+  const outcomes=await Promise.all([publish(admin.cookie),publish(admin.cookie)]);assert.deepEqual(outcomes.map(r=>r.status).sort(),[200,409]);assert.equal(posts,1);
+  assert.equal((await request('/listings/'+id,{method:'PUT',cookie:owner.cookie,data:{...ad,details:{social_shares:{}}}})).status,200);
+  await query("UPDATE listings SET status='active' WHERE id=$1",[id]);assert.equal((await publish(admin.cookie)).status,409);assert.equal(posts,1);
+  // An indeterminate remote outcome must stay blocked and never persist raw errors.
+  const failed=(await request('/listings',{method:'POST',cookie:owner.cookie,data:ad})).body.id;
+  await query("UPDATE listings SET status='active' WHERE id=$1",[failed]);
+  await query("INSERT INTO images(id,listing_id,user_id,url,sort_order) VALUES(gen_random_uuid(),$1,$2,'https://images.example.test/car.jpg',0)",[failed,owner.body.user.id]);
+  global.fetch=async(url,opts)=>{if(opts.method==='POST')throw Error('dummy-secret-should-never-be-stored');return {ok:true,json:async()=>({id:'1479681408553895',access_token:'page-dummy'})};};
+  const send=()=>request('/admin/social-publish',{method:'POST',cookie:admin.cookie,data:{id:failed,platform:'facebook'}});
+  assert.equal((await send()).status,502);assert.equal((await send()).status,409);
+  const state=(await query('SELECT details FROM listings WHERE id=$1',[failed])).rows[0].details;assert.equal(state.social_shares.facebook.status,'review_required');assert.doesNotMatch(JSON.stringify(state),/dummy-secret/);
+ }finally{global.fetch=original;process.env=saved;}
+});
