@@ -139,7 +139,7 @@ export default async function handler(req,res){
    query("SELECT status,count(*)::integer count FROM listings GROUP BY status ORDER BY status"),
    query("SELECT category,count(*)::integer count FROM listings GROUP BY category ORDER BY category"),
    query("SELECT category,status,count(*)::integer count FROM listings GROUP BY category,status ORDER BY category,status"),
-   query("SELECT to_char(created_at AT TIME ZONE 'Asia/Baku','YYYY-MM-DD') AS "day",count(*)::integer count FROM listings WHERE created_at >= now()-interval '30 days' GROUP BY 1 ORDER BY 1"),
+   query(`SELECT to_char(created_at AT TIME ZONE 'Asia/Baku','YYYY-MM-DD') AS "day",count(*)::integer count FROM listings WHERE created_at >= now()-interval '30 days' GROUP BY 1 ORDER BY 1`),
    query(`SELECT (SELECT count(*)::integer FROM users) users_total,
    (SELECT count(*)::integer FROM users WHERE created_at>=now()-interval '7 days') users_last7,
    (SELECT count(*)::integer FROM users WHERE status='banned') users_banned,
