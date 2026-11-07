@@ -62,3 +62,16 @@ CREATE TABLE IF NOT EXISTS admin_push_subscriptions (
  updated_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS admin_push_user ON admin_push_subscriptions(user_id);
+
+-- Admin financial ledger (manual entries; never infer revenue from listing prices)
+CREATE TABLE IF NOT EXISTS admin_finance_entries (
+ id uuid PRIMARY KEY,
+ entry_date date NOT NULL,
+ kind text NOT NULL CHECK(kind IN ('income','expense')),
+ category text NOT NULL,
+ description text NOT NULL DEFAULT '',
+ amount_cents bigint NOT NULL CHECK(amount_cents > 0),
+ created_by uuid REFERENCES users(id),
+ created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS admin_finance_entries_date ON admin_finance_entries(entry_date DESC,created_at DESC);
