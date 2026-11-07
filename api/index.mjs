@@ -133,6 +133,19 @@ export default async function handler(req,res){
  }
  if(path.startsWith('/api/admin')){
  requireAdmin(user);
+ if(path==='/api/admin/finance'&&method==='GET'){
+  const rows=await query("SELECT id,entry_date::text AS date,kind,category,description,amount_cents::text AS amount_cents,created_at FROM admin_finance_entries ORDER BY entry_date DESC,created_at DESC LIMIT 500");
+  const totals=await query("SELECT coalesce(sum(amount_cents) FILTER(WHERE kind='income'),0)::text AS income_cents,coalesce(sum(amount_cents) FILTER(WHERE kind='expense'),0)::text AS expense_cents FROM admin_finance_entries");
+  return json(res,200,{entries:rows.rows,totals:totals.rows[0]});
+ }
+ if(path==='/api/admin/finance'&&method==='POST'){
+  const b=await body(req);const kind=String(b.kind||''),category=String(b.category||'').trim(),description=String(b.description||'').trim(),date=String(b.date||'');const amount=Number(b.amount);
+  if(!['income','expense'].includes(kind)||!/^\\d{4}-\\d{2}-\\d{2}$/.test(date)||!category||category.length>90||description.length>500||!Number.isFinite(amount)||amount<=0||amount>100000000||Math.round(amount*100)!==amount*100)fail(400,'Maliyyə məlumatları düzgün deyil.');
+  const id=randomUUID();await transaction(async c=>{await c.query('INSERT INTO admin_finance_entries(id,entry_date,kind,category,description,amount_cents,created_by) VALUES($1,$2,$3,$4,$5,$6,$7)',[id,date,kind,category,description,Math.round(amount*100),user.id]);await c.query('INSERT INTO audit_logs VALUES($1,$2,$3,$4,now())',[randomUUID(),user.id,'finance_add',id]);});return json(res,201,{ok:true,id});
+ }
+ if(path==='/api/admin/finance'&&method==='DELETE'){
+  const b=await body(req);const id=uuid(b.id);await transaction(async c=>{const removed=await c.query('DELETE FROM admin_finance_entries WHERE id=$1 RETURNING id',[id]);if(!removed.rows.length)fail(404,'Maliyyə qeydi tapılmadı.');await c.query('INSERT INTO audit_logs VALUES($1,$2,$3,$4,now())',[randomUUID(),user.id,'finance_delete',id]);});return json(res,200,{ok:true});
+ }
  if(path==='/api/admin/workspace'&&method==='GET'){
   const [business,services,marketing]=await Promise.all([
    query("SELECT l.category,l.status,count(*)::integer count FROM listings l WHERE l.category IN ('service','wash','detailing','parts') GROUP BY l.category,l.status ORDER BY l.category,l.status"),
