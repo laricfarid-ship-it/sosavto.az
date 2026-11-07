@@ -133,6 +133,14 @@ export default async function handler(req,res){
  }
  if(path.startsWith('/api/admin')){
  requireAdmin(user);
+ if(path==='/api/admin/workspace'&&method==='GET'){
+  const [business,services,marketing]=await Promise.all([
+   query("SELECT l.category,l.status,count(*)::integer count FROM listings l WHERE l.category IN ('service','wash','detailing','parts') GROUP BY l.category,l.status ORDER BY l.category,l.status"),
+   query("SELECT (SELECT count(*)::integer FROM sos_requests) sos_requests,(SELECT count(*)::integer FROM sos_masters) sos_masters,(SELECT count(*)::integer FROM wash_bookings) wash_bookings,(SELECT count(*)::integer FROM wash_shops) wash_shops"),
+   query("SELECT count(*)::integer listings_total,count(*) FILTER (WHERE created_at>=now()-interval '30 days')::integer listings_month,sum(views)::bigint views_total FROM listings")
+  ]);
+  return json(res,200,{business:business.rows,services:services.rows[0],marketing:marketing.rows[0],serviceFlags:{sos:process.env.SOS_ENABLED==='true',wash:washEnabled()},mobile:{status:'not_connected'}});
+ }
  if(path==='/api/admin/overview'&&method==='GET'){
   const [totals,statuses,categories,breakdown,growth,operations]=await Promise.all([
    query("SELECT count(*)::integer total,count(*) FILTER (WHERE created_at >= now()-interval '30 days')::integer last30,count(*) FILTER (WHERE created_at >= now()-interval '7 days')::integer last7 FROM listings"),
