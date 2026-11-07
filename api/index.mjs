@@ -133,6 +133,23 @@ export default async function handler(req,res){
  }
  if(path.startsWith('/api/admin')){
  requireAdmin(user);
+ if(path==='/api/admin/operations'&&method==='GET'){
+  const [business,social,android,users]=await Promise.all([query("SELECT p.*,u.username,u.email FROM admin_business_profiles p JOIN users u ON u.id=p.user_id ORDER BY p.updated_at DESC LIMIT 100"),query("SELECT q.*,l.title FROM admin_social_queue q LEFT JOIN listings l ON l.id=q.listing_id ORDER BY q.created_at DESC LIMIT 100"),query("SELECT * FROM admin_android_releases ORDER BY created_at DESC LIMIT 50"),query("SELECT id,username,email FROM users WHERE role='user' ORDER BY created_at DESC LIMIT 100")]);
+  return json(res,200,{business:business.rows,social:social.rows,android:android.rows,users:users.rows});
+ }
+ if(path==='/api/admin/operations'&&method==='POST'){
+  const b=await body(req),kind=String(b.kind||'');let id=randomUUID();
+  await transaction(async c=>{
+   if(kind==='business'){
+    const uid=uuid(b.user_id),name=String(b.name||'').trim(),type=String(b.business_type||'').trim(),status=String(b.status||'pending');if(!name||name.length>120||!type||type.length>80||!['pending','approved','rejected'].includes(status))fail(400,'Biznes məlumatları düzgün deyil.');const u=await c.query("SELECT id FROM users WHERE id=$1 AND role='user'",[uid]);if(!u.rows.length)fail(404,'İstifadəçi tapılmadı.');await c.query("INSERT INTO admin_business_profiles(user_id,business_name,business_type,status) VALUES($1,$2,$3,$4) ON CONFLICT(user_id) DO UPDATE SET business_name=$2,business_type=$3,status=$4,updated_at=now()",[uid,name,type,status]);id=uid;
+   }else if(kind==='social'){
+    const platform=String(b.platform||''),caption=String(b.caption||'').trim(),status=String(b.status||'draft');if(!['instagram','facebook'].includes(platform)||!caption||caption.length>2200||!['draft','ready'].includes(status))fail(400,'Paylaşım məlumatları düzgün deyil.');const lid=b.listing_id?uuid(b.listing_id):null;if(lid){const l=await c.query("SELECT id FROM listings WHERE id=$1 AND status='active'",[lid]);if(!l.rows.length)fail(400,'Yalnız aktiv elan seçilə bilər.');}await c.query("INSERT INTO admin_social_queue(id,listing_id,platform,caption,status) VALUES($1,$2,$3,$4,$5)",[id,lid,platform,caption,status]);
+   }else if(kind==='android'){
+    const name=String(b.version_name||'').trim(),code=Number(b.version_code),notes=String(b.release_notes||'').trim(),url=String(b.apk_url||'').trim(),channel=String(b.channel||'internal');if(!name||name.length>60||!Number.isSafeInteger(code)||code<1||!notes||notes.length>2000||!['internal','beta','production'].includes(channel)||url&&(!/^https:\/\//.test(url)||url.length>500))fail(400,'Versiya məlumatları düzgün deyil.');await c.query("INSERT INTO admin_android_releases(id,version_name,version_code,release_notes,apk_url,channel) VALUES($1,$2,$3,$4,$5,$6)",[id,name,code,notes,url||null,channel]);
+   }else fail(400,'Naməlum əməliyyat.');
+   await c.query('INSERT INTO audit_logs VALUES($1,$2,$3,$4,now())',[randomUUID(),user.id,'admin_'+kind,id]);
+  });return json(res,201,{ok:true,id});
+ }
  if(path==='/api/admin/finance'&&method==='GET'){
   const rows=await query("SELECT id,entry_date::text AS date,kind,category,description,amount_cents::text AS amount_cents,created_at FROM admin_finance_entries ORDER BY entry_date DESC,created_at DESC LIMIT 500");
   const totals=await query("SELECT coalesce(sum(amount_cents) FILTER(WHERE kind='income'),0)::text AS income_cents,coalesce(sum(amount_cents) FILTER(WHERE kind='expense'),0)::text AS expense_cents FROM admin_finance_entries");
