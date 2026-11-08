@@ -1,3 +1,5 @@
+/* Android app layout: only enable for the embedded Android WebView, never mobile Chrome. */
+if (/Android/i.test(navigator.userAgent) && /(?:;\\s*wv\\)|\\bwv\\b)/i.test(navigator.userAgent)) document.documentElement.classList.add('sosavto-android-app');
 import {roadside} from './sos.js';
 import {carwash} from './wash.js';
 import {mountAdminPush,disableAdminPush} from './admin-push.js';
