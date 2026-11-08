@@ -106,3 +106,15 @@ html.sa-app {font-size:16px;-webkit-text-size-adjust:100%;scroll-padding-top:70p
 
 .sa-app #sa-update{position:fixed;z-index:110;top:60px;left:14px;right:14px;display:flex;align-items:center;gap:12px;padding:12px;border:1px solid var(--accent);border-radius:14px;background:var(--panel);box-shadow:0 8px 30px #10264022;font-size:12px}
 .sa-app #sa-update button{margin-left:auto;min-height:40px;border:0;border-radius:10px;padding:8px 13px;background:var(--accent);color:var(--on-accent);font-weight:700}
+
+/* Android-only admin: keep the viewport fixed while all admin content stacks vertically. */
+.sa-app:has(#admin-content) body{max-width:100%;overflow-x:clip}
+.sa-app:has(#admin-content) .layout{display:grid;grid-template-columns:minmax(0,1fr);width:100%;min-width:0;gap:12px}
+.sa-app:has(#admin-content) .layout>section{width:100%;min-width:0;max-width:100%}
+.sa-app:has(#admin-content) .sidebar{position:static;display:grid;grid-template-columns:minmax(0,1fr);width:100%;min-width:0;max-width:100%;overflow:visible;gap:4px}
+.sa-app:has(#admin-content) .sidebar a,.sa-app:has(#admin-content) .sidebar button{width:100%;min-width:0;white-space:normal;overflow-wrap:anywhere}
+.sa-app:has(#admin-content) #admin-content,.sa-app:has(#admin-content) #admin-content .panel,.sa-app:has(#admin-content) #admin-content .form-section{min-width:0;max-width:100%;overflow-wrap:anywhere}
+.sa-app:has(#admin-content) #admin-content .stats{grid-template-columns:minmax(0,1fr)}
+.sa-app:has(#admin-content) #admin-content .table-wrap{min-width:0;max-width:100%;width:100%;overflow-x:auto}
+.sa-app:has(#admin-content) #admin-content input,.sa-app:has(#admin-content) #admin-content select,.sa-app:has(#admin-content) #admin-content textarea{max-width:100%;min-width:0}
+.sa-app:has(#admin-content) .layout h1{font-size:clamp(20px,6vw,27px)!important;overflow-wrap:anywhere}
