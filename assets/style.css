@@ -150,3 +150,18 @@
  html.sosavto-android-app .grid>*{min-width:0}
  html.sosavto-android-app .card-photo-track{overflow-x:auto} /* Individual listing photos retain swipe. */
 }
+
+/* Android admin and account screens: prevent the entire document sliding sideways. */
+@media(max-width:720px){
+ html.sosavto-android-app .layout{display:grid;grid-template-columns:minmax(0,1fr);width:100%;min-width:0}
+ html.sosavto-android-app .layout>section{min-width:0;max-width:100%;width:100%}
+ html.sosavto-android-app .sidebar{position:static;display:grid;grid-template-columns:minmax(0,1fr);overflow:visible;max-width:100%;width:100%;min-width:0;gap:4px}
+ html.sosavto-android-app .sidebar a,html.sosavto-android-app .sidebar button{white-space:normal;overflow-wrap:anywhere;width:100%;min-width:0}
+ html.sosavto-android-app .stats{grid-template-columns:minmax(0,1fr)}
+ html.sosavto-android-app .panel,html.sosavto-android-app .form-section,html.sosavto-android-app #admin-content{min-width:0;max-width:100%;overflow-wrap:anywhere}
+ html.sosavto-android-app .table-wrap{width:100%;max-width:100%;min-width:0;overflow-x:auto}
+ html.sosavto-android-app .header-inner{min-width:0;width:100%;gap:5px}
+ html.sosavto-android-app .brand{min-width:0;overflow:hidden;text-overflow:ellipsis}
+ html.sosavto-android-app .nav-actions{min-width:0;flex-shrink:0}
+ html.sosavto-android-app h1,html.sosavto-android-app h2,html.sosavto-android-app p{overflow-wrap:anywhere}
+}
