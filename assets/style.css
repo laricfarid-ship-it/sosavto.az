@@ -138,3 +138,15 @@
 @media(max-width:400px){.nav-actions{gap:4px}.nav-actions .btn.primary .icon{display:none}}
 
 .language-switcher select{appearance:auto;min-width:58px;padding:8px 9px;border:1px solid var(--line-strong);border-radius:10px;background:var(--panel);color:var(--text);font-weight:750;font-size:.85rem}.language-switcher{display:flex;align-items:center}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}@media(max-width:900px){.language-switcher select{min-width:52px;padding:7px 5px}.header-inner{gap:8px}}
+/* Android WebView only: vertically stacked native-style page flow. */
+@media(max-width:720px){
+ html.sosavto-android-app,html.sosavto-android-app body{width:100%;max-width:100%;overflow-x:clip}
+ html.sosavto-android-app .page,html.sosavto-android-app main,html.sosavto-android-app .container{min-width:0;max-width:100%}
+ html.sosavto-android-app .home-intro .categories{display:grid;grid-template-columns:minmax(0,1fr);overflow-x:visible;gap:10px;scroll-snap-type:none}
+ html.sosavto-android-app .home-intro .category{width:100%;min-width:0;flex-direction:row;justify-content:flex-start;text-align:left;gap:14px}
+ html.sosavto-android-app .body-options{display:grid;grid-template-columns:minmax(0,1fr);overflow-x:visible;gap:8px}
+ html.sosavto-android-app .body-choice{width:100%;min-width:0;max-width:100%;flex:auto}
+ html.sosavto-android-app .grid{grid-template-columns:minmax(0,1fr)}
+ html.sosavto-android-app .grid>*{min-width:0}
+ html.sosavto-android-app .card-photo-track{overflow-x:auto} /* Individual listing photos retain swipe. */
+}
