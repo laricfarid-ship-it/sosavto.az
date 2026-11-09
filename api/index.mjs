@@ -173,8 +173,15 @@ export default async function handler(req,res){
   return json(res,200,{listings:rows.rows,enabled:socialShareEnabled(),configured:{instagram:socialConfigured('instagram'),facebook:socialConfigured('facebook')}});
  }
  if(path==='/api/admin/operations'&&method==='GET'){
-  const [business,social,android,users]=await Promise.all([query("SELECT p.*,u.username,u.email FROM admin_business_profiles p JOIN users u ON u.id=p.user_id ORDER BY p.updated_at DESC LIMIT 100"),query("SELECT q.*,l.title FROM admin_social_queue q LEFT JOIN listings l ON l.id=q.listing_id ORDER BY q.created_at DESC LIMIT 100"),query("SELECT * FROM admin_android_releases ORDER BY created_at DESC LIMIT 50"),query("SELECT id,username,email FROM users WHERE role='user' ORDER BY created_at DESC LIMIT 100")]);
-  return json(res,200,{business:business.rows,social:social.rows,android:android.rows,users:users.rows});
+  // Optional admin tables may not exist on production yet. Keep independent sections usable.
+  const results=await Promise.allSettled([
+   query("SELECT p.*,u.username,u.email FROM admin_business_profiles p JOIN users u ON u.id=p.user_id ORDER BY p.updated_at DESC LIMIT 100"),
+   query("SELECT q.*,l.title FROM admin_social_queue q LEFT JOIN listings l ON l.id=q.listing_id ORDER BY q.created_at DESC LIMIT 100"),
+   query("SELECT * FROM admin_android_releases ORDER BY created_at DESC LIMIT 50"),
+   query("SELECT id,username,email FROM users WHERE role='user' ORDER BY created_at DESC LIMIT 100")
+  ]);
+  const rows=i=>results[i].status==='fulfilled'?results[i].value.rows:[];
+  return json(res,200,{business:rows(0),social:rows(1),android:rows(2),users:rows(3),unavailable:results.map((r,i)=>r.status==='rejected'?['business','social','android','users'][i]:null).filter(Boolean)});
  }
  if(path==='/api/admin/operations'&&method==='POST'){
   const b=await body(req),kind=String(b.kind||'');let id=randomUUID();
