@@ -130,3 +130,14 @@ export async function publishSocial(platform, preview, checkpoint = async () => 
  if (!validId(data.id)) throw new Error('META_POST_ID_MISSING');
  return data.id;
 }
+
+export async function instagramPostPermalink(postId) {
+ if (!validId(postId)) throw new Error('META_POST_ID_INVALID');
+ const deadline=Date.now()+12000;
+ const c=await credentials('instagram',deadline);
+ const media=await graph(postId,{fields:'id,permalink'},c.token,{deadline});
+ if(String(media.id)!==String(postId))throw new Error('META_POST_ID_MISMATCH');
+ const link=new URL(media.permalink);
+ if(link.protocol!=='https:'||!['www.instagram.com','instagram.com'].includes(link.hostname)||link.username||link.password)throw new Error('META_POST_LINK_INVALID');
+ return link.href;
+}
