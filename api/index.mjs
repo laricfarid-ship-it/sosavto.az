@@ -1,5 +1,5 @@
 import {adminEvent,pushApi} from '../server/admin-push.mjs';
-import {socialSharePreview,publishSocial,socialConfigured,socialShareEnabled,socialConnectionReport} from '../server/social-share.mjs';
+import {socialSharePreview,publishSocial,socialConfigured,socialShareEnabled,socialConnectionReport,instagramPostPermalink} from '../server/social-share.mjs';
 import {resetEnabled,requestReset,completeReset} from '../server/password-reset.mjs';
 import {imagesFor} from '../server/listing-media.mjs';
 import {priceHistogram} from '../server/price-histogram.mjs';
@@ -167,6 +167,12 @@ export default async function handler(req,res){
   const result=await query("SELECT l.id,l.title,l.brand,l.model,l.year,l.price,l.city,l.status,(SELECT i.url FROM images i WHERE i.listing_id=l.id ORDER BY i.sort_order,i.created_at LIMIT 1) AS image_url FROM listings l WHERE l.id=$1 AND NOT COALESCE((l.details->>'_deleted')::boolean,false)",[id]);
   if(!result.rows.length||result.rows[0].status!=='active')fail(404,'Yalnız təsdiqlənmiş elanı paylaşmaq olar.');
   return json(res,200,{preview:socialSharePreview(result.rows[0],result.rows[0].image_url||'')});
+ }
+ if(path==='/api/admin/social-permalink'&&method==='GET'){
+  const id=uuid(url.searchParams.get('id'));
+  const result=await query("SELECT details#>>'{social_shares,instagram,status}' AS status,details#>>'{social_shares,instagram,post_id}' AS post_id FROM listings WHERE id=$1",[id]);
+  if(!result.rows.length||result.rows[0].status!=='sent'||!result.rows[0].post_id)fail(404,'Paylaşılmış Instagram postu tapılmadı.');
+  return json(res,200,{url:await instagramPostPermalink(result.rows[0].post_id)});
  }
  if(path==='/api/admin/social-listings'&&method==='GET'){
   const rows=await query("SELECT l.id,l.title,l.brand,l.model,l.year,l.price,l.city,l.details->'social_shares' AS social_shares FROM listings l WHERE l.status='active' AND NOT COALESCE((l.details->>'_deleted')::boolean,false) ORDER BY l.updated_at DESC LIMIT 100");
