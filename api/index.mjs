@@ -39,6 +39,31 @@ export default async function handler(req,res){
  if(path.startsWith('/api/wash/'))return json(res,200,await wash(req,user,path,method));
  if(path.startsWith('/api/sos/'))return json(res,200,await sos(req,user,path,method));
  if(path==='/api/me'&&method==='GET')return json(res,200,{user:safeUser(user)});
+
+ // Business registration is optional: individual accounts can publish in every existing category.
+ if(path==='/api/business-profile'&&method==='GET'){
+  requireUser(user);
+  const profile=(await query('SELECT business_name,business_type,description,address,phone FROM business_profiles WHERE user_id=$1',[user.id])).rows[0]||null;
+  return json(res,200,{profile});
+ }
+ if(path==='/api/business-profile'&&method==='PUT'){
+  requireUser(user);await rateLimit('business:'+user.id,20,3600);
+  const b=await body(req);
+  const business_name=text(b.business_name,'Biznes adı',2,120);
+  const business_type=text(b.business_type,'Biznes növü',2,30);
+  if(!['dealer','service','wash','detailing','parts','other'].includes(business_type))fail(400,'Biznes növünü düzgün seçin.');
+  const description=text(b.description||'','Biznes haqqında',0,1500);
+  const address=text(b.address||'','Ünvan',0,250);
+  const phone=text(b.phone||'','Telefon',0,25);
+  if(phone&&!/^(\+994|0)\d{9}$/.test(phone.replace(/[\s()-]/g,'')))fail(400,'Telefon nömrəsi düzgün deyil.');
+  await query(`INSERT INTO business_profiles(user_id,business_name,business_type,description,address,phone)
+   VALUES($1,$2,$3,$4,$5,$6) ON CONFLICT(user_id) DO UPDATE SET
+   business_name=EXCLUDED.business_name,business_type=EXCLUDED.business_type,
+   description=EXCLUDED.description,address=EXCLUDED.address,phone=EXCLUDED.phone,updated_at=now()`,
+   [user.id,business_name,business_type,description,address,phone]);
+  return json(res,200,{ok:true});
+ }
+
  if(['/api/register','/api/login'].includes(path)&&method==='POST'){
  await rateLimit(`auth:ip:${address}`,60,900);
  if(path==='/api/register')await rateLimit(`register:ip:${address}`,10,3600);
