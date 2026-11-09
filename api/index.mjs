@@ -1,4 +1,5 @@
 import {adminEvent,pushApi} from '../server/admin-push.mjs';
+import {socialSharePreview,publishSocial,socialConfigured,socialShareEnabled,socialConnectionReport} from '../server/social-share.mjs';
 import {resetEnabled,requestReset,completeReset} from '../server/password-reset.mjs';
 import {imagesFor} from '../server/listing-media.mjs';
 import {priceHistogram} from '../server/price-histogram.mjs';
@@ -133,6 +134,44 @@ export default async function handler(req,res){
  }
  if(path.startsWith('/api/admin')){
  requireAdmin(user);
+ if(path==='/api/admin/social-connection'&&method==='POST'){
+  await rateLimit('social:check:'+user.id,4,3600);
+  return json(res,200,await socialConnectionReport());
+ }
+ if(path==='/api/admin/social-publish'&&method==='POST'){
+  const b=await body(req);const id=uuid(b.id);const platform=b.platform;
+  if(!['instagram','facebook'].includes(platform))fail(400,'Sosial şəbəkə düzgün seçilməyib.');
+  if(!socialShareEnabled()||!socialConfigured(platform))fail(503,'Meta paylaşım bağlantısı aktiv deyil.');
+  await rateLimit('social:admin:'+user.id,12,3600);
+  // One atomic claim per listing/platform. Unknown outcomes never unlock automatically.
+  const locked=await query("UPDATE listings SET details=jsonb_set(details,'{social_shares}',COALESCE(details->'social_shares','{}'::jsonb)||jsonb_build_object($2::text,jsonb_build_object('status','publishing','started_at',now())),true) WHERE id=$1 AND status='active' AND NOT COALESCE((details->>'_deleted')::boolean,false) AND COALESCE(details#>>ARRAY['social_shares',$2,'status'],'')='' RETURNING id,title,brand,model,year,price,city,status",[id,platform]);
+  if(!locked.rows.length)fail(409,'Elan aktiv deyil, artıq paylaşılıb və ya əvvəlki cəhdin nəticəsi yoxlanmalıdır.');
+  try{
+   const photo=await query('SELECT url FROM images WHERE listing_id=$1 ORDER BY sort_order,created_at LIMIT 1',[id]);
+   const preview=socialSharePreview(locked.rows[0],photo.rows[0]?.url||'');
+   const postId=await publishSocial(platform,preview,async containerId=>{
+    await query("UPDATE listings SET details=jsonb_set(details,ARRAY['social_shares',$2],(details#>ARRAY['social_shares',$2])||jsonb_build_object('container_id',$3::text),true) WHERE id=$1",[id,platform,containerId]);
+   });
+   await transaction(async c=>{
+    await c.query("UPDATE listings SET details=jsonb_set(details,ARRAY['social_shares',$2],(details#>ARRAY['social_shares',$2])||jsonb_build_object('status','sent','post_id',$3::text,'sent_at',now()),true) WHERE id=$1",[id,platform,postId]);
+    await c.query('INSERT INTO audit_logs(id,admin_id,action,entity_id) VALUES($1,$2,$3,$4)',[randomUUID(),user.id,'social_'+platform,id]);
+   });
+   return json(res,200,{ok:true,platform,postId});
+  }catch{
+   await query("UPDATE listings SET details=jsonb_set(details,ARRAY['social_shares',$2],(details#>ARRAY['social_shares',$2])||jsonb_build_object('status','review_required','failed_at',now()),true) WHERE id=$1",[id,platform]);
+   fail(502,'Paylaşımın nəticəsi yoxlanmalıdır. Təkrar postun qarşısını almaq üçün yeni cəhd bağlanıb. Meta hesabını yoxlayın.');
+  }
+ }
+ if(path==='/api/admin/social-preview'&&method==='GET'){
+  const id=uuid(url.searchParams.get('id'));
+  const result=await query("SELECT l.id,l.title,l.brand,l.model,l.year,l.price,l.city,l.status,(SELECT i.url FROM images i WHERE i.listing_id=l.id ORDER BY i.sort_order,i.created_at LIMIT 1) AS image_url FROM listings l WHERE l.id=$1 AND NOT COALESCE((l.details->>'_deleted')::boolean,false)",[id]);
+  if(!result.rows.length||result.rows[0].status!=='active')fail(404,'Yalnız təsdiqlənmiş elanı paylaşmaq olar.');
+  return json(res,200,{preview:socialSharePreview(result.rows[0],result.rows[0].image_url||'')});
+ }
+ if(path==='/api/admin/social-listings'&&method==='GET'){
+  const rows=await query("SELECT l.id,l.title,l.brand,l.model,l.year,l.price,l.city,l.details->'social_shares' AS social_shares FROM listings l WHERE l.status='active' AND NOT COALESCE((l.details->>'_deleted')::boolean,false) ORDER BY l.updated_at DESC LIMIT 100");
+  return json(res,200,{listings:rows.rows,enabled:socialShareEnabled(),configured:{instagram:socialConfigured('instagram'),facebook:socialConfigured('facebook')}});
+ }
  if(path==='/api/admin/operations'&&method==='GET'){
   const [business,social,android,users]=await Promise.all([query("SELECT p.*,u.username,u.email FROM admin_business_profiles p JOIN users u ON u.id=p.user_id ORDER BY p.updated_at DESC LIMIT 100"),query("SELECT q.*,l.title FROM admin_social_queue q LEFT JOIN listings l ON l.id=q.listing_id ORDER BY q.created_at DESC LIMIT 100"),query("SELECT * FROM admin_android_releases ORDER BY created_at DESC LIMIT 50"),query("SELECT id,username,email FROM users WHERE role='user' ORDER BY created_at DESC LIMIT 100")]);
   return json(res,200,{business:business.rows,social:social.rows,android:android.rows,users:users.rows});
