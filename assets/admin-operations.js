@@ -11,7 +11,7 @@ export async function mountOperations(content){
   const data=await response.json();if(!response.ok)throw Error(data.message||'Elanlar yüklənmədi');
   const root=panes.marketing,container=root.querySelector('#social-listings'),previewBox=root.querySelector('#social-preview-result'),status=root.querySelector('#social-status');
   let chosenPlatform='instagram',chosenListing=null,requestVersion=0;
-  const configured=data.configured||{},listings=data.listings||[];
+  const configured=data.configured||{},listings=data.listings||[],sharingEnabled=Boolean(data.enabled);
   status.textContent=data.enabled?'Paylaşım xidməti aktivdir':'Paylaşım xidməti serverdə deaktivdir. Önizləmə işləyir, real göndəriş bağlıdır.';
   const label=l=>l.title||[l.brand,l.model,l.year].filter(Boolean).join(' ')||'Avtomobil elanı';
   const shareStatus=(l,p)=>l.social_shares?.[p]?.status||'';
@@ -35,9 +35,9 @@ export async function mountOperations(content){
     const heading=document.createElement('h3');heading.textContent=label(l);content.append(heading);
     const price=document.createElement('strong');price.className='social-preview-price';price.textContent=Number(l.price).toLocaleString('az-AZ')+' AZN';content.append(price);
     const caption=document.createElement('p');caption.textContent=p.caption;content.append(caption);layout.append(content);previewBox.append(layout);
-    const button=document.createElement('button');button.type='button';button.className='social-send';button.textContent=sent==='sent'?'✓ Artıq paylaşılıb':chosenPlatform==='instagram'?'Instagram-da paylaş':'Facebook-da paylaş';button.disabled=Boolean(sent)||!data.enabled||!configured[chosenPlatform];previewBox.append(button);
+    const button=document.createElement('button');button.type='button';button.className='social-send';button.textContent=sent==='sent'?'✓ Artıq paylaşılıb':chosenPlatform==='instagram'?'Instagram-da paylaş':'Facebook-da paylaş';button.disabled=Boolean(sent)||!sharingEnabled||!configured[chosenPlatform];previewBox.append(button);
     if(sent&&sent!=='sent'){const note=document.createElement('p');note.textContent='Əvvəlki paylaşım cəhdi yoxlanmalıdır: '+sent;previewBox.append(note);}
-    else if(!data.enabled||!configured[chosenPlatform]){const note=document.createElement('p');note.className='social-warning';note.textContent=!data.enabled?'Serverdə sosial paylaşım deaktivdir.':'Bu platforma üçün Meta bağlantısı tamamlanmayıb.';previewBox.append(note);}
+    else if(!sharingEnabled||!configured[chosenPlatform]){const note=document.createElement('p');note.className='social-warning';note.textContent=!sharingEnabled?'Serverdə sosial paylaşım deaktivdir.':'Bu platforma üçün Meta bağlantısı tamamlanmayıb.';previewBox.append(note);}
     button.onclick=async()=>{
      if(!confirm(label(l)+' elanını '+(chosenPlatform==='instagram'?'Instagram':'Facebook')+' hesabında İNDİ paylaşmaq istəyirsiniz?'))return;
      button.disabled=true;button.textContent='Göndərilir…';
