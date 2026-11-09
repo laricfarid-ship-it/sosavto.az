@@ -340,7 +340,7 @@ async function admin(){
  const focused=params.get('listing');if(focused){const button=$$('[data-moderate]').find(b=>b.dataset.moderate===focused);if(button){button.closest('article').id='requested-listing';button.closest('article').style.outline='2px solid var(--accent, #3dd8b5)';button.closest('article').scrollIntoView?.({block:'center'});}}
  $$('[data-moderate]').forEach(b=>b.onclick=()=>task(b,async()=>{const rejected=b.dataset.status==='rejected';const reason=await confirmAction(rejected?'Elanı rədd et':'Elanı təsdiqlə',rejected?'Rədd səbəbi elanın sahibinə bildiriləcək.':'Elan bütün istifadəçilərə görünəcək.',rejected);if(!reason)return;await api('/admin/moderate','POST',{id:b.dataset.moderate,status:b.dataset.status,reason:rejected?reason:''});await admin();toast('Elan yoxlanıldı.');}));$$('[data-resolve]').forEach(b=>b.onclick=()=>task(b,async()=>{await api('/admin/report','POST',{id:b.dataset.resolve});await admin();}));$$('[data-user]').forEach(b=>b.onclick=()=>task(b,async()=>{if(!await confirmAction('Hesabın statusunu dəyiş?',b.dataset.state==='banned'?'Girişlər bağlanacaq və aktiv elanlar arxivlənəcək.':'İstifadəçi yenidən daxil ola biləcək.'))return;await api('/admin/user','POST',{id:b.dataset.user,status:b.dataset.state});await admin();}));
  const {mountPremiumAdminShell}=await import('./admin-premium-shell.js');mountPremiumAdminShell();
- }catch(e){errorBox($('#admin-content'),e);}
+ }catch(e){document.body.classList.add('sos-admin-ready');errorBox($('#admin-content'),e);}
 }
 async function init(){
  // Remove obsolete browser credentials from the original prototype. They never authorize API access.
