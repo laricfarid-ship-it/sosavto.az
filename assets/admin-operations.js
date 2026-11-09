@@ -36,6 +36,18 @@ export async function mountOperations(content){
     const price=document.createElement('strong');price.className='social-preview-price';price.textContent=Number(l.price).toLocaleString('az-AZ')+' AZN';content.append(price);
     const caption=document.createElement('p');caption.textContent=p.caption;content.append(caption);layout.append(content);previewBox.append(layout);
     const button=document.createElement('button');button.type='button';button.className='social-send';button.textContent=sent==='sent'?'✓ Artıq paylaşılıb':chosenPlatform==='instagram'?'Instagram-da paylaş':'Facebook-da paylaş';button.disabled=Boolean(sent)||!sharingEnabled||!configured[chosenPlatform];previewBox.append(button);
+    if(sent==='sent'&&chosenPlatform==='instagram'){
+     const open=document.createElement('button');open.type='button';open.className='social-send social-open-post';open.textContent='↗ Instagram-da bax';open.disabled=false;previewBox.append(open);
+     open.onclick=async()=>{
+      open.disabled=true;open.textContent='Instagram linki alınır…';
+      try{
+       const r=await fetch('/api/admin/social-permalink?id='+encodeURIComponent(chosenListing),{credentials:'same-origin'});
+       const d=await r.json();if(!r.ok)throw Error(d.message||'Post linki tapılmadı');
+       const link=new URL(d.url);if(link.protocol!=='https:'||!['instagram.com','www.instagram.com'].includes(link.hostname))throw Error('Etibarsız Instagram ünvanı');
+       window.location.href=link.href;
+      }catch(e){status.textContent='Instagram linki açıla bilmədi: '+e.message;open.disabled=false;open.textContent='↗ Instagram-da bax';}
+     };
+    }
     if(sent&&sent!=='sent'){const note=document.createElement('p');note.textContent='Əvvəlki paylaşım cəhdi yoxlanmalıdır: '+sent;previewBox.append(note);}
     else if(!sharingEnabled||!configured[chosenPlatform]){const note=document.createElement('p');note.className='social-warning';note.textContent=!sharingEnabled?'Serverdə sosial paylaşım deaktivdir.':'Bu platforma üçün Meta bağlantısı tamamlanmayıb.';previewBox.append(note);}
     button.onclick=async()=>{
@@ -75,3 +87,5 @@ const socialStudioStyle=document.createElement('style');socialStudioStyle.textCo
 .social-preview{background:#0d2230;border:1px solid #365260;border-radius:14px;padding:17px;min-height:90px}.social-placeholder{color:#a8c3ce;margin:0}.social-preview-layout{display:flex;gap:18px;align-items:flex-start}.social-preview-layout img{width:180px;max-width:38%;border-radius:11px;object-fit:cover;aspect-ratio:4/3}.social-preview-copy{min-width:0;flex:1}.social-preview-copy h3{margin:0 0 8px}.social-preview-price{color:#6be4d0;font-size:20px}.social-preview-copy p{white-space:pre-wrap;color:#c3d8e0;max-height:220px;overflow:auto}.social-send{margin-top:14px;background:linear-gradient(100deg,#52d5cf,#2c9fda);color:#09212d;border:0;border-radius:11px;padding:13px 20px;font-weight:750;cursor:pointer}.social-send:disabled{opacity:.5;cursor:not-allowed}.social-status{margin-top:18px;color:#aed2db}.social-warning{color:#f5c584}.social-footnote{font-size:12px;color:#93b0bc;margin-top:12px}
 @media(max-width:650px){.social-card-grid{grid-template-columns:1fr}.social-preview-layout{flex-direction:column}.social-preview-layout img{width:100%;max-width:100%}.social-head-icon{display:none}}
 `;document.head.append(socialStudioStyle);
+
+const socialOpenPostStyle=document.createElement('style');socialOpenPostStyle.textContent='.social-open-post{margin-left:10px;background:#193b4c;color:#b6f7ee;border:1px solid #4abcb2}.social-open-post:hover{background:#225366}';document.head.append(socialOpenPostStyle);
