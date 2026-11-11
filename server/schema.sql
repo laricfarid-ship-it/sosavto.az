@@ -4,8 +4,9 @@ CREATE TABLE IF NOT EXISTS users (
  status text NOT NULL DEFAULT 'active' CHECK(status IN ('active','banned')), created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE TABLE IF NOT EXISTS sessions (token_hash text PRIMARY KEY, user_id uuid NOT NULL REFERENCES users(id) ON DELETE CASCADE, expires_at timestamptz NOT NULL);
+CREATE SEQUENCE IF NOT EXISTS listing_numbers START WITH 100001;
 CREATE TABLE IF NOT EXISTS listings (
- id uuid PRIMARY KEY, user_id uuid NOT NULL REFERENCES users(id), category text NOT NULL,
+ id uuid PRIMARY KEY, listing_number bigint NOT NULL DEFAULT nextval('listing_numbers') UNIQUE, user_id uuid NOT NULL REFERENCES users(id), category text NOT NULL,
  title text NOT NULL, description text NOT NULL, price numeric(12,2) NOT NULL CHECK(price>=0), city text NOT NULL,
  brand text NOT NULL DEFAULT '', model text NOT NULL DEFAULT '', year integer, mileage integer,
  phone text NOT NULL, address text NOT NULL DEFAULT '', latitude double precision, longitude double precision,

@@ -11,6 +11,10 @@
     {
       "source": "/elan",
       "destination": "/api/index"
+    },
+    {
+      "source": "/salon.html",
+      "destination": "/api/index"
     }
   ],
   "functions": {
