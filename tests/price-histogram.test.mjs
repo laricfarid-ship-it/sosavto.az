@@ -38,3 +38,5 @@ test('stale responses cannot overwrite new filter results, errors leave manual f
  const single=picker.refresh();requests[3].resolve({total:1,min:25,max:25,bins:[{from:25,to:25,count:1}]});await single;assert.ok(host.querySelector('[type=range]').disabled);
  }finally{dom.window.close();}
 });
+
+test('an incomplete optional histogram cannot crash the surrounding category page',()=>{const dom=new JSDOM('<form><section></section></form>');try{assert.equal(mountPriceHistogram(dom.window.document.querySelector('section'),dom.window.document.querySelector('form'),()=>assert.fail('must not fetch'),()=>new URLSearchParams()),null);}finally{dom.window.close();}});

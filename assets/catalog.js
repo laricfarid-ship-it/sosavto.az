@@ -7,6 +7,7 @@ export const serviceTypes={
  detailing:['Cilalama','Keramika örtüyü','Qoruyucu plyonka (PPF)','Kimyəvi təmizləmə','Şüşə tonlama','Faraların bərpası','Digər']
 };
 export const detailFields={
+ motorcycle:['fuel','transmission','engine','color','condition','credit','barter'],
  car:['fuel','transmission','body','engine','color','drive','condition','credit','barter'],
  parts:['condition','part_type','oem','fitment','map_visible'],
  service:['service_type','hours'],wash:['service_type','hours'],detailing:['service_type','hours'],
@@ -19,6 +20,7 @@ export const normalizePlate=v=>{const s=normalizeCode(v);return /^\d{2}[A-Z]{2}\
 export function filterKeys(category){
  const common=['q','city','price_min','price_max','sort','page','category'];
  if(category==='car'||!category||category==='all')return [...common,'brand','model','year_min','year_max','mileage_max','fuel','transmission','body','condition','drive','color','credit','barter'];
+ if(category==='motorcycle')return [...common,'brand','model','year_min','year_max','mileage_max','fuel','transmission','condition','color','credit','barter'];
  if(category==='parts')return [...common,'brand','model','condition','part_type','oem'];
  if(category==='insurance')return [...common,'insurance_type','insurer'];
  if(category==='plates')return [...common,'plate_region','plate_letters','plate_digits'];

@@ -1,6 +1,8 @@
 const money=n=>Number(n).toLocaleString('az-AZ',{maximumFractionDigits:2})+' ₼';
 export function mountPriceHistogram(host,form,fetchHistogram,readFilters){
- const doc=host.ownerDocument,minInput=form.elements.price_min,maxInput=form.elements.price_max;
+ const minInput=form?.elements.price_min,maxInput=form?.elements.price_max;
+ if(!host||!minInput||!maxInput)return null;
+ const doc=host.ownerDocument;
  for(const input of [minInput,maxInput])input.step='0.01';
  host.innerHTML='<div class="price-distribution-head"><strong>Qiymət paylanması</strong><output class="price-selection"></output></div><p class="muted price-distribution-status" role="status">Real elanların qiymətləri yüklənir…</p><div class="price-distribution-controls" hidden><div class="price-bars" role="img" aria-label="Elanların qiymət paylanması"></div><div class="price-axis"><span></span><span></span></div><div class="price-sliders"><label>Minimum qiymət<input type="range" aria-label="Minimum qiymət slayderi" step="0.01"></label><label>Maksimum qiymət<input type="range" aria-label="Maksimum qiymət slayderi" step="0.01"></label></div></div>';
  const status=host.querySelector('[role=status]'),controls=host.querySelector('.price-distribution-controls'),bars=host.querySelector('.price-bars'),ranges=[...host.querySelectorAll('[type=range]')],output=host.querySelector('output');let data,version=0;

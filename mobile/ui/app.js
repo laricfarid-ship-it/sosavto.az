@@ -51,11 +51,13 @@
     const form=document.getElementById('search');
     if (form && !form.querySelector('.sa-filters')) {
       const details=document.createElement('details'); details.className='sa-filters';
-      const summary=document.createElement('summary'); summary.textContent='Filtrlər · marka, qiymət, kuzov'; details.append(summary);
+      const summary=document.createElement('summary'); summary.textContent='Filtrlər · qiymət və əlavə seçimlər'; details.append(summary);
       const query=new URLSearchParams(location.search);
       details.open=[...query.keys()].some(key=>!['q','category','sort','page'].includes(key));
-      for (const node of [...form.children]) if(node.matches('.body-choices,.fields,.price-distribution,.advanced')) details.append(node);
-      form.querySelector('.search-line').after(details);
+      const keepVehicleFields=!form.querySelector('.search-line')||query.get('category')==='motorcycle';
+      for (const node of [...form.children]) if(node.matches('.body-choices,.fields,.price-distribution,.advanced')&&!(keepVehicleFields&&node.matches('.fields'))) details.append(node);
+      const anchor=form.querySelector('.search-line,.search-submit-bottom');
+      if(anchor)anchor.after(details);else form.prepend(details);
       // Retain native browser validation for fields inside a collapsed disclosure.
       form.addEventListener('invalid',()=>{details.open=true;},true);
     }
