@@ -30,7 +30,7 @@ export async function dealership(req,user,path,method){
   const p=r.rows[0];if(!p)fail(404,'Salon tapılmadı.');
   const rows=await query(`SELECT ${projection} FROM listings l WHERE l.user_id=$1 AND l.status='active' AND l.category='car' AND NOT (l.details @> '{"_deleted":true}'::jsonb) ORDER BY l.created_at DESC LIMIT 100`,[p.owner_user_id]);
   const {owner_user_id,...publicProfile}=p;
-  return {profile:publicProfile,listings:rows.rows};
+  return {profile:publicProfile,listings:rows.rows.map(({user_id,phone,address,latitude,longitude,details,...listing})=>listing)};
  }
  fail(404,'Sorğu tapılmadı.');
 }
