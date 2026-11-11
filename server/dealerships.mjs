@@ -1,6 +1,6 @@
 import {randomUUID} from 'node:crypto';
 import {query} from './db.mjs';
-import {fail,requireUser,body,text} from './security.mjs';
+import {fail,requireUser,requireAdmin,body,text} from './security.mjs';
 import {projection} from './listings.mjs';
 
 const slugPattern=/^[a-z0-9]+(?:-[a-z0-9]+)*$/;
@@ -22,6 +22,20 @@ export async function dealership(req,user,path,method){
    const r=await query(`INSERT INTO dealership_profiles(id,owner_user_id,slug,display_name,city,public_phone) VALUES($1,$2,$3,$4,$5,$6) RETURNING id,status,slug`,[randomUUID(),user.id,slug,name,city,phone]);
    return {profile:r.rows[0]};
   }catch(e){if(e.code==='23505')fail(409,'Bu hesabın salon müraciəti artıq var və ya salon linki tutulub.');throw e;}
+ }
+ if(path==='/api/dealerships/admin'&&method==='GET'){
+  requireAdmin(user);
+  const r=await query("SELECT p.id,p.slug,p.display_name,p.city,p.status,p.created_at,u.fullname,u.email FROM dealership_profiles p JOIN users u ON u.id=p.owner_user_id ORDER BY p.created_at DESC LIMIT 100");
+  return {profiles:r.rows};
+ }
+ const decision=path.match(/^\/api\/dealerships\/admin\/([a-f0-9-]+)$/);
+ if(decision&&method==='PATCH'){
+  requireAdmin(user);
+  const b=await body(req);
+  if(!['approved','rejected','suspended'].includes(b.status))fail(400,'Status yanlışdır.');
+  const r=await query('UPDATE dealership_profiles SET status=$1,updated_at=now() WHERE id=$2 RETURNING id,status',[b.status,decision[1]]);
+  if(!r.rows.length)fail(404,'Salon tapılmadı.');
+  return {profile:r.rows[0]};
  }
  const match=path.match(/^\/api\/dealerships\/([a-z0-9-]+)$/);
  if(match&&method==='GET'){
