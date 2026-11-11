@@ -139,6 +139,24 @@ export default async function handler(req,res){
  }
  if(path.startsWith('/api/admin')){
  requireAdmin(user);
+ if(path==='/api/admin/overview'&&method==='GET'){
+  const [totals,statuses,categories,breakdown,growth,operations]=await Promise.all([
+   query("SELECT count(*)::integer total,count(*) FILTER (WHERE created_at >= now()-interval '30 days')::integer last30,count(*) FILTER (WHERE created_at >= now()-interval '7 days')::integer last7 FROM listings"),
+   query("SELECT status,count(*)::integer count FROM listings GROUP BY status ORDER BY status"),
+   query("SELECT category,count(*)::integer count FROM listings GROUP BY category ORDER BY category"),
+   query("SELECT category,status,count(*)::integer count FROM listings GROUP BY category,status ORDER BY category,status"),
+   query(`SELECT to_char(created_at AT TIME ZONE 'Asia/Baku','YYYY-MM-DD') AS "day",count(*)::integer count FROM listings WHERE created_at >= now()-interval '30 days' GROUP BY 1 ORDER BY 1`),
+   query(`SELECT (SELECT count(*)::integer FROM users) users_total,
+   (SELECT count(*)::integer FROM users WHERE created_at>=now()-interval '7 days') users_last7,
+   (SELECT count(*)::integer FROM users WHERE status='banned') users_banned,
+   (SELECT count(*)::integer FROM reports WHERE status='open') reports_open,
+   (SELECT count(*)::integer FROM listings WHERE status='pending') listings_pending,
+   (SELECT count(*)::integer FROM listings WHERE category IN ('service','wash','detailing')) service_listings,
+   (SELECT count(*)::integer FROM audit_logs WHERE created_at>=now()-interval '7 days') admin_actions_last7`)
+
+  ]);
+  return json(res,200,{...totals.rows[0],statuses:statuses.rows,categories:categories.rows,breakdown:breakdown.rows,growth:growth.rows,operations:operations.rows[0]});
+ }
  if(path==='/api/admin'&&method==='GET'){
  const [stats,pending,reports,users,logs]=await Promise.all([
  query("SELECT count(*)::integer total,count(*) FILTER(WHERE status='active')::integer active,count(*) FILTER(WHERE status='pending')::integer pending FROM listings"),
