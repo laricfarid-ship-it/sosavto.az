@@ -1,3 +1,4 @@
+import {socialSharePreview,publishSocial,socialConfigured,socialShareEnabled,socialConnectionReport,instagramPostPermalink} from '../server/social-share.mjs';
 import {adminEvent,pushApi} from '../server/admin-push.mjs';
 import {resetEnabled,requestReset,completeReset} from '../server/password-reset.mjs';
 import {imagesFor} from '../server/listing-media.mjs';
@@ -139,6 +140,96 @@ export default async function handler(req,res){
  }
  if(path.startsWith('/api/admin')){
  requireAdmin(user);
+ if(path==='/api/admin/social-connection'&&method==='POST'){
+  await rateLimit('social:check:'+user.id,4,3600);
+  return json(res,200,await socialConnectionReport());
+ }
+ if(path==='/api/admin/social-publish'&&method==='POST'){
+  const b=await body(req);const id=uuid(b.id);const platform=b.platform;
+  if(!['instagram','facebook'].includes(platform))fail(400,'Sosial şəbəkə düzgün seçilməyib.');
+  if(!socialShareEnabled()||!socialConfigured(platform))fail(503,'Meta paylaşım bağlantısı aktiv deyil.');
+  await rateLimit('social:admin:'+user.id,12,3600);
+  // One atomic claim per listing/platform. Unknown outcomes never unlock automatically.
+  const locked=await query("UPDATE listings SET details=jsonb_set(details,'{social_shares}',COALESCE(details->'social_shares','{}'::jsonb)||jsonb_build_object($2::text,jsonb_build_object('status','publishing','started_at',now())),true) WHERE id=$1 AND status='active' AND NOT COALESCE((details->>'_deleted')::boolean,false) AND COALESCE(details#>>ARRAY['social_shares',$2,'status'],'')='' RETURNING id,title,brand,model,year,price,city,status",[id,platform]);
+  if(!locked.rows.length)fail(409,'Elan aktiv deyil, artıq paylaşılıb və ya əvvəlki cəhdin nəticəsi yoxlanmalıdır.');
+  try{
+   const photo=await query('SELECT url FROM images WHERE listing_id=$1 ORDER BY sort_order,created_at LIMIT 1',[id]);
+   const preview=socialSharePreview(locked.rows[0],photo.rows[0]?.url||'');
+   const postId=await publishSocial(platform,preview,async containerId=>{
+    await query("UPDATE listings SET details=jsonb_set(details,ARRAY['social_shares',$2],(details#>ARRAY['social_shares',$2])||jsonb_build_object('container_id',$3::text),true) WHERE id=$1",[id,platform,containerId]);
+   });
+   await transaction(async c=>{
+    await c.query("UPDATE listings SET details=jsonb_set(details,ARRAY['social_shares',$2],(details#>ARRAY['social_shares',$2])||jsonb_build_object('status','sent','post_id',$3::text,'sent_at',now()),true) WHERE id=$1",[id,platform,postId]);
+    await c.query('INSERT INTO audit_logs(id,admin_id,action,entity_id) VALUES($1,$2,$3,$4)',[randomUUID(),user.id,'social_'+platform,id]);
+   });
+   return json(res,200,{ok:true,platform,postId});
+  }catch{
+   await query("UPDATE listings SET details=jsonb_set(details,ARRAY['social_shares',$2],(details#>ARRAY['social_shares',$2])||jsonb_build_object('status','review_required','failed_at',now()),true) WHERE id=$1",[id,platform]);
+   fail(502,'Paylaşımın nəticəsi yoxlanmalıdır. Təkrar postun qarşısını almaq üçün yeni cəhd bağlanıb. Meta hesabını yoxlayın.');
+  }
+ }
+ if(path==='/api/admin/social-preview'&&method==='GET'){
+  const id=uuid(url.searchParams.get('id'));
+  const result=await query("SELECT l.id,l.title,l.brand,l.model,l.year,l.price,l.city,l.status,(SELECT i.url FROM images i WHERE i.listing_id=l.id ORDER BY i.sort_order,i.created_at LIMIT 1) AS image_url FROM listings l WHERE l.id=$1 AND NOT COALESCE((l.details->>'_deleted')::boolean,false)",[id]);
+  if(!result.rows.length||result.rows[0].status!=='active')fail(404,'Yalnız təsdiqlənmiş elanı paylaşmaq olar.');
+  return json(res,200,{preview:socialSharePreview(result.rows[0],result.rows[0].image_url||'')});
+ }
+ if(path==='/api/admin/social-permalink'&&method==='GET'){
+  const id=uuid(url.searchParams.get('id'));
+  const result=await query("SELECT details#>>'{social_shares,instagram,status}' AS status,details#>>'{social_shares,instagram,post_id}' AS post_id FROM listings WHERE id=$1",[id]);
+  if(!result.rows.length||result.rows[0].status!=='sent'||!result.rows[0].post_id)fail(404,'Paylaşılmış Instagram postu tapılmadı.');
+  return json(res,200,{url:await instagramPostPermalink(result.rows[0].post_id)});
+ }
+ if(path==='/api/admin/social-listings'&&method==='GET'){
+  const rows=await query("SELECT l.id,l.title,l.brand,l.model,l.year,l.price,l.city,l.details->'social_shares' AS social_shares FROM listings l WHERE l.status='active' AND NOT COALESCE((l.details->>'_deleted')::boolean,false) ORDER BY l.updated_at DESC LIMIT 100");
+  return json(res,200,{listings:rows.rows,enabled:socialShareEnabled(),configured:{instagram:socialConfigured('instagram'),facebook:socialConfigured('facebook')}});
+ }
+ if(path==='/api/admin/operations'&&method==='GET'){
+  // Optional admin tables may not exist on production yet. Keep independent sections usable.
+  const results=await Promise.allSettled([
+   query("SELECT p.*,u.username,u.email FROM admin_business_profiles p JOIN users u ON u.id=p.user_id ORDER BY p.updated_at DESC LIMIT 100"),
+   query("SELECT q.*,l.title FROM admin_social_queue q LEFT JOIN listings l ON l.id=q.listing_id ORDER BY q.created_at DESC LIMIT 100"),
+   query("SELECT * FROM admin_android_releases ORDER BY created_at DESC LIMIT 50"),
+   query("SELECT id,username,email FROM users WHERE role='user' ORDER BY created_at DESC LIMIT 100")
+  ]);
+  const rows=i=>results[i].status==='fulfilled'?results[i].value.rows:[];
+  return json(res,200,{business:rows(0),social:rows(1),android:rows(2),users:rows(3),unavailable:results.map((r,i)=>r.status==='rejected'?['business','social','android','users'][i]:null).filter(Boolean)});
+ }
+ if(path==='/api/admin/operations'&&method==='POST'){
+  const b=await body(req),kind=String(b.kind||'');let id=randomUUID();
+  await transaction(async c=>{
+   if(kind==='business'){
+    const uid=uuid(b.user_id),name=String(b.name||'').trim(),type=String(b.business_type||'').trim(),status=String(b.status||'pending');if(!name||name.length>120||!type||type.length>80||!['pending','approved','rejected'].includes(status))fail(400,'Biznes məlumatları düzgün deyil.');const u=await c.query("SELECT id FROM users WHERE id=$1 AND role='user'",[uid]);if(!u.rows.length)fail(404,'İstifadəçi tapılmadı.');await c.query("INSERT INTO admin_business_profiles(user_id,business_name,business_type,status) VALUES($1,$2,$3,$4) ON CONFLICT(user_id) DO UPDATE SET business_name=$2,business_type=$3,status=$4,updated_at=now()",[uid,name,type,status]);id=uid;
+   }else if(kind==='social'){
+    const platform=String(b.platform||''),caption=String(b.caption||'').trim(),status=String(b.status||'draft');if(!['instagram','facebook'].includes(platform)||!caption||caption.length>2200||!['draft','ready'].includes(status))fail(400,'Paylaşım məlumatları düzgün deyil.');const lid=b.listing_id?uuid(b.listing_id):null;if(lid){const l=await c.query("SELECT id FROM listings WHERE id=$1 AND status='active'",[lid]);if(!l.rows.length)fail(400,'Yalnız aktiv elan seçilə bilər.');}await c.query("INSERT INTO admin_social_queue(id,listing_id,platform,caption,status) VALUES($1,$2,$3,$4,$5)",[id,lid,platform,caption,status]);
+   }else if(kind==='android'){
+    const name=String(b.version_name||'').trim(),code=Number(b.version_code),notes=String(b.release_notes||'').trim(),url=String(b.apk_url||'').trim(),channel=String(b.channel||'internal');if(!name||name.length>60||!Number.isSafeInteger(code)||code<1||!notes||notes.length>2000||!['internal','beta','production'].includes(channel)||url&&(!/^https:\/\//.test(url)||url.length>500))fail(400,'Versiya məlumatları düzgün deyil.');await c.query("INSERT INTO admin_android_releases(id,version_name,version_code,release_notes,apk_url,channel) VALUES($1,$2,$3,$4,$5,$6)",[id,name,code,notes,url||null,channel]);
+   }else fail(400,'Naməlum əməliyyat.');
+   await c.query('INSERT INTO audit_logs VALUES($1,$2,$3,$4,now())',[randomUUID(),user.id,'admin_'+kind,id]);
+  });return json(res,201,{ok:true,id});
+ }
+ if(path==='/api/admin/finance'&&method==='GET'){
+  const rows=await query("SELECT id,entry_date::text AS date,kind,category,description,amount_cents::text AS amount_cents,created_at FROM admin_finance_entries ORDER BY entry_date DESC,created_at DESC LIMIT 500");
+  const totals=await query("SELECT coalesce(sum(amount_cents) FILTER(WHERE kind='income'),0)::text AS income_cents,coalesce(sum(amount_cents) FILTER(WHERE kind='expense'),0)::text AS expense_cents FROM admin_finance_entries");
+  return json(res,200,{entries:rows.rows,totals:totals.rows[0]});
+ }
+ if(path==='/api/admin/finance'&&method==='POST'){
+  const b=await body(req);const kind=String(b.kind||''),category=String(b.category||'').trim(),description=String(b.description||'').trim(),date=String(b.date||'');const amount=Number(b.amount);
+  if(!['income','expense'].includes(kind)||!/^\d{4}-\d{2}-\d{2}$/.test(date)||!category||category.length>90||description.length>500||!Number.isFinite(amount)||amount<=0||amount>100000000||Math.abs(Math.round(amount*100)-amount*100)>0.000001)fail(400,'Maliyyə məlumatları düzgün deyil.');
+  const id=randomUUID();await transaction(async c=>{await c.query('INSERT INTO admin_finance_entries(id,entry_date,kind,category,description,amount_cents,created_by) VALUES($1,$2,$3,$4,$5,$6,$7)',[id,date,kind,category,description,Math.round(amount*100),user.id]);await c.query('INSERT INTO audit_logs VALUES($1,$2,$3,$4,now())',[randomUUID(),user.id,'finance_add',id]);});return json(res,201,{ok:true,id});
+ }
+ if(path==='/api/admin/finance'&&method==='DELETE'){
+  const b=await body(req);const id=uuid(b.id);await transaction(async c=>{const removed=await c.query('DELETE FROM admin_finance_entries WHERE id=$1 RETURNING id',[id]);if(!removed.rows.length)fail(404,'Maliyyə qeydi tapılmadı.');await c.query('INSERT INTO audit_logs VALUES($1,$2,$3,$4,now())',[randomUUID(),user.id,'finance_delete',id]);});return json(res,200,{ok:true});
+ }
+ if(path==='/api/admin/workspace'&&method==='GET'){
+  const requests=[
+   ["sos_requests","sos_requests"],["sos_masters","sos_masters"],
+   ["wash_bookings","wash_bookings"],["wash_shops","wash_shops"]
+  ];
+  const results=await Promise.allSettled(requests.map(([table])=>query('SELECT count(*)::integer count FROM '+table)));
+  const services=Object.fromEntries(requests.map(([,key],i)=>[key,results[i].status==='fulfilled'?results[i].value.rows[0].count:null]));
+  return json(res,200,{services,unavailable:requests.filter((_,i)=>results[i].status==='rejected').map(([,key])=>key),serviceFlags:{sos:process.env.SOS_ENABLED==='true',wash:washEnabled()}});
+ }
  if(path==='/api/admin/overview'&&method==='GET'){
   const [totals,statuses,categories,breakdown,growth,operations]=await Promise.all([
    query("SELECT count(*)::integer total,count(*) FILTER (WHERE created_at >= now()-interval '30 days')::integer last30,count(*) FILTER (WHERE created_at >= now()-interval '7 days')::integer last7 FROM listings"),
