@@ -13,7 +13,7 @@
       "destination": "/api/index"
     },
     {
-      "source": "/salon.html",
+      "source": "/salon",
       "destination": "/api/index"
     }
   ],
@@ -69,5 +69,12 @@
   ],
   "buildCommand": "sh scripts/vercel-build.sh",
   "outputDirectory": "public",
-  "framework": null
+  "framework": null,
+  "redirects": [
+    {
+      "source": "/salon.html",
+      "destination": "/salon",
+      "permanent": true
+    }
+  ]
 }

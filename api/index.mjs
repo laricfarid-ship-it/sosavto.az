@@ -30,7 +30,7 @@ export default async function handler(req,res){
  const address=clientAddress(req);
  await rateLimit(`api:ip:${address}`,300,60);
  if(['/sitemap.xml','/elan'].includes(path)&&['GET','HEAD'].includes(method))return seoPage(req,res,path,url);
- if(path==='/salon.html'&&['GET','HEAD'].includes(method))return dealershipSeo(req,res,url);
+ if(['/salon.html','/salon'].includes(path)&&['GET','HEAD'].includes(method))return dealershipSeo(req,res,url);
  const user=await session(req);
  if(path==='/api/admin/push')return json(res,200,await pushApi(req,user,method));
  if(path==='/api/admin/2fa/verify-login'&&method==='POST'){

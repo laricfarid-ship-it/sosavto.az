@@ -50,14 +50,14 @@ export function listingHead(l,origin){
 }
 
 export function sitemapXml(rows,origin,{wash=false,sos=false,dealerships=[]}={}){
- const pages=['/salon.html','/','/xarita.html','/kredit.html','/haqqinda.html','/elaqe.html','/qaydalar.html','/mexfiyyet.html',...(wash?['/avtoyuma.html']:[]),...(sos?['/sos.html']:[])];
+ const pages=['/salon','/','/xarita.html','/kredit.html','/haqqinda.html','/elaqe.html','/qaydalar.html','/mexfiyyet.html',...(wash?['/avtoyuma.html']:[]),...(sos?['/sos.html']:[])];
  const urls=pages.map(p=>`<url><loc>${esc(origin+p)}</loc></url>`);
  for(const r of rows){
   if(!UUID.test(String(r.id)))continue;
   const d=r.updated_at?new Date(r.updated_at):null;
   urls.push(`<url><loc>${esc(`${origin}/elan?id=${r.id}`)}</loc>${d&&!Number.isNaN(d.getTime())?`<lastmod>${d.toISOString()}</lastmod>`:''}</url>`);
  }
- for(const p of dealerships)if(/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.slug))urls.push(`<url><loc>${esc(origin+'/salon.html?slug='+p.slug)}</loc></url>`);
+ for(const p of dealerships)if(/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(p.slug))urls.push(`<url><loc>${esc(origin+'/salon?slug='+p.slug)}</loc></url>`);
  return `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urls.join('')}</urlset>\n`;
 }
 
