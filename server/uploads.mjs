@@ -16,5 +16,7 @@ export async function upload(user,b,{spin=false,branding=false}={}){
  await s3.send(new PutObjectCommand({Bucket:process.env.S3_BUCKET,Key:`originals/${user.id}/${id}.webp`,Body:original,ContentType:'image/webp'}));
  await s3.send(new PutObjectCommand({Bucket:process.env.S3_BUCKET,Key:key,Body:output,ContentType:'image/webp',CacheControl:'public,max-age=31536000,immutable'}));url=`${process.env.S3_PUBLIC_URL.replace(/\/$/,'')}/${key}`;
  }else if(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL){await mkdir('.data/originals',{recursive:true});await writeFile(`.data/originals/${id}.webp`,original);await mkdir('.data/uploads',{recursive:true});await writeFile(`.data/uploads/${id}.webp`,output);url=`/media/${id}.webp`;}else fail(503,'Şəkil yükləmə xidməti hələ qoşulmayıb.');
+ // Branding assets must never be attachable to listing galleries or bypass their watermark.
+ if(branding)return {url};
  await query('INSERT INTO images(id,user_id,url,sort_order) VALUES($1,$2,$3,$4)',[id,user.id,url,spin?100:0]);return {id,url};
 }
