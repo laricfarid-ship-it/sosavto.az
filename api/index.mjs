@@ -95,6 +95,10 @@ export default async function handler(req,res){
  if(detail){
  const id=uuid(detail[1]);const l=(await query(`SELECT ${projection},u.fullname AS seller FROM listings l JOIN users u ON u.id=l.user_id WHERE l.id=$1`,[id])).rows[0];if(!l||l.details?._deleted)fail(404,'Elan tapılmadı.');
  const owner=user?.id===l.user_id;
+ if(method==='GET'&&l.status==='active'){
+  const salon=(await query("SELECT slug,display_name FROM dealership_profiles WHERE owner_user_id=$1 AND status='approved'",[l.user_id])).rows[0];
+  if(salon)l.dealership={slug:salon.slug,name:salon.display_name};
+ }
  if(method==='GET'){
  if(l.status!=='active'&&!owner&&user?.role!=='admin')fail(404,'Elan tapılmadı.');
  if(l.status==='active'&&!owner)await query('UPDATE listings SET views=views+1 WHERE id=$1',[id]);
