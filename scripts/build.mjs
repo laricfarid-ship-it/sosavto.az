@@ -1,3 +1,4 @@
+if(process.env.VERCEL_ENV==='production')await import('../server/listing-number-migrate.mjs');
 if(process.env.VERCEL_ENV==='production')await import('../server/admin-workspace-migrate.mjs');
 if(process.env.VERCEL_ENV==='production')await import('../server/dealership-migrate.mjs');
 if(process.env.VERCEL_ENV==='production')await import('../server/push-migrate.mjs');

@@ -14,8 +14,9 @@ import {sos} from '../server/sos.mjs';
 import {query,transaction} from '../server/db.mjs';
 import {HttpError,fail,hash,safeUser,session,createSession,requireUser,requireAdmin,originCheck,rateLimit,clientAddress,body,text,uuid} from '../server/security.mjs';
 import {listingInput,columns,projection,search} from '../server/listings.mjs';
-import {dealership} from '../server/dealerships.mjs';
+import {dealership,dealershipInput,createDealership} from '../server/dealerships.mjs';
 import {upload} from '../server/uploads.mjs';
+import {dealershipSeo} from '../server/dealership-seo.mjs';
 import {seoPage} from '../server/seo.mjs';
 import {admin2fa,verifyAdminLogin,issueAdminChallenge,challengeUser,consumeChallenge} from '../server/admin-2fa.mjs';
 const json=(res,status,data)=>{res.statusCode=status;res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(data));};
@@ -29,6 +30,7 @@ export default async function handler(req,res){
  const address=clientAddress(req);
  await rateLimit(`api:ip:${address}`,300,60);
  if(['/sitemap.xml','/elan'].includes(path)&&['GET','HEAD'].includes(method))return seoPage(req,res,path,url);
+ if(path==='/salon.html'&&['GET','HEAD'].includes(method))return dealershipSeo(req,res,url);
  const user=await session(req);
  if(path==='/api/admin/push')return json(res,200,await pushApi(req,user,method));
  if(path==='/api/admin/2fa/verify-login'&&method==='POST'){
@@ -54,7 +56,8 @@ export default async function handler(req,res){
  const email=identifier;if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))fail(400,'Email ünvanını düzgün yazın.');
  const username=text(b.username,'İstifadəçi adı',3,30).toLowerCase();if(!/^[a-z0-9_]+$/.test(username))fail(400,'İstifadəçi adı üçün latın hərfləri, rəqəm və alt xətt istifadə edin.');
  const fullname=text(b.fullname,'Ad və soyad',2,100);const id=randomUUID();
- try{await query('INSERT INTO users(id,fullname,username,email,password_hash) VALUES($1,$2,$3,$4,$5)',[id,fullname,username,email,await bcrypt.hash(password,12)]);}catch(e){if(e.code==='23505')fail(409,'Bu email və ya istifadəçi adı artıq istifadə olunur.');throw e;}
+ const salon=b.account_type==='salon'?dealershipInput(b):null;
+ try{const passwordHash=await bcrypt.hash(password,12);await transaction(async c=>{await c.query('INSERT INTO users(id,fullname,username,email,password_hash) VALUES($1,$2,$3,$4,$5)',[id,fullname,username,email,passwordHash]);if(salon)await createDealership(c,id,salon);});}catch(e){if(e.code==='23505')fail(409,'Bu email və ya istifadəçi adı artıq istifadə olunur.');throw e;}
  const u=(await query('SELECT * FROM users WHERE id=$1',[id])).rows[0];await createSession(res,u);await adminEvent('register',{id:u.id,name:u.fullname});return json(res,201,{user:safeUser(u)});
  }
  const u=(await query('SELECT * FROM users WHERE email=$1 OR username=$1',[identifier])).rows[0];
@@ -86,8 +89,8 @@ export default async function handler(req,res){
  const rows=(await query(`SELECT ${projection} FROM listings l WHERE ${s.where} ORDER BY ${s.order} LIMIT 24 OFFSET $${s.args.length+1}`,[...s.args,(s.page-1)*24])).rows;return json(res,200,{listings:rows,total,page:s.page,pages:Math.ceil(total/24)});
  }
  if(path==='/api/listings'&&method==='POST'){
- requireUser(user);await rateLimit(`create:${user.id}`,20,3600);const v=listingInput(await body(req));const id=randomUUID();
- await transaction(async c=>{await c.query(`INSERT INTO listings(id,user_id,${columns.join(',')}) VALUES(${Array.from({length:columns.length+2},(_,i)=>'$'+(i+1)).join(',')})`,[id,user.id,...columns.map(k=>v[k])]);await imagesFor(c,user,id,v.imageIds,v.spinImageIds,v.category);});await adminEvent('listing',{id});return json(res,201,{id,status:'pending'});
+ requireUser(user);const approvedSalon=(await query("SELECT id FROM dealership_profiles WHERE owner_user_id=$1 AND status='approved'",[user.id])).rows.length>0;await rateLimit(`create:${user.id}`,approvedSalon?150:20,3600);const v=listingInput(await body(req));const id=randomUUID();let listingNumber;
+ await transaction(async c=>{await c.query(`INSERT INTO listings(id,user_id,${columns.join(',')}) VALUES(${Array.from({length:columns.length+2},(_,i)=>'$'+(i+1)).join(',')})`,[id,user.id,...columns.map(k=>v[k])]);await imagesFor(c,user,id,v.imageIds,v.spinImageIds,v.category);listingNumber=(await c.query('SELECT listing_number FROM listings WHERE id=$1',[id])).rows[0].listing_number;});await adminEvent('listing',{id});return json(res,201,{id,listing_number:listingNumber,url:'/elan?id='+id,status:'pending'});
  }
  if(path==='/api/my-listings'&&method==='GET'){
  requireUser(user);return json(res,200,{listings:(await query(`SELECT ${projection} FROM listings l WHERE l.user_id=$1 AND NOT (l.details @> '{"_deleted":true}'::jsonb) ORDER BY l.created_at DESC`,[user.id])).rows});
