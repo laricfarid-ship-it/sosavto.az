@@ -14,7 +14,7 @@ The premium admin sidebar contains `Story idarəetməsi`: active story images, a
 
 ## Database and media
 
-`server/stories-schema.sql` is additive and compatible with the earlier stories branch's table. `scripts/build.mjs` applies it transactionally on production Vercel builds and aborts a deployment if migration fails. Local full-schema initialization includes the same schema. No existing stories, trials or listing media are dropped by migration.
+`server/stories-schema.sql` is additive and compatible with the earlier stories branch's table. `scripts/build.mjs` applies it transactionally on production and preview Vercel builds and aborts a deployment if migration fails. Local full-schema initialization includes the same schema. No existing stories, trials or listing media are dropped by migration.
 
 New uploaded images use the existing S3/R2 configuration with keys under `stories/`; local development uses `.data/uploads`. Read requests perform bounded cleanup at most once per warm instance per minute. DeleteObject permission is needed for cleanup. A failed deletion leaves its database row available for a later cleanup attempt. Shared listing photos are never deleted. This is request-driven cleanup, so objects can remain longer than 24 hours when the site has no traffic; visibility still expires exactly on the server.
 

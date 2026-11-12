@@ -1,4 +1,4 @@
-if(process.env.VERCEL_ENV==='production')await import('../server/stories-migrate.mjs');
+if(['production','preview'].includes(process.env.VERCEL_ENV))await import('../server/stories-migrate.mjs');
 if(process.env.VERCEL_ENV==='production')await import('../server/listing-number-migrate.mjs');
 if(process.env.VERCEL_ENV==='production')await import('../server/admin-workspace-migrate.mjs');
 if(process.env.VERCEL_ENV==='production')await import('../server/dealership-migrate.mjs');
