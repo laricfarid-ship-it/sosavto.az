@@ -4,6 +4,7 @@ import {readFile} from 'node:fs/promises';
 import {randomUUID} from 'node:crypto';
 import {Readable} from 'node:stream';
 import sharp from 'sharp';
+for(const key of ['S3_BUCKET','S3_PUBLIC_URL','S3_ENDPOINT','S3_REGION','S3_ACCESS_KEY_ID','S3_SECRET_ACCESS_KEY'])delete process.env[key];
 process.env.LOCAL_DATABASE='true';process.env.LOCAL_DB_PATH='memory://';process.env.APP_ORIGIN='http://localhost:4173';delete process.env.DATABASE_URL;delete process.env.VERCEL;
 const {database,query,close}=await import('../server/db.mjs');
 const {createSession}=await import('../server/security.mjs');
