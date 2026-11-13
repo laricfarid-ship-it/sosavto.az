@@ -1,3 +1,4 @@
+import {rentacar,rentalEnabled} from '../server/rentacar.mjs';
 import {stories} from '../server/stories.mjs';
 import {socialSharePreview,publishSocial,socialConfigured,socialShareEnabled,socialConnectionReport,instagramPostPermalink} from '../server/social-share.mjs';
 import {adminEvent,pushApi} from '../server/admin-push.mjs';
@@ -28,6 +29,8 @@ export default async function handler(req,res){
  const url=new URL(req.url,'http://localhost'); const path=url.pathname.replace(/\/$/,'');const method=req.method;
  originCheck(req);
  if(path==='/api/config'&&method==='GET')return json(res,200,{passwordReset:resetEnabled(),wash:washEnabled(),sos:process.env.SOS_ENABLED==='true',ai:assistantConfig().enabled,aiProvider:assistantConfig().provider,uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
+ if(path==='/api/rentacar/config'&&method==='GET')return json(res,200,{enabled:rentalEnabled(),mode:process.env.VERCEL_ENV==='production'?'live':'test'});
+ if(path.startsWith('/api/rentacar/')&&!rentalEnabled())return json(res,503,{error:'Rent a Car önizləmə rejimindədir. Real rezervasiya aktiv deyil.'});
  const address=clientAddress(req);
  await rateLimit(`api:ip:${address}`,300,60);
  if(['/sitemap.xml','/elan'].includes(path)&&['GET','HEAD'].includes(method))return seoPage(req,res,path,url);
@@ -45,6 +48,7 @@ export default async function handler(req,res){
  if(path.startsWith('/api/dealerships/'))return json(res,method==='POST'?201:200,await dealership(req,user,path,method));
  if(path.startsWith('/api/wash/'))return json(res,200,await wash(req,user,path,method));
  if(path.startsWith('/api/sos/'))return json(res,200,await sos(req,user,path,method));
+ if(path.startsWith('/api/rentacar/'))return json(res,200,await rentacar(req,user,path,method,url));
  if(path==='/api/me'&&method==='GET')return json(res,200,{user:safeUser(user)});
  if(['/api/register','/api/login'].includes(path)&&method==='POST'){
  await rateLimit(`auth:ip:${address}`,60,900);

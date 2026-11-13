@@ -1,3 +1,5 @@
+import {rentalEnabled} from '../server/rentacar.mjs';
+if(rentalEnabled())await (await import('../server/rentacar-migrate.mjs')).migrateRentalSchema();
 if(['production','preview'].includes(process.env.VERCEL_ENV))await import('../server/stories-migrate.mjs');
 if(process.env.VERCEL_ENV==='production')await import('../server/listing-number-migrate.mjs');
 if(process.env.VERCEL_ENV==='production')await import('../server/admin-workspace-migrate.mjs');
