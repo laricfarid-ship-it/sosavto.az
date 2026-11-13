@@ -4,7 +4,7 @@ import {randomUUID} from 'node:crypto';
 import {Readable} from 'node:stream';
 import {readFile} from 'node:fs/promises';
 process.env.LOCAL_DATABASE='true';process.env.LOCAL_DB_PATH='memory://';process.env.APP_ORIGIN='http://localhost:4173';process.env.RENTACAR_ENABLED='true';process.env.RENTACAR_ISOLATED_DB='true';delete process.env.DATABASE_URL;delete process.env.VERCEL_ENV;
-const {database,query,close}=await import('../server/db.mjs');
+const {database,query,transaction,close}=await import('../server/db.mjs');
 const {hash}=await import('../server/security.mjs');
 const {rentalDates,rentalQuote}=await import('../server/rentacar.mjs');
 const {rentalToday}=await import('../assets/rentacar-shared.js');
@@ -84,7 +84,7 @@ test('admin and owner dashboards are scoped and actions are auditable',async()=>
 });
 test('additive migration reruns preserve insurance, user accounts and rental bookings',async()=>{
  const users=(await query('SELECT count(*) AS n FROM users')).rows[0].n,bookings=(await query('SELECT count(*) AS n FROM rental_bookings')).rows[0].n;
- await (await database()).exec(await readFile(new URL('../server/rentacar-schema.sql',import.meta.url),'utf8'));
+ const sql=await readFile(new URL('../server/rentacar-schema.sql',import.meta.url),'utf8');await transaction(async c=>{for(const statement of sql.split(';').map(s=>s.trim()).filter(Boolean))await c.query(statement);});
  assert.equal((await query('SELECT count(*) AS n FROM users')).rows[0].n,users);assert.equal((await query('SELECT count(*) AS n FROM rental_bookings')).rows[0].n,bookings);
  assert.equal((await query('SELECT title,status FROM listings WHERE id=$1',[insurance])).rows[0].title,'Legacy insurance');
 });

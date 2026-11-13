@@ -55,3 +55,7 @@ Miqrasiya mövcud Sığorta/listings/users cədvəllərini dəyişmir. Təkrar i
 - Ödəniş, SMS/email rezervasiya bildirişləri, əlavə sığorta və müqavilə imzalanması qoşulmayıb.
 - Rezervasiya pending olduqda tarix ayrılmır; yalnız sahib/admin təsdiqi intervalı bağlayır. Qiymət ən sərfəli tam günlük/həftəlik/30 günlük paket birləşməsi ilə hesablanır. Depozit ayrıca göstərilir; ödəniş alındığı iddia edilmir.
 - İctimai kataloq ən çox 100, panel siyahıları ən çox 200 qeyd göstərir; geniş miqyaslı istifadə üçün səhifələmə ayrıca tamamlanmalıdır.
+
+### Test runner sabitliyi
+
+Paralel `--test-force-exit` rejimində frontend suite bəzən axırıncı testləri icra etmədən 0 exit code qaytarırdı (say 213/226 kimi dəyişirdi). Eyni kod ardıcıl rejimdə 234 testi tamamlayır. `npm test` üçün `--test-concurrency=1` və 60 saniyəlik test timeout əlavə edildi; bundan sonra CI-də yalnız yaşıl status deyil, tam test sayı da yoxlanmalıdır.
