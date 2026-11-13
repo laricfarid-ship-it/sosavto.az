@@ -13,13 +13,17 @@ async function expire(c){
  const stale=(await c.query("UPDATE sos_requests SET status='expired',updated_at=now() WHERE status IN ('searching','offered') AND expires_at<=now() RETURNING id,driver_id,master_id")).rows;
  for(const r of stale){await c.query("UPDATE sos_dispatches SET status='closed' WHERE request_id=$1 AND status IN ('pending','accepted')",[r.id]);await event(c,r.id,null,'expired');}
 }
-async function dispatch(c,r){
+async function nearby(c,r){
  const candidates=(await c.query(`SELECT m.* FROM sos_masters m JOIN users u ON u.id=m.user_id
  WHERE m.approval='approved' AND m.online AND m.location_at>now()-interval '90 seconds' AND u.status='active'
  AND m.user_id<>$1 AND $2=ANY(m.specialties)
- AND NOT EXISTS(SELECT 1 FROM sos_requests s WHERE s.master_id=m.user_id AND s.status IN ('offered','en_route','arrived'))`,[r.driver_id,r.problem])).rows;
+ AND m.latitude IS NOT NULL AND m.longitude IS NOT NULL
+ AND NOT EXISTS(SELECT 1 FROM sos_requests s WHERE (s.master_id=m.user_id AND s.status IN ('offered','en_route','arrived')) OR (s.driver_id=m.user_id AND s.status IN ('searching','offered','en_route','arrived')))`,[r.driver_id,r.problem])).rows;
  const near=candidates.map(m=>({...m,km:distance(r.latitude,r.longitude,m.latitude,m.longitude)})).filter(m=>m.km<=8).sort((a,b)=>a.km-b.km).slice(0,10);
- for(const m of near)await c.query('INSERT INTO sos_dispatches(request_id,master_id,distance_km) VALUES($1,$2,$3) ON CONFLICT DO NOTHING',[r.id,m.user_id,m.km]);
+ return near;
+}
+async function dispatch(c,r){
+ for(const m of await nearby(c,r))await c.query('INSERT INTO sos_dispatches(request_id,master_id,distance_km) VALUES($1,$2,$3) ON CONFLICT DO NOTHING',[r.id,m.user_id,m.km]);
 }
 async function requestView(c,r,user){
  const mine=r.driver_id===user.id,assigned=r.master_id===user.id;
@@ -41,6 +45,10 @@ export async function sos(req,user,path,method){
  requireUser(user);
  if(method!=='GET')await rateLimit(`sos:${user.id}`,120,60);
  await transaction(expire);
+ if(path==='/api/sos/availability'&&method==='POST'){
+ const b=await body(req),[latitude,longitude]=coords(b);if(!problems.includes(b.problem))fail(400,'Problem növünü seçin.');
+ return transaction(async c=>{const matches=await nearby(c,{driver_id:user.id,problem:b.problem,latitude,longitude});return {availability:{count:matches.length,radius_km:8,nearest_km:matches.length?Math.round(matches[0].km*10)/10:null,checked_at:new Date().toISOString()}};});
+ }
  if(path==='/api/sos/master'&&method==='GET')return {master:(await query("SELECT *,online AND location_at>now()-interval '90 seconds' AS available FROM sos_masters WHERE user_id=$1",[user.id])).rows[0]||null};
  if(path==='/api/sos/master'&&method==='POST'){
  const b=await body(req);const p=phone(b.phone);if(!Array.isArray(b.specialties)||!b.specialties.length||b.specialties.some(v=>!problems.includes(v)))fail(400,'Ən azı bir ixtisas seçin.');
