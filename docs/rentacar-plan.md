@@ -22,3 +22,36 @@ Serverdə tarix aralığı yoxlanması, ikiqat rezervasiyanın qarşısı, sifar
 
 ## Buraxılış
 Test branch -> avtomatik testlər -> preview deploy -> mobil/desktop QA -> istifadəçi təsdiqi -> ayrıca canlı buraxılış. Canlı sayt və main budağı bu mərhələdə dəyişdirilməsin.
+
+## 2026-11-14 — test budağında icra olunan mərhələ
+
+- `e0b5b26` yoxlamasında 15 frontend testi eyni `$('[data-category]').forEach` xətası ilə dayanırdı. `$$` seçicisi ilə düzəldildi; Sığorta kateqoriyasının köhnə filtri və məlumat modeli qorunur.
+- Rent a Car səhifəsi ayrıca CSS/JS istifadə edir. CSP inline skriptləri blokladığı üçün ilkin formanın inline skripti çıxarıldı.
+- Real stock fotolar, tünd/silver dizayn, mobil düzülüş, animasiya və reduced-motion dəstəyi; nümunə kolleksiya, şəhər/sinif filtri, günlük/həftəlik/aylıq qiymətlər, elan detalı, tarix üzrə qiymət hesablaması.
+- `rental_*` adlarında ayrıca cədvəllər, sahibi və adminə görə icazələr, şirkət/fərdi profil yoxlaması, elan moderasiyası, rezervasiya sorğusu/təsdiq/rədd/ləğv/tamamlanma və audit API-si.
+- Hər elan üçün identity nömrəsi və paylaşım URL-si. Profil/elan qiymət və şərtləri rezervasiyada snapshot kimi saxlanılır.
+- Eyni avtomobil üzrə create/confirm/cancel/complete əməliyyatları eyni parent sətrini `FOR UPDATE` ilə kilidləyir. Təsdiqdə toqquşma transaction daxilində yenidən yoxlanır. Götürmə günü daxil, qaytarma günü xaric intervaldır.
+- İcarə paneli və premium admin panelinin Rent a Car bölməsi həmin API-yə qoşulub; hazırkı Vercel preview-də məlumat yazılması aktiv deyil.
+
+### Təhlükəsiz aktivləşdirmə
+
+Bu mərhələdə Vercel preview dizayn/sınaq kataloqudur. Real elan, sahib yoxlaması və rezervasiya axını ayrıca yerli yaddaş bazasında avtomatik testlərlə yoxlanıb. Uzaq preview bazasında tam giriş → elan → admin təsdiqi → rezervasiya axını hələ yoxlanmayıb.
+
+API yalnız `RENTACAR_ENABLED=true` və `RENTACAR_ISOLATED_DB=true` birlikdə olduqda aktivdir. `VERCEL_ENV=production` olduqda hər halda bağlıdır. Bu dəyişənləri mövcud canlı bazaya yönələn mühitdə aktivləşdirmək olmaz.
+
+Miqrasiya build skriptinə qoşulmayıb. Əvvəlcə ayrıca test bazasının ünvanı etibarlı mühit konfiqurasiyası ilə verilməli, mövcud əsas schema/auth sxemi həmin ayrıca bazada yaradılmalı, sonra:
+
+```sh
+RENTACAR_ISOLATED_DB=true node server/rentacar-migrate.mjs
+```
+
+Miqrasiya mövcud Sığorta/listings/users cədvəllərini dəyişmir. Təkrar işə salınması test edilib. Canlı məlumatlara heç bir manual miqrasiya və ya test yazısı göndərilməyib.
+
+### Məhdudiyyətlər / növbəti mərhələ
+
+- Ayrı uzaq test bazasının qoşulması və real browser sessiyaları ilə tam sahib/admin/icarəçi axınının yoxlanması.
+- Şəkillər ilkin mərhələdə HTTPS URL-lərlə əlavə edilir; telefondan birbaşa rental şəkil yükləmə interfeysi hələ yoxdur.
+- Sahib yoxlaması adminin əl ilə qərarı və audit qeydi ilə aparılır; avtomatik şəxsiyyət və sənəd yoxlama xidməti yoxdur.
+- Ödəniş, SMS/email rezervasiya bildirişləri, əlavə sığorta və müqavilə imzalanması qoşulmayıb.
+- Rezervasiya pending olduqda tarix ayrılmır; yalnız sahib/admin təsdiqi intervalı bağlayır. Qiymət ən sərfəli tam günlük/həftəlik/30 günlük paket birləşməsi ilə hesablanır. Depozit ayrıca göstərilir; ödəniş alındığı iddia edilmir.
+- İctimai kataloq ən çox 100, panel siyahıları ən çox 200 qeyd göstərir; geniş miqyaslı istifadə üçün səhifələmə ayrıca tamamlanmalıdır.
