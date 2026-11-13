@@ -253,6 +253,7 @@ const STRINGS = {
   "SosAvto yüklənir…": {en:"Loading SosAvto…",ru:"Загрузка SosAvto…"},
   "Avtomobillər": {en:"Cars",ru:"Автомобили"},
   "Bütün elanlar": {en:"All listings",ru:"Все объявления"},
+  "Kateqoriyalar": {en:"Categories",ru:"Категории"},
   "Ehtiyat hissələri": {en:"Spare parts",ru:"Запчасти"},
   "Usta və servis": {en:"Mechanics & service",ru:"Мастера и сервис"},
   "Avtoyuma": {en:"Car wash",ru:"Автомойка"},
