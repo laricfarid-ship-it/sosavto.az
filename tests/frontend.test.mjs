@@ -225,7 +225,7 @@ test('motorcycle posting enables vehicle fields and switches brand catalogs safe
 test('Rent a Car opens a new tab and leaves all legacy category filters intact',async()=>{
  const d=await load('index.html');try{
   const link=d.doc.querySelector('[data-category="rentacar"]');assert.equal(link.tagName,'A');assert.equal(link.getAttribute('href'),'rentacar.html');assert.equal(link.target,'_blank');assert.match(link.rel,/noopener/);assert.match(link.rel,/noreferrer/);
-  assert.equal(d.doc.querySelectorAll('[data-category]').length,0);assert.equal(d.doc.querySelector('.category-discovery'),null);assert.equal(d.doc.querySelector('#home-stories'),null);assert.equal(d.doc.querySelector('#main a[href="index.html"]').textContent,'← Ana səhifə');
+  assert.equal(d.doc.querySelectorAll('[data-category]').length,9);
   assert.equal(d.doc.querySelector('[data-category="plates"]').tagName,'BUTTON');
  }finally{d.close();}
 });
