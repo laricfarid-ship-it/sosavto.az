@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import {randomUUID} from 'node:crypto';
 import {Readable} from 'node:stream';
 import {readFile} from 'node:fs/promises';
-process.env.LOCAL_DATABASE='true';process.env.LOCAL_DB_PATH='memory://';process.env.APP_ORIGIN='http://localhost:4173';process.env.RENTACAR_ENABLED='true';process.env.RENTACAR_ISOLATED_DB='true';delete process.env.DATABASE_URL;delete process.env.VERCEL_ENV;
+process.env.LOCAL_DATABASE='true';process.env.LOCAL_DB_PATH='memory://';process.env.APP_ORIGIN='http://localhost:4173';process.env.RENTACAR_ENABLED='true';process.env.RENTACAR_ISOLATED_DB='true';delete process.env.DATABASE_URL;delete process.env.VERCEL_ENV;delete process.env.RENTACAR_PRODUCTION_APPROVED;
 const {database,query,transaction,close}=await import('../server/db.mjs');
 const {hash}=await import('../server/security.mjs');
 const {rentalDates,rentalQuote}=await import('../server/rentacar.mjs');
@@ -15,9 +15,9 @@ async function user(n,role='user'){const id=randomUUID(),token=randomUUID().repl
 async function call(path,u,method='GET',data,origin=process.env.APP_ORIGIN){const req=Readable.from(data?[JSON.stringify(data)]:[]);req.url='/api/rentacar'+path;req.method=method;req.headers={'content-type':'application/json',origin,...(u?{cookie:u.cookie}:{})};let result;const res={statusCode:200,setHeader(){},end(v){result=JSON.parse(v);}};await handler(req,res);return {code:res.statusCode,...result};}
 const post=(p,u,d)=>call(p,u,'POST',d),patch=(p,u,d)=>call(p,u,'PATCH',d);
 const carInput={title:'Premium test car',city:'Bakı',vehicle_type:'premium',year:2023,images:['https://example.test/car.jpg'],daily_cents:10000,weekly_cents:60000,monthly_cents:200000,deposit_cents:50000,terms:'Minimum yaş 25, təcrübə 3 il, 200 km/gün; təhvil Bakı, ləğv 48 saat əvvəl.'};
-const bookingInput=(start=2,end=5)=>({car_id:car.id,starts_on:future(start),ends_on:future(end),client_key:randomUUID(),expected_total_cents:rentalQuote(carInput,end-start)});
+const bookingInput=(start=2,end=5)=>({car_id:car.id,starts_on:future(start),ends_on:future(end),client_key:randomUUID(),phone:'+994501234567',expected_total_cents:rentalQuote(carInput,end-start)});
 before(async()=>{const db=await database();await db.exec(await readFile(new URL('../server/schema.sql',import.meta.url),'utf8'));await db.exec(await readFile(new URL('../server/rentacar-schema.sql',import.meta.url),'utf8'));owner=await user('rental_owner');a=await user('renter_a');b=await user('renter_b');admin=await user('rental_admin','admin');insurance=randomUUID();await query("INSERT INTO listings(id,user_id,category,title,description,price,city,phone,status) VALUES($1,$2,'insurance','Legacy insurance','Preserve me',100,'Bakı','+994501234567','active')",[insurance,owner.id]);});after(close);
-test('Rent a Car is off by default and always off in production, including explicitly enabled flags',async()=>{
+test('Rent a Car is off by default and production requires a separate approval flag',async()=>{
  delete process.env.RENTACAR_ENABLED;assert.equal((await call('/config')).enabled,false);assert.equal((await call('/cars')).code,503);
  process.env.RENTACAR_ENABLED='true';delete process.env.RENTACAR_ISOLATED_DB;assert.equal((await call('/config')).enabled,false);process.env.RENTACAR_ISOLATED_DB='true';
  process.env.VERCEL_ENV='production';assert.equal((await call('/config')).enabled,false);assert.equal((await post('/profile',owner,{})).code,503);delete process.env.VERCEL_ENV;
@@ -87,4 +87,34 @@ test('additive migration reruns preserve insurance, user accounts and rental boo
  const sql=await readFile(new URL('../server/rentacar-schema.sql',import.meta.url),'utf8');await transaction(async c=>{for(const statement of sql.split(';').map(s=>s.trim()).filter(Boolean))await c.query(statement);});
  assert.equal((await query('SELECT count(*) AS n FROM users')).rows[0].n,users);assert.equal((await query('SELECT count(*) AS n FROM rental_bookings')).rows[0].n,bookings);
  assert.equal((await query('SELECT title,status FROM listings WHERE id=$1',[insurance])).rows[0].title,'Legacy insurance');
+});
+
+test('production requires separate explicit approval; isolated preview flag alone cannot activate live rentals',async()=>{
+ process.env.VERCEL_ENV='production';assert.equal((await call('/config')).enabled,false);process.env.RENTACAR_PRODUCTION_APPROVED='true';assert.equal((await call('/config')).enabled,true);delete process.env.RENTACAR_PRODUCTION_APPROVED;delete process.env.VERCEL_ENV;
+});
+test('owner edits return to moderation, strangers cannot edit, active confirmed bookings prevent destructive changes',async()=>{
+ assert.equal((await call('/cars/'+car.id,a,'PUT',carInput)).code,404);
+ assert.equal((await call('/cars/'+car.id,owner,'PUT',carInput)).code,409);
+ assert.equal((await call('/cars/'+car.id,owner,'PATCH',{status:'archived'})).code,409);
+ const other=await post('/cars',owner,{...carInput,title:'Editable rental'});assert.equal(other.code,200);
+ const id=other.car.id;await patch('/admin/cars/'+id,admin,{status:'active'});
+ const edit=await call('/cars/'+id,owner,'PUT',{...carInput,title:'Updated rental',daily_cents:12000});assert.equal(edit.car.status,'pending');assert.equal(edit.car.title,'Updated rental');assert.equal(edit.car.listing_number,other.car.listing_number);
+ assert.equal((await call('/cars/'+id,owner,'PATCH',{status:'archived'})).code,200);
+});
+test('calendar reveals confirmed intervals only and notifications persist for participants',async()=>{
+ const r=await call('/cars/'+car.id+'/calendar');assert.equal(r.code,200);assert.equal(r.intervals.length,1);assert.equal(Object.hasOwn(r.intervals[0],'renter_id'),false);
+ const notifications=(await query('SELECT body FROM notifications WHERE user_id=$1',[owner.id])).rows;assert.ok(notifications.some(n=>n.body.includes('Rent a Car')));
+ assert.equal((await call('/cars?owner_id='+owner.id)).cars.every(c=>c.owner_id===owner.id),true);
+});
+test('rental uploads validate the image and attach only media owned by the listing owner',async()=>{
+ const sharp=(await import('sharp')).default;const image=await sharp({create:{width:100,height:100,channels:3,background:'#224466'}}).png().toBuffer();
+ assert.equal((await post('/uploads',a,{data:'data:image/png;base64,'+image.toString('base64')})).code,403);
+ const r=await post('/uploads',owner,{data:'data:image/png;base64,'+image.toString('base64')});assert.equal(r.code,200,JSON.stringify(r));assert.match(r.url,/^\/media\//);
+ const created=await post('/cars',owner,{...carInput,images:[r.url],media_ids:[r.id]});assert.equal(created.code,200,JSON.stringify(created));assert.equal((await query('SELECT car_id FROM rental_media WHERE id=$1',[r.id])).rows[0].car_id,created.car.id);
+ assert.equal((await post('/cars',b,{...carInput,images:[r.url],media_ids:[r.id]})).code,403);
+ assert.equal((await post('/uploads',owner,{data:'data:image/png;base64,bm90YW5pbWFnZQ=='})).code,400);
+});
+test('profile editing requires renewed verification and keeps old bookings and cars',async()=>{
+ const count=(await query('SELECT count(*) AS n FROM rental_bookings')).rows[0].n;
+ const r=await call('/profile',owner,'PATCH',{name:'Updated company',city:'Bakı',phone:'+994501234567'});assert.equal(r.profile.status,'pending');assert.equal((await call('/cars?owner_id='+owner.id)).cars.length,0);assert.equal((await query('SELECT count(*) AS n FROM rental_bookings')).rows[0].n,count);
 });

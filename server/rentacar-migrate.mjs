@@ -1,9 +1,11 @@
-// Explicit opt-in: no automatic build-time or production migration.
 import {readFile} from 'node:fs/promises';
+import {pathToFileURL} from 'node:url';
 import {transaction,close} from './db.mjs';
-if(process.env.VERCEL_ENV==='production'||process.env.RENTACAR_ISOLATED_DB!=='true')throw Error('Rent a Car requires an explicitly isolated test database.');
-try{
+import {rentalEnabled} from './rentacar.mjs';
+export async function migrateRentalSchema(){
+ if(!rentalEnabled())throw Error('Rent a Car migration requires explicit environment approval.');
  const sql=await readFile(new URL('./rentacar-schema.sql',import.meta.url),'utf8');
  await transaction(async c=>{for(const statement of sql.split(';').map(s=>s.trim()).filter(Boolean))await c.query(statement);});
- console.log('Rent a Car additive test schema ready.');
-}finally{await close();}
+ console.log('Rent a Car additive schema ready.');
+}
+if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){try{await migrateRentalSchema();}finally{await close();}}

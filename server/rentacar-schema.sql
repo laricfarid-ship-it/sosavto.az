@@ -38,3 +38,11 @@ CREATE TABLE IF NOT EXISTS rental_audit (
  action text NOT NULL, subject_id uuid NOT NULL,
  detail jsonb NOT NULL DEFAULT '{}', created_at timestamptz NOT NULL DEFAULT now()
 );
+
+ALTER TABLE rental_bookings ADD COLUMN IF NOT EXISTS renter_phone varchar(25) NOT NULL DEFAULT '';
+CREATE TABLE IF NOT EXISTS rental_media (
+ id uuid PRIMARY KEY,owner_id uuid NOT NULL REFERENCES users(id),
+ car_id uuid REFERENCES rental_cars(id),url text NOT NULL,created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS rental_cars_owner ON rental_cars(owner_id,created_at DESC);
+CREATE INDEX IF NOT EXISTS rental_bookings_renter ON rental_bookings(renter_id,created_at DESC);

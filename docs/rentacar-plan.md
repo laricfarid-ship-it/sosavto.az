@@ -59,3 +59,17 @@ Miqrasiya mövcud Sığorta/listings/users cədvəllərini dəyişmir. Təkrar i
 ### Test runner sabitliyi
 
 Paralel `--test-force-exit` rejimində frontend suite bəzən axırıncı testləri icra etmədən 0 exit code qaytarırdı (say 213/226 kimi dəyişirdi). Eyni kod ardıcıl rejimdə 234 testi tamamlayır. `npm test` üçün `--test-concurrency=1` və 60 saniyəlik test timeout əlavə edildi; bundan sonra CI-də yalnız yaşıl status deyil, tam test sayı da yoxlanmalıdır.
+
+## 2026-11-14 — işlək idarəetmə və canlı buraxılış hazırlığı
+
+İstifadəçi bu mərhələdə panellərin tamamlanmasını və canlıya buraxılmasını açıq şəkildə istədi.
+
+- Admin idarəetməsi mövcud premium mərkəzin Rent a Car menyusundadır. Statistika, status filtri, sahib yoxlama forması, elan moderasiyası və rezervasiya keçidləri əlavə olundu. Rent a Car sahib panelində ikinci admin paneli yaradılmır; admin mərkəzinə keçid göstərilir.
+- Sahib paneli: öz avtomobilləri, gələn sorğular, şəxsi icarələr, tərəfdaş profili; şəkil yükləmə, elan yaratma/redaktə/arxiv, profilin yenidən yoxlanması.
+- Şəkillər mövcud S3/R2 konfiqurasiyası ilə `rentals/test/` və `rentals/live/` qovluqlarına, ayrıca rental_media cədvəlinə yazılır. Digər elanların şəkillərinə toxunulmur.
+- Yeni rezervasiya, qərar və moderasiya bildirişləri mövcud sayt daxili notifications cədvəlinə transaction daxilində yazılır. Email/SMS çatdırılması qoşulmayıb.
+- Şirkət üzrə filtr qorunur; elan təqvimində təsdiqli intervallar göstərilir. İcarəçi əlaqə telefonu rezervasiyada yalnız səlahiyyətli panellərə göstərilir.
+- Aktiv təsdiqli rezervasiyası olan elanı sahib dəyişə/arxivləyə bilmir. Elan redaktəsi yeni moderasiya tələb edir; profil dəyişməsi yeni sahib yoxlaması tələb edir.
+- Neon test budağı: `br-sweet-fog-aupo05mh`, `sosavto-rentacar-test-20261114`, parent production branch. Yeni schema yalnız bu ayrıca budaqda tətbiq və yoxlanılıb. Vercel-də DATABASE_URL yalnız `feat/rentacar-replace-insurance` preview budağı üçün ayrıca konfiqurasiya edilib.
+- Canlı rejim üçün həm `RENTACAR_ENABLED=true`, həm `RENTACAR_PRODUCTION_APPROVED=true` tələb olunur. Sadəcə preview/isolated flag canlı modulu aça bilməz. Təsdiqli mühitdə build yalnız additive rental schema miqrasiyasını transaction daxilində tətbiq edir. Miqrasiya alınmasa build dayanır.
+- Son yerli yoxlama: 243/243 test keçdi. Tam browser/preview və son CI/deploy statusları buraxılış nəticəsində ayrıca qeyd olunmalıdır.

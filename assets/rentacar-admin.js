@@ -1,27 +1,30 @@
 import {rentalStatus} from './rentacar-shared.js';
-const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+import {escapeRental as esc,rentalMoney as money,rentalDate as date,rentalImage as image,rentalApi as api,rentalPanelStyles,rentalTabs,rentalMetric} from './rentacar-panel-shared.js';
 export async function mountRentalAdmin(pane){
- const api=async(path,method='GET',data)=>{const r=await fetch('/api/rentacar/'+path,{method,headers:method==='GET'?{}:{'Content-Type':'application/json'},...(data?{body:JSON.stringify(data)}:{})});const b=await r.json();if(!r.ok)throw Error(b.error||'Sorğu alınmadı.');return b;};
- const config=await api('config');
- pane.innerHTML='<h2>Rent a Car idarəetməsi</h2><p data-rental-status role="status"></p><div data-rental-data></div>';
- const status=pane.querySelector('[data-rental-status]'),content=pane.querySelector('[data-rental-data]');
- if(!config.enabled){status.textContent='Rent a Car test önizləməsidir. Ayrı test bazası aktivləşdirilməyib; real elan və rezervasiya qəbul edilmir.';content.innerHTML='<a href="rentacar.html" target="_blank" rel="noopener noreferrer">Dizayn önizləməsinə bax ↗</a>';return;}
- async function refresh(){
-  const d=await api('admin');
-  const row=(x,body)=>'<article class="panel-row"><strong>'+esc(x.name||x.title||x.id)+'</strong><p>'+body+'</p></article>';
-  const buttons=(kind,id,items)=>items.map(([action,label])=>'<button type="button" data-kind="'+kind+'" data-id="'+esc(id)+'" data-action="'+action+'">'+label+'</button>').join(' ');
-  content.innerHTML='<h3>Sahib yoxlamaları</h3>'+d.profiles.map(p=>row(p,esc(p.kind==='company'?'Şirkət':'Fərdi sahib')+' · '+esc(p.city)+' · '+esc(p.phone)+' · '+esc(rentalStatus[p.status])+'<br>'+esc(p.review_note)+'<br>'+buttons('profiles',p.user_id,[['approved','Təsdiqlə'],['rejected','Rədd et']]))).join('')+'<h3>İcarə elanları</h3>'+d.cars.map(c=>row(c,'R-'+esc(c.listing_number)+' · '+esc(c.owner_name)+' · '+esc(rentalStatus[c.status])+'<br>'+buttons('cars',c.id,[['active','Dərc et'],['rejected','Rədd et'],['archived','Arxivlə']]))).join('')+'<h3>Rezervasiyalar</h3>'+d.bookings.map(b=>row(b,esc(b.starts_on)+' → '+esc(b.ends_on)+' · '+esc(rentalStatus[b.status])+'<br>'+buttons('bookings',b.id,b.status==='pending'?[['confirm','Təsdiqlə'],['reject','Rədd et']]:b.status==='confirmed'?[['cancel','Ləğv et'],['complete','Tamamla']]:[]))).join('')+'<h3>Əməliyyat tarixçəsi</h3>'+d.audit.map(a=>row(a,esc(a.action)+' · '+esc(a.created_at)+' · '+esc(JSON.stringify(a.detail)))).join('');
+ rentalPanelStyles(pane.ownerDocument);pane.classList.add('rental-console');
+ if(!(await api('config')).enabled){pane.innerHTML='<h2>Rent a Car idarəetməsi</h2><div class="rp-empty">Modul test rejimindədir. Real elan və rezervasiya qəbul edilmir.<p><a class="rp-link" href="rentacar.html" target="_blank" rel="noopener noreferrer">Rent a Car səhifəsinə bax ↗</a></p></div>';return;}
+ let data,tab='profiles',filter='all';
+ const feedback=(s,error=false)=>{const el=pane.querySelector('[data-feedback]');el.textContent=s;el.classList.toggle('rp-error',error);};
+ async function refresh(){data=await api('admin');render();}
+ function render(){
+  pane.innerHTML=`<div class="rp-intro"><div><div class="rp-kicker">SOSAVTO / RENTAL CONTROL</div><h2>İcarə idarəetmə mərkəzi</h2><p>Şirkətlər, fərdi sahiblər, avtomobil parkı və rezervasiyalar.</p></div><a class="rp-link" href="rentacar.html" target="_blank" rel="noopener noreferrer">İctimai səhifə ↗</a></div><div class="rp-metrics">${rentalMetric(data.profiles.filter(p=>p.status==='pending').length,'Sahib təsdiqi gözləyir')}${rentalMetric(data.cars.filter(c=>c.status==='pending').length,'Elan təsdiqi gözləyir')}${rentalMetric(data.cars.filter(c=>c.status==='active').length,'Aktiv avtomobillər')}${rentalMetric(data.bookings.filter(b=>b.status==='confirmed').length,'Təsdiqli rezervasiyalar')}</div><div class="rp-toolbar" role="tablist" aria-label="İcarə idarəetməsi">${rentalTabs([['profiles','Sahiblər'],['cars','Elanlar'],['bookings','Rezervasiyalar'],['audit','Tarixçə']],tab)}<label class="rp-filter">Status<select data-filter><option value="all">Hamısı</option>${Object.entries(rentalStatus).map(([k,v])=>`<option value="${k}" ${filter===k?'selected':''}>${v}</option>`).join('')}</select></label></div><p class="rp-feedback" role="status" data-feedback></p><div data-review></div><div data-list></div>`;renderList();
  }
- content.addEventListener('click',async e=>{
-  const b=e.target.closest('[data-kind]');if(!b)return;b.disabled=true;
-  try{
-   if(b.dataset.kind==='bookings')await api('bookings/'+b.dataset.id+'/'+b.dataset.action,'POST',{});
-   else{
-    const note=window.prompt('Yoxlama qeydi: sənədləri və icarəyə vermə səlahiyyətini necə yoxladınız? Şəxsi sənəd nömrəsi yazmayın.');if(note===null)return;
-    await api('admin/'+b.dataset.kind+'/'+b.dataset.id,'PATCH',{status:b.dataset.action,note});
-   }
-   status.textContent='Əməliyyat saxlanıldı.';await refresh();
-  }catch(e){status.textContent=e.message;}finally{b.disabled=false;}
- });
+ const actions=(kind,id,items)=>`<div class="rp-actions">${items.map(([action,label])=>`<button data-kind="${kind}" data-id="${esc(id)}" data-action="${action}">${label}</button>`).join('')}</div>`;
+ function renderList(){
+  const list=pane.querySelector('[data-list]');const items=data[tab].filter(x=>filter==='all'||x.status===filter);
+  if(!items.length){list.innerHTML='<div class="rp-empty">Seçilən statusda qeyd yoxdur.</div>';return;}
+  if(tab==='profiles')list.innerHTML=items.map(p=>`<article class="rp-row"><div class="rp-body"><span class="rp-tag">${esc(rentalStatus[p.status])} · ${p.kind==='company'?'Şirkət':'Fərdi sahib'}</span><h3>${esc(p.name)}</h3><p>${esc(p.city)} · ${esc(p.phone)}<br>${esc(p.review_note)}</p>${actions('profiles',p.user_id,[['approved','Yoxla və təsdiqlə'],['rejected','Rədd et']])}</div></article>`).join('');
+  else if(tab==='cars')list.innerHTML=items.map(c=>`<article class="rp-row"><img class="rp-cover" src="${esc(image(c.images[0]))}" alt="${esc(c.title)}"><div class="rp-body"><span class="rp-tag">R-${esc(c.listing_number)} · ${esc(rentalStatus[c.status])}</span><h3>${esc(c.title)}</h3><p>${esc(c.owner_name)} · ${esc(c.city)} · ${esc(c.year)}<br>${money(c.daily_cents)} / gün · ${money(c.weekly_cents)} / həftə · ${money(c.monthly_cents)} / ay<br>Depozit: ${money(c.deposit_cents)}<br>${esc(c.terms)}</p>${actions('cars',c.id,[['active','Dərc et'],['rejected','Rədd et'],['archived','Arxivlə']])}</div></article>`).join('');
+  else if(tab==='bookings')list.innerHTML=items.map(b=>`<article class="rp-row"><div class="rp-body"><span class="rp-tag">${esc(rentalStatus[b.status])}</span><h3>${esc(b.title)}</h3><p>${date(b.starts_on)} → ${date(b.ends_on)} · ${money(b.total_cents)}<br>Əlaqə: ${esc(b.renter_phone||'Qeyd edilməyib')}<br>Rezervasiya: ${esc(b.id)}</p>${actions('bookings',b.id,b.status==='pending'?[['confirm','Təsdiqlə'],['reject','Rədd et']]:b.status==='confirmed'?[['cancel','Ləğv et'],['complete','Tamamla']]:[])}</div></article>`).join('');
+  else list.innerHTML=items.map(a=>`<div class="rp-audit"><strong>${esc(a.action)}</strong><p>${esc(a.created_at)} · ${esc(a.subject_id)}</p><p>${esc(JSON.stringify(a.detail))}</p></div>`).join('');
+ }
+ function review(b){
+  const host=pane.querySelector('[data-review]'),profile=b.dataset.kind==='profiles';
+  host.innerHTML=`<section class="rp-editor"><h3>${profile?'Sahib yoxlaması':'Elan qərarı'}</h3><p>${profile?'Şirkət/fərdi sahibin icarəyə vermə səlahiyyətini əlaqə saxlayaraq yoxla. Şəxsi sənəd nömrələrini qeydə yazma.':'Şəkilləri, qiymətləri və icarə şərtlərini nəzərdən keçir.'}</p><form class="rp-form" data-decision><label class="rp-wide">Yoxlama qeydi<textarea name="note" rows="3" maxlength="500" ${profile?'minlength="10" required':''}></textarea></label>${profile&&b.dataset.action==='approved'?'<label class="rp-wide"><span><input style="width:auto" type="checkbox" required> Sahiblik/icarə səlahiyyəti yoxlanıldı</span></label>':''}<button class="rp-primary" type="submit">Qərarı saxla</button><button type="button" data-review-close>Bağla</button></form></section>`;
+  host.querySelector('form').onsubmit=async e=>{e.preventDefault();const submit=e.target.querySelector('[type=submit]');submit.disabled=true;try{await api('admin/'+b.dataset.kind+'/'+b.dataset.id,'PATCH',{status:b.dataset.action,note:e.target.elements.note.value});await refresh();feedback('Yoxlama qərarı saxlanıldı.');}catch(e){feedback(e.message,true);}finally{submit.disabled=false;}};
+  host.scrollIntoView({behavior:'smooth',block:'start'});
+ }
+ pane.onclick=async e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.tab){tab=b.dataset.tab;filter='all';render();return;}if(b.hasAttribute('data-review-close')){pane.querySelector('[data-review]').replaceChildren();return;}if(!b.dataset.kind)return;if(b.dataset.kind!=='bookings'){review(b);return;}b.disabled=true;try{await api('bookings/'+b.dataset.id+'/'+b.dataset.action,'POST',{});await refresh();feedback('Rezervasiya yeniləndi.');}catch(e){feedback(e.message,true);}finally{b.disabled=false;}};
+ pane.onchange=e=>{if(e.target.matches('[data-filter]')){filter=e.target.value;renderList();}};
  await refresh();
 }

@@ -29,7 +29,7 @@ export default async function handler(req,res){
  const url=new URL(req.url,'http://localhost'); const path=url.pathname.replace(/\/$/,'');const method=req.method;
  originCheck(req);
  if(path==='/api/config'&&method==='GET')return json(res,200,{passwordReset:resetEnabled(),wash:washEnabled(),sos:process.env.SOS_ENABLED==='true',ai:assistantConfig().enabled,aiProvider:assistantConfig().provider,uploads:!!(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL)||(process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL)});
- if(path==='/api/rentacar/config'&&method==='GET')return json(res,200,{enabled:rentalEnabled()});
+ if(path==='/api/rentacar/config'&&method==='GET')return json(res,200,{enabled:rentalEnabled(),mode:process.env.VERCEL_ENV==='production'?'live':'test'});
  if(path.startsWith('/api/rentacar/')&&!rentalEnabled())return json(res,503,{error:'Rent a Car önizləmə rejimindədir. Real rezervasiya aktiv deyil.'});
  const address=clientAddress(req);
  await rateLimit(`api:ip:${address}`,300,60);
