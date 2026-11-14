@@ -1,6 +1,6 @@
 # SosAvto Rent a Car — təhlükəsiz inteqrasiya planı
 
-Status: ilkin UI prototipi, canlı sistemə qoşulmayıb.
+Status: baza modulu PR #56 ilə buraxılıb; aşağıdakı şirkət vitrini və maliyyə əlavələri ayrıca test budağındadır.
 
 ## Qərar
 Həm yoxlanmış icarə şirkətləri, həm də fərdi avtomobil sahibləri avtomobil yerləşdirə bilər. Fərdi sahiblərin icarəyə vermək səlahiyyəti təsdiqlənməlidir.
@@ -73,3 +73,18 @@ Paralel `--test-force-exit` rejimində frontend suite bəzən axırıncı testl�
 - Neon test budağı: `br-sweet-fog-aupo05mh`, `sosavto-rentacar-test-20261114`, parent production branch. Yeni schema yalnız bu ayrıca budaqda tətbiq və yoxlanılıb. Vercel-də DATABASE_URL yalnız `feat/rentacar-replace-insurance` preview budağı üçün ayrıca konfiqurasiya edilib.
 - Canlı rejim üçün həm `RENTACAR_ENABLED=true`, həm `RENTACAR_PRODUCTION_APPROVED=true` tələb olunur. Sadəcə preview/isolated flag canlı modulu aça bilməz. Təsdiqli mühitdə build yalnız additive rental schema miqrasiyasını transaction daxilində tətbiq edir. Miqrasiya alınmasa build dayanır.
 - Son yerli yoxlama: 243/243 test keçdi. Tam browser/preview və son CI/deploy statusları buraxılış nəticəsində ayrıca qeyd olunmalıdır.
+
+
+## 2026-11-14 — şirkət vitrini və komissiya uçotu
+
+Budaq: `feat/rental-profiles-finance`. Bu dəyişiklik canlıya avtomatik birləşdirilmir.
+
+- Kataloqun yuxarısında təsdiqli şirkət kartları, ayrıca şirkət vitrini və avtomobil kartından şirkətə keçid. Şirkət və avtomobil siyahıları 24-lük səhifələrlə yüklənir; parkda 61 avtomobilin tam görünməsi test edilib. Fərdi sahibin ayrıca açıq profil səhifəsi yoxdur.
+- Admin mövcud hesabın istifadəçi adı ilə sahib adından şirkət/fərdi profil yaradır. Sahiblik yoxlaması yenə ayrıca tələb olunur. Admin eyni mövcud mərkəzdə seçilmiş sahibin profilini, şəkillərini və avtomobillərini idarə edir. Auditdə əməliyyatı həqiqətən edən admin saxlanılır; hesabın şifrəsi və rolu dəyişmir. Sahibi olmayan şəxs üçün əvvəl adi SosAvto qeydiyyatı tələb olunur.
+- Maliyyə modeli: icarə haqqını və depoziti sahib toplayır, SosAvto komissiyası ayrıca sahibdən alınır. İlkin komissiya **təyin edilməyib**; admin 0–100% arası faizi təyin edir. İki onluq dəqiqlik və tam qəpik hesablaması; komissiya depozitdən çıxılmır.
+- Yeni rezervasiyada həmin andakı faiz/məbləğ sabitlənir. Sonrakı faiz dəyişikliyi əvvəlki rezervasiyaları dəyişmir. Köhnə rezervasiyalara geriyə komissiya tətbiq edilmir. Sahib təsdiq etməzdən əvvəl rezervasiya kartında komissiyanı görür.
+- Təsdiqli sifariş üzrə gözlənilən, tamamlanmış sifariş üzrə alınmalı və faktiki qəbzlə qeyd olunmuş komissiyalar ayrıdır. Ləğv/rədd komissiya borcu yaratmır. Qəbzi yalnız admin, faktiki alınmanı yoxladıqdan sonra istinad nömrəsi ilə qeyd edir. Təkrar sorğu ikinci gəlir yazmır; eyni qəbz istinadı təkrar istifadə edilmir.
+- Qəbz uçotu kartdan pul çəkmir, bank köçürməsi və ya hüquqi e-qaimə yaratmır. Kart ödənişi, kartla depozit bloklanması, avtomatik bölüşdürmə və bank geriödənişi **qoşulmayıb**. Provayder seçimi və merchant təsdiqi, etibarlı callback yoxlaması, real sandbox ödəniş/geriödəniş testləri həmin ayrıca inteqrasiya üçün tələb olunur. Heç bir ödənişli provayder aktivləşdirilməyib.
+- Telefon şəkillərinin 64 KB JSON limiti də düzəldilib: yalnız rental uploads üçün mövcud 3 MB şəkil qaydasına uyğun 4.5 MB JSON zərfi qəbul edilir. Digər JSON sorğularının limiti dəyişmir.
+- Schema additive və təkrar icraya uyğundur. Test bazası: `sosavto-rental-finance-test-20261114` / `br-cold-math-au4pgqod`, əvvəlki rental test budağından ayrılıb. Vercel DATABASE_URL və rental flag-lər yalnız bu Git budağı üçün konfiqurasiya edilir.
+- Yerli API/UI testləri şirkət siyahısı → profil → əlavə səhifə, admin adından yaratma/icazə, qiymət snapshotu, komissiya hesablaması, qəbzin paralel təkrarı, ləğv və miqrasiya təkrarını yoxlayır. Yerli Chromium bu iş mühitində başlamır; Cloud Browser yerli serverə qoşula bilmir. Vizual brauzer QA-sı ayrıca məhdudiyyət olaraq qalır.
