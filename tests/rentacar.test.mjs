@@ -118,3 +118,55 @@ test('profile editing requires renewed verification and keeps old bookings and c
  const count=(await query('SELECT count(*) AS n FROM rental_bookings')).rows[0].n;
  const r=await call('/profile',owner,'PATCH',{name:'Updated company',city:'Bakı',phone:'+994501234567'});assert.equal(r.profile.status,'pending');assert.equal((await call('/cars?owner_id='+owner.id)).cars.length,0);assert.equal((await query('SELECT count(*) AS n FROM rental_bookings')).rows[0].n,count);
 });
+
+test('admin creates profiles for existing accounts and manages cars on their behalf without granting owner impersonation',async()=>{
+ const target=await user('managed_owner');
+ const data={account:'managed_owner',kind:'company',name:'Managed Rental',city:'Bakı',phone:'+994501234567'};
+ assert.equal((await post('/admin/profiles',a,data)).code,403);
+ const p=await post('/admin/profiles',admin,data);assert.equal(p.profile.user_id,target.id);assert.equal(p.profile.status,'pending');
+ assert.equal((await post('/admin/profiles',admin,data)).code,409);
+ assert.equal((await post('/cars?owner_id='+target.id,admin,carInput)).code,403);
+ await patch('/admin/profiles/'+target.id,admin,{status:'approved',note:'Sahibin icarə səlahiyyəti yoxlanıldı.'});
+ assert.equal((await call('/owner?owner_id='+target.id,a)).code,403);
+ assert.equal((await post('/cars?owner_id='+target.id,a,carInput)).code,403);
+ const r=await post('/cars?owner_id='+target.id,admin,carInput);assert.equal(r.car.owner_id,target.id);
+ assert.equal((await call('/cars/'+r.car.id,admin,'PUT',{...carInput,title:'Admin edited'})).car.title,'Admin edited');
+ assert.equal((await call('/owner?owner_id='+target.id,admin)).cars[0].owner_id,target.id);
+ const audits=(await call('/admin',admin)).audit;assert.ok(audits.some(x=>x.action==='profile.create-on-behalf'&&x.actor_id===admin.id));
+});
+test('company directory excludes individuals and pending profiles; 61-car fleet paginates completely',async()=>{
+ await patch('/admin/profiles/'+owner.id,admin,{status:'approved',note:'Sahibin icarə səlahiyyəti yenidən yoxlanıldı.'});
+ await transaction(async c=>{for(let i=0;i<60;i++)await c.query("INSERT INTO rental_cars(id,owner_id,title,city,vehicle_type,year,images,daily_cents,weekly_cents,monthly_cents,deposit_cents,terms,status) VALUES($1,$2,$3,'Bakı','sedan',2023,'[]',10000,60000,200000,0,'Pagination fixture','active')",[randomUUID(),owner.id,'Fleet '+i]);});
+ const company=(await call('/companies')).companies.find(p=>p.user_id===owner.id);assert.equal(company.car_count,61);assert.equal(Object.hasOwn(company,'review_note'),false);
+ assert.equal((await call('/companies')).companies.some(x=>x.user_id===b.id),false);
+ const ids=[];for(let page=1;page<=3;page++){const r=await call('/profiles/'+owner.id+'?page='+page);assert.equal(r.total,61);ids.push(...r.cars.map(x=>x.id));assert.ok(r.cars.every(x=>x.owner_kind==='company'&&x.owner_id===owner.id));}
+ assert.equal(new Set(ids).size,61);assert.equal((await call('/cars?owner_id='+owner.id+'&page=3')).cars.length,13);
+ assert.equal((await call('/cars?page=-1')).code,400);assert.equal((await call('/companies?page=1.5')).code,400);
+});
+test('commission is server-owned, rounded in cents, excludes deposit and remains fixed after settings change',async()=>{
+ assert.equal((await patch('/admin/finance/settings',owner,{commission_bps:1000})).code,403);
+ for(const n of [-1,10001,1.5])assert.equal((await patch('/admin/finance/settings',admin,{commission_bps:n})).code,400);
+ await patch('/admin/finance/settings',admin,{commission_bps:1250});
+ const input=bookingInput(20,23),r=await post('/bookings',a,{...input,commission_cents:1,commission_bps:0});assert.equal(r.code,200);assert.equal(r.booking.commission_cents,3750);assert.equal(r.booking.commission_configured,true);
+ await patch('/admin/finance/settings',admin,{commission_bps:2000});
+ assert.equal((await post('/bookings',a,input)).booking.commission_cents,3750);
+ assert.equal((await call('/finance',b)).entries.some(x=>x.id===r.booking.id),false);
+ const entry=(await call('/finance',owner)).entries.find(x=>x.id===r.booking.id);assert.equal(entry.commission_bps,1250);assert.equal((await call('/finance',owner)).online_payments,false);
+ assert.equal((await post('/admin/finance/'+r.booking.id+'/receive',owner,{reference:'bank-1'})).code,403);
+ assert.equal((await post('/admin/finance/'+r.booking.id+'/receive',admin,{reference:'bank-1'})).code,409);
+ await post('/bookings/'+r.booking.id+'/confirm',owner,{});
+ // Advance only fixture dates, then exercise real complete/receipt transitions.
+ await query("UPDATE rental_bookings SET starts_on=CURRENT_DATE-3,ends_on=CURRENT_DATE-1 WHERE id=$1",[r.booking.id]);
+ assert.equal((await post('/bookings/'+r.booking.id+'/complete',owner,{})).code,200);
+ const receipts=await Promise.all([post('/admin/finance/'+r.booking.id+'/receive',admin,{reference:'bank-1'}),post('/admin/finance/'+r.booking.id+'/receive',admin,{reference:'bank-1'})]);assert.ok(receipts.every(x=>x.code===200));assert.equal(receipts[0].receipt.id,receipts[1].receipt.id);assert.equal(receipts[0].receipt.amount_cents,3750);
+ assert.equal((await post('/admin/finance/'+r.booking.id+'/receive',admin,{reference:'bank-2'})).code,409);
+ assert.equal((await query('SELECT count(*)::integer AS n FROM rental_commission_receipts')).rows[0].n,1);
+ const cancelled=await post('/bookings',a,bookingInput(25,26));await post('/bookings/'+cancelled.booking.id+'/cancel',a,{});assert.equal((await post('/admin/finance/'+cancelled.booking.id+'/receive',admin,{reference:'bank-3'})).code,409);
+});
+
+test('rental uploads accept genuine phone photos above 64 KB and migration reruns retain financial receipts',async()=>{
+ const sharp=(await import('sharp')).default,{randomBytes}=await import('node:crypto');const bytes=await sharp(randomBytes(512*512*3),{raw:{width:512,height:512,channels:3}}).jpeg().toBuffer();assert.ok(bytes.length>65536);
+ const r=await post('/uploads',owner,{data:'data:image/jpeg;base64,'+bytes.toString('base64')});assert.equal(r.code,200,JSON.stringify(r));
+ const sql=await readFile(new URL('../server/rentacar-schema.sql',import.meta.url),'utf8');await transaction(async c=>{for(const statement of sql.split(';').map(s=>s.trim()).filter(Boolean))await c.query(statement);});
+ assert.equal((await query('SELECT count(*)::integer AS n FROM rental_commission_receipts')).rows[0].n,1);assert.equal((await query('SELECT commission_bps FROM rental_finance_settings WHERE id=1')).rows[0].commission_bps,2000);
+});
