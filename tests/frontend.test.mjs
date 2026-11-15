@@ -144,7 +144,7 @@ test('gallery supports keyboard, arrows and thumbnail state; missing specs stay 
 });
 
 test('credit calculator uses listing price, updates estimates and clears stale results',async()=>{
- const d=await load('elan.html?id='+listing.id,null,{['/listings/'+listing.id]:{listing}}),f=d.doc.querySelector('#credit-form');
+ const d=await load('elan.html?id='+listing.id,null,{['/listings/'+listing.id]:{listing:{...listing,details:{credit:true}}}}),f=d.doc.querySelector('#credit-form');
  assert.equal(f.elements.price.value,'23000');assert.equal(d.doc.querySelector('#credit-result').hidden,true);
  f.elements.annualRate.value='0';f.elements.months.value='20';f.elements.downPayment.value='3000';f.dispatchEvent(new d.w.Event('input'));
  assert.equal(d.doc.querySelector('#credit-result').hidden,false);assert.match(d.doc.querySelector('.credit-monthly strong').textContent,/1[.\s]?000/);
@@ -243,4 +243,11 @@ test('a failed photo does not block the next photo or discard successfully uploa
   assert.equal(d.doc.querySelectorAll('#photos img').length,1);
   assert.equal(d.doc.querySelector('#save-listing').disabled,false);assert.equal(input.disabled,false);
  }finally{d.close();}
+});
+
+test('listing calculator is hidden unless the seller explicitly offers credit',async()=>{
+ for(const details of [{},{credit:false},{credit:'false'},{credit:'true'}]){
+  const d=await load('elan.html?id='+listing.id,null,{['/listings/'+listing.id]:{listing:{...listing,details}}});
+  assert.equal(d.doc.querySelector('#credit-form'),null);d.close();
+ }
 });
