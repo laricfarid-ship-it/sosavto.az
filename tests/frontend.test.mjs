@@ -15,12 +15,12 @@ import * as discovery from '../assets/discovery.js';
 const source=(await readFile(new URL('../assets/app.js',import.meta.url),'utf8')).replace("import {prepareUpload} from './image-upload.js';",'').replace("import {mountStories} from './stories.js';",'const mountStories=async()=>{};').replace("import {roadside} from './sos.js';","const roadside=async({main})=>{main.innerHTML='<h1>SOS preview</h1>';};").replace("import {carwash} from './wash.js';","const carwash=async({main})=>{main.innerHTML='<h1>Wash preview</h1>';};").replace("import {mountAdminPush,disableAdminPush} from './admin-push.js';",'const mountAdminPush=async()=>{};const disableAdminPush=async()=>{};').replace("import {cardGalleryMarkup,mountCardGalleries} from './card-gallery.js';",'').replace("import {mountPriceHistogram} from './price-histogram.js';",'').replace("import {mountBrandPicker} from './brand-picker.js';",'').replace("import {creditMarkup,mountCredit} from './credit.js';",'const {creditMarkup,mountCredit}=credit;').replace("import {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights} from './discovery.js';",'const {bodyChoices,chipMarkup,comparisonIds,vehicleHighlights}=discovery;').replace("import {mountDemoListings} from './demo-listings.js';",'const mountDemoListings=()=>{};').replace("import {groupMapListings,mapKinds} from './service-map.js';",'').replace("import {cars} from './cars.js';",'').replace("import {initLanguage} from './i18n.js';",'const initLanguage=()=>{};').replace("import {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys} from './catalog.js';",'const {partTypes,insuranceTypes,serviceTypes,detailFields,detailLabels,plateNotice,filterKeys}=catalog;').replace("import {technolAds} from './technol-ads.js';",'const technolAds=()=>"";').replace("import {mountSpinViewer} from './spin-viewer.js';",'').replace("import {mountSpinUploader} from './spin-uploader.js';",'').replace('init().catch(e=>errorBox(main,e));','return init();');
 const user={id:'11111111-1111-4111-8111-111111111111',fullname:'Test Owner',username:'owner',email:'owner@example.test',phone:'',role:'user'};
 const listing={id:'22222222-2222-4222-8222-222222222222',user_id:user.id,title:'BMW <script>alert(1)</script>',category:'car',description:'Test avtomobil haqqında ətraflı məlumat.',brand:'BMW',model:'5 Series',year:2018,mileage:90000,city:'Bakı',phone:'+994501234567',price:23000,status:'active',views:4,favorite_count:1,images:[],details:{},created_at:new Date().toISOString(),seller:'Test Owner'};
-async function load(path,me=null,responses={}){
+async function load(path,me=null,responses={},preparePhoto=prepareUpload){
  const dom=new JSDOM('<html><head><meta name="description" content=""></head><body><header id="header"></header><main id="main"></main><footer id="footer"></footer><dialog id="dialog"></dialog><div id="toast"></div></body></html>',{url:'https://sosavto.test/'+path});
  const w=dom.window;const calls=[];const fetch=async(url,options={})=>{calls.push({url,...options});const path=url.replace('/api','');const result=responses[path]||({'/me':{user:me},'/config':{ai:false,uploads:false},'/favorites':{listings:[]},'/my-listings':{listings:[]},'/listings?category=car':{listings:[],total:0,page:1,pages:0}}[path]);if(!result)throw Error('Unexpected API request: '+path);return {ok:!result.error,status:result.error?503:200,json:async()=>result};};
  w.L={map:()=>({setView(){return this;},on(event,handler){w.mapHandlers??={};w.mapHandlers[event]=handler;},removeLayer(){},fitBounds(){},invalidateSize(){}}),tileLayer:()=>({addTo(){}}),marker:()=>({addTo(){return this;},bindPopup(){return this;},getLatLng(){return [40,49];},openPopup(){}})};
  const run=new Function('window','document','location','navigator','localStorage','sessionStorage','fetch','FormData','cars','catalog','discovery','credit','mountBrandPicker','cardGalleryMarkup','mountCardGalleries','mountSpinViewer','mountSpinUploader','setTimeout','clearTimeout','mountPriceHistogram','prepareUpload',source);
- await run(w,w.document,w.location,w.navigator,w.localStorage,w.sessionStorage,fetch,w.FormData,cars,catalog,discovery,credit,mountBrandPicker,cardGalleryMarkup,mountCardGalleries,mountSpinViewer,mountSpinUploader,()=>0,()=>{},mountPriceHistogram,prepareUpload);return {w,doc:w.document,calls,close:()=>dom.window.close()};
+ await run(w,w.document,w.location,w.navigator,w.localStorage,w.sessionStorage,fetch,w.FormData,cars,catalog,discovery,credit,mountBrandPicker,cardGalleryMarkup,mountCardGalleries,mountSpinViewer,mountSpinUploader,()=>0,()=>{},mountPriceHistogram,preparePhoto);return {w,doc:w.document,calls,close:()=>dom.window.close()};
 }
 test('home builds dependent model filter from URL regardless of query parameter order',async()=>{
  const path='index.html?model=Elantra&brand=Hyundai&year_min=2018';const d=await load(path,null,{'/listings?model=Elantra&brand=Hyundai&year_min=2018&category=car':{listings:[],total:0,page:1,pages:0}});
@@ -228,5 +228,19 @@ test('Rent a Car opens a new tab and leaves all legacy category filters intact',
   const link=d.doc.querySelector('[data-category="rentacar"]');assert.equal(link.tagName,'A');assert.equal(link.getAttribute('href'),'rentacar.html');assert.equal(link.target,'_blank');assert.match(link.rel,/noopener/);assert.match(link.rel,/noreferrer/);
   assert.equal(d.doc.querySelectorAll('[data-category]').length,9);
   assert.equal(d.doc.querySelector('[data-category="plates"]').tagName,'BUTTON');
+ }finally{d.close();}
+});
+
+test('a failed photo does not block the next photo or discard successfully uploaded photos',async()=>{
+ const photo={id:'33333333-3333-4333-8333-333333333333',url:'https://images.example.test/photo.webp'};
+ const d=await load('elan-ver.html',user,{'/config':{ai:false,uploads:true},'/uploads':photo},async file=>{if(file.name==='broken.jpg')throw Error('Şəkil oxunmadı.');return 'data:image/jpeg;base64,AAAA';});
+ try{
+  const input=d.doc.querySelector('#files');Object.defineProperty(input,'files',{value:[{name:'broken.jpg'},{name:'phone.jpg'}]});
+  await input.onchange({target:input});
+  assert.equal(d.calls.filter(c=>c.url==='/api/uploads').length,1);
+  assert.match(d.doc.querySelector('#upload-status').textContent,/1 şəkil yükləndi/);
+  assert.match(d.doc.querySelector('#upload-status').textContent,/broken.jpg/);
+  assert.equal(d.doc.querySelectorAll('#photos img').length,1);
+  assert.equal(d.doc.querySelector('#save-listing').disabled,false);assert.equal(input.disabled,false);
  }finally{d.close();}
 });
