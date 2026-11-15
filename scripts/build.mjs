@@ -16,3 +16,5 @@ for(const f of await readdir('.'))if(f.endsWith('.html')||['robots.txt','sw.js',
 await cp('assets','public/assets',{recursive:true});
 await (await import('../mobile/scripts/build-hosted-ui.mjs')).buildHostedUI();
 console.log('Public output contains only HTML, browser assets and robots.txt.');
+
+await import('./repair-watermarks.mjs');
