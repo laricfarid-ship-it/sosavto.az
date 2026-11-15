@@ -47,6 +47,8 @@ public class MainActivity extends BridgeActivity {
             throw new IllegalStateException("Missing APK presentation asset", error);
         }
         bridge.setWebViewClient(new BridgeWebViewClient(bridge) {
+            private boolean navigationFailed=false;
+            @Override public void onPageStarted(WebView view,String url,android.graphics.Bitmap favicon){navigationFailed=false;super.onPageStarted(view,url,favicon);}
             private void present(WebView view, String url) {
                 Uri uri = Uri.parse(url);
                 if ("https".equals(uri.getScheme()) && "sosavto.az".equals(uri.getHost())) {
@@ -56,11 +58,11 @@ public class MainActivity extends BridgeActivity {
             @Override
             public void onPageCommitVisible(WebView view, String url) {
                 super.onPageCommitVisible(view, url);
-                hideOffline();
+                if(!navigationFailed)hideOffline();
                 present(view, url);
             }
-            @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error){super.onReceivedError(view,request,error);if(request.isForMainFrame())showOffline();}
-            @Override public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse response){super.onReceivedHttpError(view,request,response);if(request.isForMainFrame()&&response.getStatusCode()>=500)showOffline();}
+            @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error){super.onReceivedError(view,request,error);if(request.isForMainFrame()){navigationFailed=true;showOffline();}}
+            @Override public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse response){super.onReceivedHttpError(view,request,response);if(request.isForMainFrame()&&response.getStatusCode()>=500){navigationFailed=true;showOffline();}}
             @Override
             public void onPageFinished(WebView view, String url) {
                 super.onPageFinished(view, url);
