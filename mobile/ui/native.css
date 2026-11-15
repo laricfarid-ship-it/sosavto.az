@@ -1,0 +1,45 @@
+/* Packaged in the APK only; the hosted website never loads this file. */
+html.sa-native{overflow-x:clip;scroll-padding-bottom:88px}
+.sa-native body{overflow-x:clip;max-width:100%;padding-bottom:calc(78px + env(safe-area-inset-bottom))}
+.sa-native *, .sa-native *::before,.sa-native *::after{box-sizing:border-box}
+.sa-native .layout,.sa-native .detail-layout,.sa-native .layout>*{min-width:0;max-width:100%}
+.sa-native .layout{grid-template-columns:minmax(0,1fr)}
+.sa-native .layout .side{width:100%;min-width:0}
+.sa-native .table-wrap{max-width:100%;overflow-x:auto}
+.sa-native .story-section{padding:13px!important;margin:10px 0 14px!important;border-radius:16px}
+.sa-native .story-heading{margin-bottom:12px;gap:8px}
+.sa-native .story-heading h2{font-size:16px;line-height:1.3;margin:5px 0}
+.sa-native .story-heading p,.sa-native .story-free,.sa-native .story-invite-icon,.sa-native .story-bottom{display:none}
+.sa-native .story-eyebrow{font-size:8px;letter-spacing:1px}
+.sa-native .story-ring{width:54px;height:54px}
+.sa-native .story-circle{width:46px;height:46px}
+.sa-native .story-bubble{width:65px;flex:0 0 65px}
+.sa-native .story-bubble strong{font-size:10px}.sa-native .story-bubble small{font-size:9px}
+.sa-native .story-rail{gap:10px}.sa-native .story-invite{min-width:0;flex:1;padding:6px}
+.sa-native .story-invite strong{font-size:11px}.sa-native .story-invite p{font-size:10px;margin:4px 0}
+.sa-native .home-intro .category-discovery{margin:12px 0}
+.sa-native .home-intro .category-grid .category{min-height:99px!important;padding:13px 3px 7px!important;gap:3px!important}
+.sa-native .category-discovery .category-art{width:56px!important;height:56px!important;max-width:100%}
+.sa-native .home-intro .category-heading{margin-bottom:10px}
+.sa-native .home-intro .category-heading h2{font-size:18px}
+.sa-native .discovery-heading{min-height:85px;margin-bottom:10px}
+.sa-native .discovery-heading h1{font-size:20px}
+.sa-native .technol-left{margin-bottom:12px!important}
+.sa-native .technol-ad a{height:60px;min-height:60px}
+.sa-native .footer{padding-bottom:18px}
+.sa-native .sa-bottom{padding-bottom:calc(8px + env(safe-area-inset-bottom))}
+.sa-native .sa-bottom a{min-width:0;font-size:9px}
+.sa-native .detail-info .btn,.sa-native .detail-info a[href^="tel:"],.sa-native .detail-info a[href*="wa.me"]{min-height:46px;display:flex;align-items:center;justify-content:center}
+.sa-native .sa-device-button{display:grid!important;place-items:center;width:34px;height:36px;padding:5px;border:1px solid var(--line);border-radius:10px;background:var(--panel);color:var(--text);font-size:18px;cursor:pointer;flex:none}
+.sa-native .sa-device-dialog{width:min(94vw,420px);max-height:85dvh;padding:20px;border:1px solid var(--line);border-radius:20px;color:var(--text);background:var(--panel);overflow:auto}
+.sa-native .sa-device-dialog::backdrop{background:#071322bb}
+.sa-native .sa-device-dialog h2{font-size:20px;margin:0 0 16px}
+.sa-native .sa-device-dialog .btn{display:flex;align-items:center;justify-content:center;width:100%;min-height:46px;margin:10px 0;white-space:normal}
+.sa-native .sa-device-dialog p{font-size:13px;line-height:1.6}
+.sa-native .sa-device-dialog small{display:block;color:var(--muted);line-height:1.6}
+.sa-native .sa-device-dialog header{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.sa-native .sa-device-dialog header button{border:0;background:none;color:var(--text);font-size:26px;min-width:44px;min-height:44px}
+.sa-native .sa-plain-description{white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:370px){.sa-native .brand-wordmark{font-size:17px}.sa-native .brand-emblem{width:28px}.sa-native .header-inner{gap:5px}.sa-native .sa-favorite{width:30px}.sa-native .language-switcher select{min-width:42px}}
+
+.sa-native .nav .sa-device-button{width:100%;min-height:44px;font-size:14px;display:flex!important;justify-content:flex-start;padding:10px 12px}
