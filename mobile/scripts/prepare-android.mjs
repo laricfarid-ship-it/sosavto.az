@@ -1,5 +1,5 @@
 import {installLauncherIcons} from './launcher-icons.mjs';
-import {readFile,writeFile,copyFile,mkdir} from 'node:fs/promises';
+import {readFile,writeFile,copyFile,mkdir,rm} from 'node:fs/promises';
 const css=await readFile('ui/app.css','utf8');
 const js=await readFile('ui/app.js','utf8');
 let asset=`(()=>{if(location.origin!=='https://sosavto.az'||window.__sosavtoAppUI)return;if(!document.getElementById('sa-app-style')){const s=document.createElement('style');s.id='sa-app-style';s.textContent=${JSON.stringify(css)};document.documentElement.append(s);}})();\nif(!window.__sosavtoAppUI){${js}\n}`;
@@ -23,6 +23,7 @@ const project='android/build.gradle';let projectGradle=await readFile(project,'u
 const manifest='android/app/src/main/AndroidManifest.xml';let xml=await readFile(manifest,'utf8');
 for(const permission of ['ACCESS_COARSE_LOCATION','ACCESS_FINE_LOCATION','POST_NOTIFICATIONS'])if(!xml.includes('android.permission.'+permission))xml=xml.replace('</manifest>',`    <uses-permission android:name="android.permission.${permission}" />\n</manifest>`);
 xml=xml.replace('android:allowBackup="true"','android:allowBackup="false"');await writeFile(manifest,xml);
+await rm('android/app/src/androidTest/java/com/getcapacitor/myapp',{recursive:true,force:true});
 await mkdir('android/app/src/androidTest/java/az/sosavto/app',{recursive:true});
 await copyFile('tests/DeviceSmokeTest.java','android/app/src/androidTest/java/az/sosavto/app/DeviceSmokeTest.java');
 console.log('Installed APK-only UI and native activity.');

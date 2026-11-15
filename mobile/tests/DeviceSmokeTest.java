@@ -14,7 +14,8 @@ public class DeviceSmokeTest {
         CompletableFuture<String> result=new CompletableFuture<>();scenario.onActivity(a->a.getBridge().getWebView().evaluateJavascript(script,result::complete));return result.get(5,TimeUnit.SECONDS);
     }
     private void screenshot(String name)throws Exception{
-        Bitmap image=InstrumentationRegistry.getInstrumentation().getUiAutomation().takeScreenshot();File directory=new File(InstrumentationRegistry.getInstrumentation().getTargetContext().getExternalFilesDir(null),"audit");directory.mkdirs();try(FileOutputStream output=new FileOutputStream(new File(directory,name+".png"))){image.compress(Bitmap.CompressFormat.PNG,100,output);}
+        android.os.ParcelFileDescriptor command=InstrumentationRegistry.getInstrumentation().getUiAutomation().executeShellCommand("screencap -p /data/local/tmp/sosavto-"+name+".png");
+        try(InputStream input=new android.os.ParcelFileDescriptor.AutoCloseInputStream(command)){while(input.read()!=-1){}}
     }
     @Test public void homepageAndNativeSettings()throws Exception{
         try(ActivityScenario<MainActivity> scenario=ActivityScenario.launch(MainActivity.class)){
