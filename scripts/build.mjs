@@ -1,3 +1,4 @@
+if(['production','preview'].includes(process.env.VERCEL_ENV))await import('../server/phone-signup-migrate.mjs');
 import {rentalEnabled} from '../server/rentacar.mjs';
 if(rentalEnabled())await (await import('../server/rentacar-migrate.mjs')).migrateRentalSchema();
 if(['production','preview'].includes(process.env.VERCEL_ENV))await import('../server/stories-migrate.mjs');
