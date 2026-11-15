@@ -1,6 +1,6 @@
 import test,{before,after} from 'node:test';
 import assert from 'node:assert/strict';
-import {readFile} from 'node:fs/promises';
+import {readFile,access,mkdir,writeFile} from 'node:fs/promises';
 import {randomUUID} from 'node:crypto';
 import {Readable} from 'node:stream';
 import sharp from 'sharp';
@@ -9,7 +9,7 @@ process.env.LOCAL_DATABASE='true';process.env.LOCAL_DB_PATH='memory://';process.
 const {database,query,close}=await import('../server/db.mjs');
 const {createSession}=await import('../server/security.mjs');
 const {default:handler}=await import('../api/index.mjs');
-const {listingReference}=await import('../server/stories.mjs');
+const {listingReference,cleanupStories}=await import('../server/stories.mjs');
 const ids=Array.from({length:4},()=>randomUUID()),cookies=[];const listing=randomUUID();let story;
 async function request(path,{method='GET',data,cookie=cookies[0]}={}){
  const req=Readable.from(data?[Buffer.from(JSON.stringify(data))]:[]);req.url='/api'+path;req.method=method;req.headers={cookie:cookie||'',origin:process.env.APP_ORIGIN,'content-type':'application/json'};req.socket={remoteAddress:'192.0.2.193'};
@@ -56,6 +56,30 @@ test('invalid image and missing listing do not spend daily allowance; uploaded s
 test('simultaneous submissions cannot bypass the daily quota',async()=>{
  const results=await Promise.all([1,2].map(()=>request('/stories',{method:'POST',cookie:cookies[2],data:{reference:listing}})));
  assert.deepEqual(results.map(r=>r.status).sort(),[201,409]);assert.equal((await query('SELECT count(*)::int AS n FROM stories WHERE user_id=$1',[ids[2]])).rows[0].n,1);
+});
+test('admin has no daily quota and can publish repeatedly, including video',async()=>{
+ const allowance=(await request('/stories',{cookie:cookies[3]})).body.allowance;
+ assert.equal(allowance.unlimited,true);assert.equal(allowance.remaining,null);
+ for(let i=0;i<12;i++)assert.equal((await request('/stories',{method:'POST',cookie:cookies[3],data:{reference:listing}})).status,201);
+ const bytes=await readFile(new URL('./fixtures/story-video.mp4',import.meta.url));
+ const r=await request('/stories',{method:'POST',cookie:cookies[3],data:{data:'data:video/mp4;base64,'+bytes.toString('base64')}});assert.equal(r.status,201);
+ const video=(await request('/stories',{cookie:cookies[3]})).body.stories.find(s=>s.id===r.body.id);assert.equal(video.media_type,'video');
+ const file='.data/uploads/'+video.media_url.split('/').pop();await access(file);
+ assert.equal((await request('/stories/'+video.id,{method:'DELETE',cookie:cookies[3],data:{}})).status,200);
+ await assert.rejects(access(file));assert.equal((await query('SELECT id FROM stories WHERE id=$1',[video.id])).rows.length,0);
+ assert.equal((await query('SELECT * FROM story_daily_posts WHERE user_id=$1',[ids[3]])).rows.length,0);
+ assert.equal((await request('/stories',{method:'POST',cookie:cookies[3],data:{data:'data:video/mp4;base64,'+Buffer.from('not a real video file').toString('base64')}})).status,400);
+ assert.equal((await request('/stories',{method:'POST',cookie:cookies[3],data:{data:'data:video/mp4;base64,'+Buffer.alloc(3*1024*1024+1).toString('base64')}})).status,413);
+});
+test('expiry cleanup removes owned media and reports but preserves shared listing images and current quota',async()=>{
+ const id=randomUUID(),name=randomUUID()+'.webm',key='stories/'+ids[3]+'/'+name;
+ await mkdir('.data/uploads',{recursive:true});await writeFile('.data/uploads/'+name,'expired video');
+ await query("INSERT INTO stories(id,user_id,media_url,media_type,media_key,expires_at) VALUES($1,$2,$3,'video',$4,now()-interval '1 second')",[id,ids[3],'/media/'+name,key]);
+ await query('INSERT INTO story_reports(story_id,user_id,reason) VALUES($1,$2,$3)',[id,ids[0],'test']);
+ const result=await cleanupStories({force:true});assert.ok(result.deleted>=1);assert.equal(result.failed,0);
+ await assert.rejects(access('.data/uploads/'+name));assert.equal((await query('SELECT * FROM story_reports WHERE story_id=$1',[id])).rows.length,0);
+ assert.equal((await query('SELECT * FROM images WHERE listing_id=$1',[listing])).rows.length,1);
+ assert.equal((await request('/stories',{cookie:cookies[2]})).body.allowance.remaining,0);
 });
 test('sold/deleted ads lose their CTA and expired stories disappear',async()=>{
  await query("UPDATE listings SET status='sold' WHERE id=$1",[listing]);const r=await request('/stories');assert.ok(r.body.stories.every(s=>s.listing===null));
