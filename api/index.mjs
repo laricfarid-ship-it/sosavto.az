@@ -1,3 +1,4 @@
+import {normalizeLoginPhone} from '../server/phone-identity.mjs';
 import {rentacar,rentalEnabled} from '../server/rentacar.mjs';
 import {stories} from '../server/stories.mjs';
 import {socialSharePreview,publishSocial,socialConfigured,socialShareEnabled,socialConnectionReport,instagramPostPermalink} from '../server/social-share.mjs';
@@ -55,18 +56,18 @@ export default async function handler(req,res){
  if(path==='/api/register')await rateLimit(`register:ip:${address}`,10,3600);
  // Bound rotating-identifier traffic before creating per-identifier buckets.
  await rateLimit('auth:global',1000,900);
- const b=await body(req);const identifier=text(b.identifier||b.email||'','Email və ya istifadəçi adı',3,200).toLowerCase();
+ const b=await body(req);const rawIdentifier=text(b.identifier||b.email||b.phone||'','Email, telefon və ya istifadəçi adı',3,200).toLowerCase();const loginPhone=normalizeLoginPhone(rawIdentifier);const identifier=loginPhone||rawIdentifier;
  await rateLimit(`auth:${identifier}`,10,900);
  const password=text(b.password,'Şifrə',10,72);if(Buffer.byteLength(password)>72)fail(400,'Şifrə 72 baytdan uzun ola bilməz.');
  if(path==='/api/register'){
- const email=identifier;if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))fail(400,'Email ünvanını düzgün yazın.');
+ const method=b.registration_method||(b.phone&&!b.email?'phone':'email');if(!['phone','email'].includes(method))fail(400,'Qeydiyyat üsulunu seçin.');const phone=method==='phone'?normalizeLoginPhone(b.phone||rawIdentifier):'';const email=method==='email'?rawIdentifier:null;if(method==='phone'&&!phone)fail(400,'Azərbaycan telefon nömrəsini düzgün yazın.');if(method==='email'&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))fail(400,'Email ünvanını düzgün yazın.');
  const username=text(b.username,'İstifadəçi adı',3,30).toLowerCase();if(!/^[a-z0-9_]+$/.test(username))fail(400,'İstifadəçi adı üçün latın hərfləri, rəqəm və alt xətt istifadə edin.');
  const fullname=text(b.fullname,'Ad və soyad',2,100);const id=randomUUID();
  const salon=b.account_type==='salon'?dealershipInput(b):null;
- try{const passwordHash=await bcrypt.hash(password,12);await transaction(async c=>{await c.query('INSERT INTO users(id,fullname,username,email,password_hash) VALUES($1,$2,$3,$4,$5)',[id,fullname,username,email,passwordHash]);if(salon)await createDealership(c,id,salon);});}catch(e){if(e.code==='23505')fail(409,'Bu email və ya istifadəçi adı artıq istifadə olunur.');throw e;}
+ try{const passwordHash=await bcrypt.hash(password,12);await transaction(async c=>{await c.query('INSERT INTO users(id,fullname,username,email,phone,password_hash) VALUES($1,$2,$3,$4,$5,$6)',[id,fullname,username,email,phone,passwordHash]);if(phone)await c.query('INSERT INTO login_phones(user_id,phone) VALUES($1,$2)',[id,phone]);if(salon)await createDealership(c,id,salon);});}catch(e){if(e.code==='23505')fail(409,'Bu email, telefon və ya istifadəçi adı artıq istifadə olunur.');throw e;}
  const u=(await query('SELECT * FROM users WHERE id=$1',[id])).rows[0];await createSession(res,u);await adminEvent('register',{id:u.id,name:u.fullname});return json(res,201,{user:safeUser(u)});
  }
- const u=(await query('SELECT * FROM users WHERE email=$1 OR username=$1',[identifier])).rows[0];
+ const u=(await query('SELECT u.* FROM users u LEFT JOIN login_phones p ON p.user_id=u.id WHERE u.email=$1 OR u.username=$1 OR p.phone=$2 ORDER BY CASE WHEN u.email=$1 OR u.username=$1 THEN 0 ELSE 1 END LIMIT 1',[rawIdentifier,loginPhone||null])).rows[0];
  const valid=await bcrypt.compare(password,u?.password_hash||'$2b$12$XU7.1nUi/iCTy4lYfsZnGO9DZdvNU91FdY56dLg47/O85VzVFhUUe');
  if(!u||!valid||u.status!=='active')fail(401,'Giriş məlumatları düzgün deyil.');
  if(u.role==='admin'&&(await query('SELECT enabled FROM admin_totp WHERE user_id=$1',[u.id])).rows[0]?.enabled){
@@ -199,7 +200,7 @@ export default async function handler(req,res){
    query("SELECT p.*,u.username,u.email FROM admin_business_profiles p JOIN users u ON u.id=p.user_id ORDER BY p.updated_at DESC LIMIT 100"),
    query("SELECT q.*,l.title FROM admin_social_queue q LEFT JOIN listings l ON l.id=q.listing_id ORDER BY q.created_at DESC LIMIT 100"),
    query("SELECT * FROM admin_android_releases ORDER BY created_at DESC LIMIT 50"),
-   query("SELECT id,username,email FROM users WHERE role='user' ORDER BY created_at DESC LIMIT 100")
+   query("SELECT id,username,email,phone FROM users WHERE role='user' ORDER BY created_at DESC LIMIT 100")
   ]);
   const rows=i=>results[i].status==='fulfilled'?results[i].value.rows:[];
   return json(res,200,{business:rows(0),social:rows(1),android:rows(2),users:rows(3),unavailable:results.map((r,i)=>r.status==='rejected'?['business','social','android','users'][i]:null).filter(Boolean)});
@@ -262,7 +263,7 @@ export default async function handler(req,res){
  query("SELECT count(*)::integer total,count(*) FILTER(WHERE status='active')::integer active,count(*) FILTER(WHERE status='pending')::integer pending FROM listings"),
  query(`SELECT ${projection} FROM listings l WHERE l.status='pending' ORDER BY l.created_at`),
  query("SELECT r.*,l.title FROM reports r JOIN listings l ON l.id=r.listing_id WHERE r.status='open' ORDER BY r.created_at DESC LIMIT 100"),
- query('SELECT id,fullname,email,role,status,created_at FROM users ORDER BY created_at DESC LIMIT 100'),query('SELECT a.*,u.fullname FROM audit_logs a JOIN users u ON u.id=a.admin_id ORDER BY a.created_at DESC LIMIT 100')]);
+ query('SELECT id,fullname,email,phone,role,status,created_at FROM users ORDER BY created_at DESC LIMIT 100'),query('SELECT a.*,u.fullname FROM audit_logs a JOIN users u ON u.id=a.admin_id ORDER BY a.created_at DESC LIMIT 100')]);
  return json(res,200,{stats:stats.rows[0],pending:pending.rows,reports:reports.rows,users:users.rows,logs:logs.rows});
  }
  if(path==='/api/admin/moderate'&&method==='POST'){

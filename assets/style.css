@@ -144,3 +144,10 @@ html:not(.sa-app) .home-intro #search > .body-choices{display:none!important}
 /* Premium category artwork shared by website and hosted Android app. */
 .categories .category .car-front-premium,.categories .category .moto-side-icon{width:55px;height:39px;max-width:100%;flex-shrink:0;stroke:none}
 .categories .category .sa-dimensional-icon{width:48px;height:39px;max-width:100%;flex-shrink:0;overflow:visible}
+
+/* Sorting starts on the handle, leaving the rest of the page free to scroll. */
+.photo-drag-handle{touch-action:none;cursor:grab;width:100%;user-select:none}
+.photo-drag-handle:active{cursor:grabbing}
+.photo-drop-target{outline:3px solid #159eb9;outline-offset:3px}
+.photo-order-controls{display:flex;align-items:center;justify-content:space-between;gap:6px;margin:6px 0}
+.photo-order-controls .btn{padding:6px 12px}.photo-order-controls span{font-size:12px}
