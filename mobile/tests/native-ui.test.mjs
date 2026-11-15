@@ -8,7 +8,7 @@ import {buildHostedUI} from '../scripts/build-hosted-ui.mjs';
 const code=await readFile(new URL('../ui/native.js',import.meta.url),'utf8');
 function setup(url='https://sosavto.az/elan?id=test'){
  const dom=new JSDOM('<html data-theme="light"><body><header><nav class="nav"></nav></header><div class="detail-layout"><p class="description">**Toyota**\n* Təmiz avtomobil &lt;script&gt;x&lt;/script&gt;</p><p>**Unrelated text**</p><a id="contact" href="tel:0123">Zəng et</a></div></body></html>',{url,runScripts:'outside-only',pretendToBeVisual:true});
- const calls=[];dom.window.Capacitor={registerPlugin:()=>({setTheme:async data=>calls.push(['theme',data]),notificationStatus:async()=>({enabled:false}),enableNotifications:async()=>calls.push(['enable']),disableNotifications:async()=>calls.push(['disable'])})};
+ const calls=[];dom.window.Capacitor={nativePromise:async(plugin,name,data)=>{assert.equal(plugin,'SosAvtoDevice');if(name==='notificationStatus')return {enabled:false};calls.push([name==='setTheme'?'theme':name==='enableNotifications'?'enable':'disable',data]);}};
  dom.window.HTMLDialogElement.prototype.showModal=function(){this.open=true;};dom.window.HTMLDialogElement.prototype.close=function(){this.open=false;};
  dom.window.eval(code);return {dom,calls};
 }

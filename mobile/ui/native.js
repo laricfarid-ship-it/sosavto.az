@@ -2,8 +2,7 @@
 (() => {
  if(location.origin!=='https://sosavto.az'||window.__sosavtoNativeEnhancements)return;
  window.__sosavtoNativeEnhancements=true;document.documentElement.classList.add('sa-native');
- const device=window.Capacitor?.registerPlugin?.('SosAvtoDevice');
- const call=async(name,data={})=>{if(!device)throw Error('Bu funksiya yeni Android paketində işləyir.');return device[name](data);};
+ const call=async(name,data={})=>{if(typeof window.Capacitor?.nativePromise!=='function')throw Error('Bu funksiya yeni Android paketində işləyir.');return window.Capacitor.nativePromise('SosAvtoDevice',name,data);};
  let scheduled=false,lastTheme='';
  function theme(){const value=document.documentElement.getAttribute('data-theme')||'light';if(value===lastTheme)return;lastTheme=value;call('setTheme',{dark:value==='dark'}).catch(()=>{});}
  function dialog(){
