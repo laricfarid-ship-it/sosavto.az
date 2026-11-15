@@ -9,7 +9,7 @@ export async function upload(user,b,{spin=false,branding=false}={}){
  const input=Buffer.from(b.data.split(',')[1],'base64');if(input.length>3*1024*1024)fail(413,'Şəkil 3 MB-dan böyükdür.');
  let output,original;try{({output,original}=await prepareListingImage(input,{spin}));}catch{fail(400,'Şəkil oxunmadı. Başqa fayl seçin.');}
  if(branding)output=original;
- const id=randomUUID(),key=`listings/${user.id}/${id}.webp`;let url;
+ const id=randomUUID(),key=`listings/${user.id}/${id}-wm2.webp`;let url;
  if(process.env.S3_BUCKET&&process.env.S3_PUBLIC_URL){
  const s3=new S3Client({endpoint:process.env.S3_ENDPOINT||undefined,region:process.env.S3_REGION||'auto',credentials:{accessKeyId:process.env.S3_ACCESS_KEY_ID,secretAccessKey:process.env.S3_SECRET_ACCESS_KEY}});
  // A separate unlinked clean copy allows future rebranding without double stamping.

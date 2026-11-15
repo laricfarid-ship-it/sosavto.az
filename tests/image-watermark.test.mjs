@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import sharp from 'sharp';
 import {readFile} from 'node:fs/promises';
-import {prepareListingImage} from '../server/image-watermark.mjs';
+import {watermarkSvg,prepareListingImage} from '../server/image-watermark.mjs';
 
 test('server emblem matches the official website logo',async()=>{
  assert.deepEqual(await readFile(new URL('../server/watermark-logo.svg',import.meta.url)),await readFile(new URL('../assets/brand-sa.svg',import.meta.url)));
@@ -34,4 +34,11 @@ test('orientation is applied before watermark placement and invalid input is rej
  const meta=await sharp(output).metadata();
  assert.equal(meta.width,500);assert.equal(meta.height,800);assert.equal(meta.orientation,undefined);
  await assert.rejects(prepareListingImage(Buffer.from('not an image')));
+});
+
+test('watermark lettering uses outlines and renders without installed fonts',async()=>{
+ const svg=watermarkSvg(1600,900).toString();assert.ok(!svg.includes('<text'));assert.match(svg,/sosavto.az/);
+ const {data,info}=await sharp(Buffer.from(svg)).ensureAlpha().raw().toBuffer({resolveWithObject:true});
+ let white=0;for(let y=800;y<866;y++)for(let x=1300;x<1545;x++){const i=(y*info.width+x)*info.channels;if(data[i]>200&&data[i+1]>200&&data[i+2]>200&&data[i+3]>200)white++;}
+ assert.ok(white>800,'corner lettering contains visible white glyphs');
 });
