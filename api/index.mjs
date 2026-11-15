@@ -179,9 +179,9 @@ export default async function handler(req,res){
  }
  if(path==='/api/admin/social-preview'&&method==='GET'){
   const id=uuid(url.searchParams.get('id'));
-  const result=await query("SELECT l.id,l.title,l.brand,l.model,l.year,l.price,l.city,l.status,(SELECT i.url FROM images i WHERE i.listing_id=l.id ORDER BY i.sort_order,i.created_at LIMIT 1) AS image_url FROM listings l WHERE l.id=$1 AND NOT COALESCE((l.details->>'_deleted')::boolean,false)",[id]);
+  const result=await query("SELECT l.id,l.title,l.brand,l.model,l.year,l.price,l.city,l.status,(SELECT i.url FROM images i WHERE i.listing_id=l.id ORDER BY i.sort_order,i.created_at LIMIT 1) AS image_url,ARRAY(SELECT i.url FROM images i WHERE i.listing_id=l.id ORDER BY i.sort_order,i.created_at LIMIT 8) AS image_urls FROM listings l WHERE l.id=$1 AND NOT COALESCE((l.details->>'_deleted')::boolean,false)",[id]);
   if(!result.rows.length||result.rows[0].status!=='active')fail(404,'Yalnız təsdiqlənmiş elanı paylaşmaq olar.');
-  return json(res,200,{preview:socialSharePreview(result.rows[0],result.rows[0].image_url||'')});
+  return json(res,200,{preview:{...socialSharePreview(result.rows[0],result.rows[0].image_url||''),images:result.rows[0].image_urls||[]}});
  }
  if(path==='/api/admin/social-permalink'&&method==='GET'){
   const id=uuid(url.searchParams.get('id'));
