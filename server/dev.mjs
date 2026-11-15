@@ -8,7 +8,7 @@ http.createServer(async(req,res)=>{
  const path=new URL(req.url,'http://localhost').pathname;
  if(path.startsWith('/api/')||path==='/sitemap.xml'||path==='/elan'||path==='/salon.html'||path==='/salon')return handler(req,res);
  let file;if(/^\/media\/[a-f0-9-]+\.webp$/.test(path))file=resolve(root,'.data/uploads',path.split('/').pop());
- else if(path==='/'||/^\/[a-z0-9-]+\.html$/.test(path)||/^\/assets\/[a-z0-9.-]+$/.test(path)||['/robots.txt','/sw.js','/manifest.webmanifest'].includes(path))file=resolve(root,'.'+(path==='/'?'/index.html':path));
+ else if(path==='/'||/^\/[a-z0-9-]+\.html$/.test(path)||/^\/assets\/[a-z0-9.-]+$/.test(path)||['/robots.txt','/sw.js','/manifest.webmanifest','/site.webmanifest'].includes(path))file=resolve(root,'.'+(path==='/'?'/index.html':path));
  if(!file){res.writeHead(404);return res.end('Not found');}
  try{const data=await readFile(file);res.setHeader('Content-Type',types[extname(file)]||'application/octet-stream');res.end(data);}catch{res.writeHead(404,{'Content-Type':'text/html; charset=utf-8'});res.end(await readFile('404.html','utf8'));}
 }).listen(port,'0.0.0.0',()=>console.log(`SosAvto listening on port ${port}`));
