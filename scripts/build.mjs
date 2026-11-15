@@ -12,9 +12,12 @@ import {washEnabled} from '../server/wash-config.mjs';
 if(process.env.VERCEL_ENV==='production'&&washEnabled())await import('../server/wash-migrate.mjs');
 import {mkdir,copyFile,readdir,rm,cp} from 'node:fs/promises';
 await rm('public',{recursive:true,force:true});await mkdir('public');
-for(const f of await readdir('.'))if(f.endsWith('.html')||['robots.txt','sw.js','manifest.webmanifest'].includes(f))await copyFile(f,'public/'+f);
+for(const f of await readdir('.'))if(f.endsWith('.html')||['robots.txt','sw.js','manifest.webmanifest','site.webmanifest'].includes(f))await copyFile(f,'public/'+f);
 await cp('assets','public/assets',{recursive:true});
 await (await import('../mobile/scripts/build-hosted-ui.mjs')).buildHostedUI();
 console.log('Public output contains only HTML, browser assets and robots.txt.');
 
 await import('./repair-watermarks.mjs');
+
+await copyFile('assets/apple-touch-icon-v1.png','public/apple-touch-icon.png');
+await copyFile('assets/apple-touch-icon-v1.png','public/apple-touch-icon-precomposed.png');
