@@ -1,3 +1,4 @@
+import {messages} from '../server/messages.mjs';
 import {normalizeLoginPhone} from '../server/phone-identity.mjs';
 import {rentacar,rentalEnabled} from '../server/rentacar.mjs';
 import {stories} from '../server/stories.mjs';
@@ -50,6 +51,7 @@ export default async function handler(req,res){
  if(path.startsWith('/api/wash/'))return json(res,200,await wash(req,user,path,method));
  if(path.startsWith('/api/sos/'))return json(res,200,await sos(req,user,path,method));
  if(path.startsWith('/api/rentacar/'))return json(res,200,await rentacar(req,user,path,method,url));
+ if(path==='/api/conversations'||path.startsWith('/api/conversations/'))return json(res,200,await messages(req,user,path,method,url));
  if(path==='/api/me'&&method==='GET')return json(res,200,{user:safeUser(user)});
  if(['/api/register','/api/login'].includes(path)&&method==='POST'){
  await rateLimit(`auth:ip:${address}`,60,900);
@@ -70,6 +72,7 @@ export default async function handler(req,res){
  const u=(await query('SELECT u.* FROM users u LEFT JOIN login_phones p ON p.user_id=u.id WHERE u.email=$1 OR u.username=$1 OR p.phone=$2 ORDER BY CASE WHEN u.email=$1 OR u.username=$1 THEN 0 ELSE 1 END LIMIT 1',[rawIdentifier,loginPhone||null])).rows[0];
  const valid=await bcrypt.compare(password,u?.password_hash||'$2b$12$XU7.1nUi/iCTy4lYfsZnGO9DZdvNU91FdY56dLg47/O85VzVFhUUe');
  if(!u||!valid||u.status!=='active')fail(401,'Giriş məlumatları düzgün deyil.');
+ if(b.login_mode==='business'){let business=(await query(`SELECT 1 FROM dealership_profiles WHERE owner_user_id=$1 AND status IN ('pending','approved') UNION ALL SELECT 1 FROM admin_business_profiles WHERE user_id=$1 AND status IN ('pending','approved') LIMIT 1`,[u.id])).rows.length;if(!business&&(await query("SELECT to_regclass('rental_profiles') AS name")).rows[0].name)business=(await query("SELECT 1 FROM rental_profiles WHERE user_id=$1 AND kind='company' AND status IN ('pending','approved')",[u.id])).rows.length;if(!business)fail(403,'Bu hesab biznes kimi qeydiyyatdan keçməyib. Fərdi girişdən istifadə edin.');}
  if(u.role==='admin'&&(await query('SELECT enabled FROM admin_totp WHERE user_id=$1',[u.id])).rows[0]?.enabled){
   await issueAdminChallenge(res,u);return json(res,200,{requires2fa:true});
  }
