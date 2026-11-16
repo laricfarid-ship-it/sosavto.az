@@ -20,3 +20,29 @@ test('installed APK is claimed before legacy injection and hosted runtime mounts
 test('update check preserves typed form data and deduplicates update notice',async()=>{const d=dom();const w=d.window;w.eval(legacyJS);w.__sosavtoMobileVersion='old';w.fetch=async(url,options)=>{assert.equal(url,'/assets/mobile-version.json');assert.equal(options.cache,'no-store');return {ok:true,json:async()=>({version:'new'})};};w.eval(updates);const input=w.document.querySelector('input');input.value='Saxlanılmamış elan';input.dispatchEvent(new w.Event('input',{bubbles:true}));w.dispatchEvent(new w.Event('focus'));await new Promise(r=>setTimeout(r,30));assert.equal(input.value,'Saxlanılmamış elan');assert.equal(w.document.querySelectorAll('#sa-update').length,1);w.confirm=()=>false;w.document.querySelector('#sa-update button').click();assert.equal(input.value,'Saxlanılmamış elan');w.dispatchEvent(new w.Event('focus'));await new Promise(r=>setTimeout(r,30));assert.equal(w.document.querySelectorAll('#sa-update').length,1);close(d);});
 test('failed update checks leave the current interface and data usable',async()=>{const d=dom();const w=d.window;w.eval(legacyJS);w.fetch=async()=>{throw Error('offline')};w.eval(updates);w.dispatchEvent(new w.Event('focus'));await new Promise(r=>setTimeout(r,30));assert.equal(w.document.querySelectorAll('#sa-bottom').length,1);assert.equal(w.document.querySelector('#sa-update'),null);close(d);});
 for(const category of ['car','motorcycle'])test('Android '+category+' keeps search fields when no text-search row exists',()=>{const d=new JSDOM('<form id="search"><div class="fields"><input name="brand" value="Yamaha"><input name="year_min" value="2020"></div><div class="search-submit-bottom"><button>Axtar</button></div><details class="advanced"><input name="price_min"><input name="price_max"></details></form>',{url:'https://sosavto.az/index.html?category='+category,runScripts:'outside-only',pretendToBeVisual:true});try{assert.doesNotThrow(()=>d.window.eval(legacyJS));const f=d.window.document.querySelector('#search');assert.equal(f.elements.brand.value,'Yamaha');assert.equal(f.elements.year_min.value,'2020');assert.equal(f.querySelector('.fields').parentElement,f);assert.ok(f.querySelector('.sa-filters .advanced'));assert.ok(f.elements.price_min.isConnected);assert.equal(f.querySelectorAll('.sa-filters').length,1);}finally{close(d);}});
+
+test('installed Chrome and Safari use the same app bundle without native bridges',async()=>{
+ const dir=await mkdtemp(join(tmpdir(),'sosavto-installed-'));
+ try{
+ await buildHostedUI(dir);const script=await readFile(join(dir,'mobile-app.js'),'utf8');
+ for(const mode of ['chrome','safari']){
+  const d=dom(false),w=d.window;
+  if(mode==='chrome')w.matchMedia=q=>({matches:q==='(display-mode: standalone)',addEventListener(){}});
+  else Object.defineProperty(w.navigator,'standalone',{value:true});
+  w.eval(theme);assert.equal(w.document.querySelectorAll('#sosavto-app-runtime').length,1);
+  w.eval(script);w.eval(script);
+  assert.ok(w.document.documentElement.classList.contains('sa-app'));
+  assert.equal(w.document.querySelectorAll('#sa-bottom').length,1);
+  assert.deepEqual([...w.document.querySelectorAll('#sa-bottom a')].map(a=>a.getAttribute('href')),['/index.html','/ai.html','/elan-ver.html','/mesajlar.html','/giris.html']);
+  close(d);
+ }
+ }finally{await rm(dir,{recursive:true,force:true});}
+});
+test('preview mode stays on preview hosts and never changes ordinary production tabs',()=>{
+ for(const [url,allowed] of [['https://sosavto.az/index.html?app-preview=1',false],['https://sosavto-demo.vercel.app/index.html?app-preview=1',true]]){
+  const d=new JSDOM('<html><head></head><body></body></html>',{url,runScripts:'outside-only'});d.window.eval(theme);
+  assert.equal(!!d.window.document.querySelector('#sosavto-app-runtime'),allowed);
+  if(allowed){d.window.history.replaceState(null,'','/mesajlar.html');d.window.eval(theme);assert.equal(d.window.document.querySelectorAll('#sosavto-app-runtime').length,1);}
+  close(d);
+ }
+});

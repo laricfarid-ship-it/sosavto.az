@@ -1,4 +1,4 @@
-/* APK-only presentation. No production stylesheet or access-control changes. */
+/* Shared APK and installed web-app presentation. Ordinary tabs keep website styles. */
 html.sa-app {font-size:16px;-webkit-text-size-adjust:100%;scroll-padding-top:70px}
 .sa-app body{font-size:14px;line-height:1.45;overscroll-behavior-y:contain}
 .sa-app .container{width:calc(100% - 28px)}
@@ -126,3 +126,7 @@ html.sa-app {font-size:16px;-webkit-text-size-adjust:100%;scroll-padding-top:70p
 .sa-app .sa-bottom a[aria-current=page]:not(.sa-create):after{content:'';position:absolute;bottom:2px;width:12px;height:2px;border-radius:8px;background:var(--accent-ink);box-shadow:0 0 6px color-mix(in srgb,var(--accent) 45%,transparent)}
 .sa-app .sa-bottom .sa-create svg{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 78%,white),var(--blue));box-shadow:0 0 14px color-mix(in srgb,var(--blue) 24%,transparent),inset 0 1px 1px #ffffff80;border:1px solid color-mix(in srgb,var(--accent) 40%,transparent)}
 @media(prefers-reduced-motion:reduce){.sa-app .sa-bottom a{transition:none}}
+
+/* Keep the installed iPhone/Android home indicator clear of navigation. */
+.sa-app body{padding-bottom:calc(76px + env(safe-area-inset-bottom,0px))}
+.sa-app .sa-bottom{padding-bottom:calc(8px + env(safe-area-inset-bottom,0px))}
