@@ -5,7 +5,7 @@
   document.documentElement.classList.add('sa-app');
   const paths = {
     home:'M3 10 12 3l9 7v11h-6v-7H9v7H3Z',
-    map:'M9 18 3 21V5l6-3 6 3 6-3v16l-6 3Zm0 0V2m6 3v16',
+    message:'M21 11.5a8.4 8.4 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.4 8.4 0 0 1-3.8-.9L3 21l1.9-5.7a8.4 8.4 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.4 8.4 0 0 1 3.8-.9h.5a8.5 8.5 0 0 1 8 8v.5Z',
     plus:'M12 5v14M5 12h14',
     ai:'m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5ZM20 2v4M18 4h4',
     user:'M20 21v-2a7 7 0 0 0-14 0v2M17 7a5 5 0 1 1-10 0 5 5 0 0 1 10 0',
@@ -33,7 +33,7 @@
       nav.id = 'sa-bottom'; nav.className = 'sa-bottom'; nav.setAttribute('aria-label','Tətbiq naviqasiyası');
       const page = location.pathname.split('/').pop() || 'index.html';
       const account = document.querySelector('.nav-actions>a')?.getAttribute('href') || 'giris.html';
-      nav.innerHTML = [['index.html','home','Ana səhifə'],['xarita.html','map','Xəritə'],['elan-ver.html','plus','Elan ver'],['ai.html','ai','AI köməkçi'],[account,'user','Hesabım']].map(([href,i,label]) => `<a href="/${href}" ${page===href?'aria-current="page"':''} ${i==='plus'?'class="sa-create"':''}>${icon(i)}<span>${label}</span></a>`).join('');
+      nav.innerHTML = [['index.html','home','Ana səhifə'],['ai.html','ai','AI köməkçi'],['elan-ver.html','plus','Elan ver'],['mesajlar.html','message','Mesajlar'],[account,'user','Hesabım']].map(([href,i,label]) => `<a href="/${href}" ${page===href?'aria-current="page"':''} ${i==='plus'?'class="sa-create"':''}>${icon(i)}<span>${label}</span></a>`).join('');
       document.body.append(nav);
     }
     // Auth renders asynchronously. Follow its existing account link, never infer roles.

@@ -116,3 +116,13 @@ html.sa-app {font-size:16px;-webkit-text-size-adjust:100%;scroll-padding-top:70p
 
 /* Premium illustrations for all remaining Android-only category tiles. */
 .sa-app .categories .category .sa-dimensional-icon{width:45px;height:36px;max-width:100%;flex-shrink:0;overflow:visible}
+
+/* Approved navigation polish: keep the existing five-item layout. */
+.sa-app .sa-bottom{background:linear-gradient(180deg,color-mix(in srgb,var(--blue) 5%,var(--panel)),var(--panel));border-top-color:color-mix(in srgb,var(--accent) 22%,var(--line))}
+.sa-app .sa-bottom a{position:relative;min-width:0;transition:color .18s,background .18s}
+.sa-app .sa-bottom a:not(.sa-create)>svg{color:color-mix(in srgb,var(--accent-ink) 28%,var(--text-soft));filter:drop-shadow(0 0 3px color-mix(in srgb,var(--accent) 28%,transparent))}
+.sa-app .sa-bottom a[aria-current=page]{color:var(--accent-ink);background:radial-gradient(ellipse at 50% 20%,color-mix(in srgb,var(--accent) 17%,var(--panel)),var(--info-bg));box-shadow:inset 0 1px 0 color-mix(in srgb,var(--accent) 12%,transparent)}
+.sa-app .sa-bottom a[aria-current=page]:not(.sa-create)>svg{color:var(--accent-ink);stroke-width:1.85;filter:drop-shadow(0 0 5px color-mix(in srgb,var(--accent) 48%,transparent))}
+.sa-app .sa-bottom a[aria-current=page]:not(.sa-create):after{content:'';position:absolute;bottom:2px;width:12px;height:2px;border-radius:8px;background:var(--accent-ink);box-shadow:0 0 6px color-mix(in srgb,var(--accent) 45%,transparent)}
+.sa-app .sa-bottom .sa-create svg{background:linear-gradient(135deg,color-mix(in srgb,var(--accent) 78%,white),var(--blue));box-shadow:0 0 14px color-mix(in srgb,var(--blue) 24%,transparent),inset 0 1px 1px #ffffff80;border:1px solid color-mix(in srgb,var(--accent) 40%,transparent)}
+@media(prefers-reduced-motion:reduce){.sa-app .sa-bottom a{transition:none}}
