@@ -1,5 +1,5 @@
 (() => {
-  if (location.origin !== 'https://sosavto.az' || window.__sosavtoHostedUI) return;
+  if (window.__sosavtoHostedUI) return;
   window.__sosavtoAppUI = true;
   window.__sosavtoHostedUI = true;
   document.documentElement.classList.add('sa-app');

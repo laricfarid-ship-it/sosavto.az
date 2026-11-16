@@ -1,16 +1,34 @@
-/* Claim presentation before legacy APK onPageCommitVisible injection.
-   androidBridge is installed by Capacitor before the document starts. */
+/* Reuse the APK presentation for installed web apps; ordinary browser tabs stay web. */
 (function () {
-  if (!(window.androidBridge || window.Capacitor?.isNativePlatform?.())) return;
-  window.__sosavtoAppUI = true;
-  var runtime = document.createElement('script');
-  runtime.src = '/assets/mobile-app.js';
-  runtime.async = true;
-  runtime.onerror = function () {
-    // The original website stays usable if the presentation asset is unavailable.
-    document.documentElement.classList.remove('sa-app');
-  };
-  document.head.appendChild(runtime);
+  function previewMode() {
+    if (!location.hostname.endsWith('.vercel.app') && location.hostname !== 'localhost' && location.hostname !== '127.0.0.1') return false;
+    try {
+      var preview = new URLSearchParams(location.search).get('app-preview');
+      if (preview === '1') sessionStorage.setItem('sosavto-app-preview', '1');
+      if (preview === '0') sessionStorage.removeItem('sosavto-app-preview');
+      return sessionStorage.getItem('sosavto-app-preview') === '1';
+    } catch (e) { return false; }
+  }
+  var display = window.matchMedia ? window.matchMedia('(display-mode: standalone)') : null;
+  function loadAppUI() {
+    var native = window.androidBridge || window.Capacitor?.isNativePlatform?.();
+    var installed = window.navigator.standalone === true || display?.matches;
+    var preview = previewMode();
+    if (!(native || installed || preview) || document.getElementById('sosavto-app-runtime')) return;
+    window.__sosavtoAppUI = true;
+    window.__sosavtoAppPreview = preview;
+    var runtime = document.createElement('script');
+    runtime.id = 'sosavto-app-runtime';
+    runtime.src = '/assets/mobile-app.js';
+    runtime.async = true;
+    runtime.onerror = function () {
+      document.documentElement.classList.remove('sa-app');
+      runtime.remove();
+    };
+    document.head.appendChild(runtime);
+  }
+  loadAppUI();
+  display?.addEventListener?.('change', function (event) { if (event.matches) loadAppUI(); });
 })();
 
 /* Light / dark theme. Loaded as a blocking script in <head> so the page never flashes the wrong colours.
