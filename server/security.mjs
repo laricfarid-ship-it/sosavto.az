@@ -56,7 +56,7 @@ export function clientAddress(req){
  return ip;
 }
 export async function body(req){
- const max=new URL(req.url,'http://localhost').pathname.replace(/\/$/,'').match(/^\/api\/(uploads|stories)$/)?4500000:65536;
+ const max=new URL(req.url,'http://localhost').pathname.replace(/\/$/,'').match(/^\/api\/(uploads|stories|rentacar\/uploads)$/)?4500000:65536;
  if(Number(req.headers['content-length'])>max)fail(413,'Sorğu çox böyükdür.');
  let value;
  if(req.body!==undefined&&!Buffer.isBuffer(req.body)&&typeof req.body!=='string'){
