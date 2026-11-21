@@ -1,7 +1,7 @@
 import {randomUUID} from 'node:crypto';
-import {mkdir,writeFile,unlink} from 'node:fs/promises';
+import {mkdir,writeFile,unlink,readFile} from 'node:fs/promises';
 import sharp from 'sharp';
-import {S3Client,PutObjectCommand,DeleteObjectCommand} from '@aws-sdk/client-s3';
+import {S3Client,GetObjectCommand,PutObjectCommand,DeleteObjectCommand} from '@aws-sdk/client-s3';
 import {query,transaction} from './db.mjs';
 import {requireUser,requireAdmin,fail,body,text,uuid,rateLimit} from './security.mjs';
 const local=()=>process.env.LOCAL_DATABASE==='true'&&process.env.NODE_ENV!=='production'&&!process.env.VERCEL;
@@ -49,6 +49,35 @@ export function videoFormat(bytes,mime){
  if(mime==='mp4'&&bytes.length>=16&&bytes.toString('ascii',4,8)==='ftyp')return 'mp4';
  if(mime==='webm'&&bytes.length>=16&&bytes.subarray(0,4).equals(Buffer.from([0x1a,0x45,0xdf,0xa3]))&&bytes.subarray(4,128).includes(Buffer.from('webm')))return 'webm';
  fail(400,'Video oxunmadı. MP4 və ya WebM videosu seçin.');
+}
+export async function storyVideo(req,res,id){
+ const row=(await query(`SELECT s.media_key FROM stories s JOIN users u ON u.id=s.user_id
+  WHERE s.id=$1 AND s.expires_at>now() AND s.media_type='video' AND u.status='active'`,[uuid(id)])).rows[0];
+ const key=row?.media_key;
+ if(!key||!/^stories\/[a-f0-9-]+\/[a-f0-9-]+\.(mp4|webm)$/.test(key))fail(404,'Story videosu tapılmadı.');
+ let bytes;
+ if(configured()){
+  const object=await s3().send(new GetObjectCommand({Bucket:process.env.S3_BUCKET,Key:key}));
+  bytes=Buffer.from(await object.Body.transformToByteArray());
+ }else if(local())bytes=await readFile('.data/uploads/'+key.split('/').pop());
+ else fail(404,'Story videosu tapılmadı.');
+ const size=bytes.length;
+ if(!size||size>3*1024*1024)fail(404,'Story videosu tapılmadı.');
+ res.setHeader('Content-Type','video/'+key.split('.').pop());
+ res.setHeader('Accept-Ranges','bytes');
+ let start=0,end=size-1;
+ const range=req.headers.range;
+ if(range){
+  const match=/^bytes=(\d*)-(\d*)$/.exec(range);
+  if(match&&(match[1]||match[2])){
+   if(match[1]){start=Number(match[1]);if(match[2])end=Math.min(end,Number(match[2]));}
+   else start=Math.max(0,size-Number(match[2]));
+   if(start<=end){res.statusCode=206;res.setHeader('Content-Range',`bytes ${start}-${end}/${size}`);}
+   else{res.statusCode=416;res.setHeader('Content-Range',`bytes */${size}`);return res.end();}
+  }
+ }
+ res.setHeader('Content-Length',end-start+1);
+ return res.end(req.method==='HEAD'?undefined:bytes.subarray(start,end+1));
 }
 export async function stories(req,user,path,method,url){
  if(path==='/api/stories/cleanup'&&method==='GET'){
