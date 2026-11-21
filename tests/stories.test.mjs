@@ -11,9 +11,9 @@ const {createSession}=await import('../server/security.mjs');
 const {default:handler}=await import('../api/index.mjs');
 const {listingReference,cleanupStories}=await import('../server/stories.mjs');
 const ids=Array.from({length:4},()=>randomUUID()),cookies=[];const listing=randomUUID();let story;
-async function request(path,{method='GET',data,cookie=cookies[0]}={}){
- const req=Readable.from(data?[Buffer.from(JSON.stringify(data))]:[]);req.url='/api'+path;req.method=method;req.headers={cookie:cookie||'',origin:process.env.APP_ORIGIN,'content-type':'application/json'};req.socket={remoteAddress:'192.0.2.193'};
- let output;const res={statusCode:200,setHeader(){},end(v){output=v;}};await handler(req,res);return {status:res.statusCode,body:JSON.parse(output)};
+async function request(path,{method='GET',data,cookie=cookies[0],range}={}){
+ const req=Readable.from(data?[Buffer.from(JSON.stringify(data))]:[]);req.url='/api'+path;req.method=method;req.headers={cookie:cookie||'',origin:process.env.APP_ORIGIN,'content-type':'application/json'};if(range)req.headers.range=range;req.socket={remoteAddress:'192.0.2.193'};
+ let output;const res={statusCode:200,setHeader(){},end(v){output=v;}};await handler(req,res);return {status:res.statusCode,body:Buffer.isBuffer(output)?output:JSON.parse(output)};
 }
 before(async()=>{await(await database()).exec(await readFile(new URL('../server/schema.sql',import.meta.url),'utf8'));for(let i=0;i<ids.length;i++){
  await query('INSERT INTO users(id,fullname,username,email,password_hash,role) VALUES($1,$2,$2,$3,$4,$5)',[ids[i],'story'+i,'story'+i+'@example.test','hash',i===3?'admin':'user']);cookies.push((await createSession({setHeader(){}},{id:ids[i]})).split(';')[0]);
@@ -65,6 +65,7 @@ test('admin has no daily quota and can publish repeatedly, including video',asyn
  const r=await request('/stories',{method:'POST',cookie:cookies[3],data:{data:'data:video/mp4;base64,'+bytes.toString('base64')}});assert.equal(r.status,201);
  const video=(await request('/stories',{cookie:cookies[3]})).body.stories.find(s=>s.id===r.body.id);assert.equal(video.media_type,'video');assert.equal(video.author,'SosAvto');assert.equal(video.own,true);
  const publicVideo=(await request('/stories',{cookie:''})).body.stories.find(s=>s.id===video.id);assert.equal(publicVideo.author,'SosAvto');assert.equal(publicVideo.own,null);
+ const fallback=await request('/stories/'+video.id+'/video',{cookie:'',range:'bytes=0-31'});assert.equal(fallback.status,206);assert.deepEqual(fallback.body,bytes.subarray(0,32));
  const file='.data/uploads/'+video.media_url.split('/').pop();await access(file);
  assert.equal((await request('/stories/'+video.id,{method:'DELETE',cookie:cookies[3],data:{}})).status,200);
  await assert.rejects(access(file));assert.equal((await query('SELECT id FROM stories WHERE id=$1',[video.id])).rows.length,0);

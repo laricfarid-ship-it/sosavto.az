@@ -1,7 +1,7 @@
 import {messages} from '../server/messages.mjs';
 import {normalizeLoginPhone} from '../server/phone-identity.mjs';
 import {rentacar,rentalEnabled} from '../server/rentacar.mjs';
-import {stories} from '../server/stories.mjs';
+import {stories,storyVideo} from '../server/stories.mjs';
 import {socialSharePreview,publishSocial,socialConfigured,socialShareEnabled,socialConnectionReport,instagramPostPermalink} from '../server/social-share.mjs';
 import {adminEvent,pushApi} from '../server/admin-push.mjs';
 import {resetEnabled,requestReset,completeReset} from '../server/password-reset.mjs';
@@ -46,6 +46,8 @@ export default async function handler(req,res){
   const clearChallengeCookie=await consumeChallenge(req);const sessionCookie=await createSession(res,pending);res.setHeader('Set-Cookie',[sessionCookie,clearChallengeCookie]);await adminEvent('login',{id:pending.id,name:pending.fullname});return json(res,200,{user:safeUser(pending)});
  }
  if(user&&!['GET','HEAD','OPTIONS'].includes(method))await rateLimit(`write:${user.id}`,120,60);
+ const videoRoute=/^\/api\/stories\/([a-f0-9-]+)\/video$/i.exec(path);
+ if(videoRoute&&(method==='GET'||method==='HEAD'))return await storyVideo(req,res,videoRoute[1]);
  if(path==='/api/stories'||path.startsWith('/api/stories/'))return json(res,method==='POST'&&path==='/api/stories'?201:200,await stories(req,user,path,method,url));
  if(path.startsWith('/api/dealerships/'))return json(res,method==='POST'?201:200,await dealership(req,user,path,method));
  if(path.startsWith('/api/wash/'))return json(res,200,await wash(req,user,path,method));
