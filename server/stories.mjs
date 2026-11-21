@@ -59,7 +59,7 @@ export async function stories(req,user,path,method,url){
  await cleanupStories();const admin=url.searchParams.get('moderation')==='1';if(admin)requireAdmin(user);
  const cursor=url.searchParams.get('before'),parts=cursor?.split('~');if(cursor&&(parts.length!==2||!Number.isFinite(Date.parse(parts[0]))))fail(400,'Yanlış səhifə göstəricisi.');if(cursor)uuid(parts[1]);
  const args=cursor?[parts[0],parts[1]]:[];
- const rows=(await query(`SELECT s.id,s.caption,s.theme,s.created_at,s.expires_at,s.media_url,s.media_type,s.user_id=$${args.length+1} AS own,u.fullname AS author,
+ const rows=(await query(`SELECT s.id,s.caption,s.theme,s.created_at,s.expires_at,s.media_url,s.media_type,s.user_id=$${args.length+1} AS own,CASE WHEN u.role='admin' THEN 'SosAvto' ELSE u.fullname END AS author,
  CASE WHEN ${active} THEN json_build_object('id',l.id,'title',l.title,'number',l.listing_number,'price',l.price) END AS listing
  ${admin?',(SELECT count(*)::integer FROM story_reports r WHERE r.story_id=s.id) AS reports':''}
  FROM stories s JOIN users u ON u.id=s.user_id LEFT JOIN listings l ON l.id=s.listing_id
