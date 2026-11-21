@@ -204,13 +204,13 @@ async function home(){
   main.innerHTML=`${technolAds()}<div class="home-intro"><div class="container">${categoryBackLink()}<h1 style="font-size:clamp(1.6rem,4vw,2.2rem);margin:0 0 20px">${esc(categories[category][0])}</h1>${search}</div></div>${results}${aiBanner}`;
  }else{
   main.innerHTML=`<div class="home-intro compact-home"><div class="container">
+  <section id="home-stories" aria-label="SosAvto Story"></section>
   <section class="discovery-heading discovery-hero">
    <div class="discovery-copy"><h1>Növbəti avtomobilini <span class="accent">burada tap.</span></h1><a class="btn primary" href="elan-ver.html">${icon('plus')} Elan ver</a></div>
    <div class="discovery-visual"><img src="https://images.unsplash.com/photo-1555215695-3004980ad54e?auto=format&fit=crop&w=1000&q=85" alt="BMW avtomobili" width="1000" height="600" fetchpriority="high"></div>
   </section>
   ${search}
   ${results}
-  <section id="home-stories" aria-label="SosAvto Story"></section>
   <section class="category-discovery" aria-labelledby="category-heading"><div class="category-heading"><div><span class="category-eyebrow" aria-hidden="true">SOSAVTO / EXPLORE</span><h2 id="category-heading">Kateqoriyalar</h2></div><button class="category-overview ${category==='all'?'active':''}" data-category="all" aria-pressed="${category==='all'}"><span class="category-art" data-art="all" aria-hidden="true"></span><span>Bütün elanlar</span><span class="category-overview-arrow" aria-hidden="true">↗</span></button></div><div class="categories category-grid" aria-label="Kateqoriyalar">${Object.entries(categories).filter(([k])=>k!=='all').map(([k,[label]],index)=>k==='insurance'?`<a class="category category-rental" data-category="rentacar" data-index="0${index+1}" href="rentacar.html" target="_blank" rel="noopener noreferrer" aria-label="Rent a Car — yeni sekmədə açılır"><span class="category-art" data-art="rentacar" aria-hidden="true"></span><span class="category-label">Rent a Car <span aria-hidden="true">↗</span></span></a>`:`<button class="category ${k===category?'active':''}" data-category="${k}" data-index="0${index+1}" aria-pressed="${k===category}"><span class="category-art" data-art="${k}" aria-hidden="true"></span><span class="category-label">${label}</span></button>`).join('')}</div></section>
   </div></div>${technolAds()}${aiBanner}`;
  }

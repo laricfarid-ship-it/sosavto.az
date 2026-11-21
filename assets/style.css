@@ -168,7 +168,7 @@ html:not(.sa-app) .home-intro #search > .body-choices{display:none!important}
 .search-submit-bottom{display:flex;justify-content:flex-end;margin-top:12px}
 .compact-home .search-submit-bottom{margin-top:8px}
 .compact-home #search .advanced:not([open]){margin-top:4px;padding-top:4px}
-.compact-home #home-stories+.category-discovery{margin-top:10px}
+.compact-home #home-stories:not(:empty){margin:0 0 10px}
 .account-entry-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}
 @media(max-width:1000px){.compact-home #search>.fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:720px){
