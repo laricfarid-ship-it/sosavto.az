@@ -63,7 +63,8 @@ test('admin has no daily quota and can publish repeatedly, including video',asyn
  for(let i=0;i<12;i++)assert.equal((await request('/stories',{method:'POST',cookie:cookies[3],data:{reference:listing}})).status,201);
  const bytes=await readFile(new URL('./fixtures/story-video.mp4',import.meta.url));
  const r=await request('/stories',{method:'POST',cookie:cookies[3],data:{data:'data:video/mp4;base64,'+bytes.toString('base64')}});assert.equal(r.status,201);
- const video=(await request('/stories',{cookie:cookies[3]})).body.stories.find(s=>s.id===r.body.id);assert.equal(video.media_type,'video');
+ const video=(await request('/stories',{cookie:cookies[3]})).body.stories.find(s=>s.id===r.body.id);assert.equal(video.media_type,'video');assert.equal(video.author,'SosAvto');assert.equal(video.own,true);
+ const publicVideo=(await request('/stories',{cookie:''})).body.stories.find(s=>s.id===video.id);assert.equal(publicVideo.author,'SosAvto');assert.equal(publicVideo.own,null);
  const file='.data/uploads/'+video.media_url.split('/').pop();await access(file);
  assert.equal((await request('/stories/'+video.id,{method:'DELETE',cookie:cookies[3],data:{}})).status,200);
  await assert.rejects(access(file));assert.equal((await query('SELECT id FROM stories WHERE id=$1',[video.id])).rows.length,0);
