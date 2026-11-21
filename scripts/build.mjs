@@ -15,6 +15,7 @@ import {mkdir,copyFile,readdir,rm,cp} from 'node:fs/promises';
 await rm('public',{recursive:true,force:true});await mkdir('public');
 for(const f of await readdir('.'))if(f.endsWith('.html')||['robots.txt','sw.js','manifest.webmanifest','site.webmanifest'].includes(f))await copyFile(f,'public/'+f);
 await cp('assets','public/assets',{recursive:true});
+for(const name of ['ffmpeg-core.js','ffmpeg-core.wasm'])await copyFile('node_modules/@ffmpeg/core/dist/umd/'+name,'public/assets/'+name);
 await (await import('../mobile/scripts/build-hosted-ui.mjs')).buildHostedUI();
 console.log('Public output contains only HTML, browser assets and robots.txt.');
 

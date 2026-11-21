@@ -19,6 +19,7 @@
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.864.0",
+    "@ffmpeg/core": "0.12.10",
     "bcryptjs": "^3.0.2",
     "pg": "^8.16.3",
     "sharp": "0.35.5",

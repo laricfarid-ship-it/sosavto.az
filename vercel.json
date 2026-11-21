@@ -50,6 +50,15 @@
       ]
     },
     {
+      "source": "/assets/story-video-worker.js",
+      "headers": [
+        {
+          "key": "Content-Security-Policy",
+          "value": "default-src 'none'; script-src 'self' 'wasm-unsafe-eval'; connect-src 'self'"
+        }
+      ]
+    },
+    {
       "source": "/assets/:file(theme.js|mobile-app.js|mobile-version.json)",
       "headers": [
         {
