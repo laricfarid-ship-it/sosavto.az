@@ -20,7 +20,7 @@ before(async()=>{await(await database()).exec(await readFile(new URL('../server/
 });
 after(async()=>{dom.window.close();await close();});
 test('actual composer → resolve API → publish → viewer → delete → quota, plus empty and unavailable states',async()=>{
- const root=document.querySelector('#stories');await mountStories(root,{api,me,toast:t=>notices.push(t)});assert.match(root.textContent,/İlk story səndən olsun/);assert.equal(root.querySelectorAll('.story-bubble').length,1);
+ const root=document.querySelector('#stories');await mountStories(root,{api,me,toast:t=>notices.push(t)});assert.match(root.textContent,/Gündə 1 pulsuz/);assert.equal(root.querySelectorAll('.story-bubble').length,1);
  root.querySelector('.story-add').click();await until(()=>document.querySelector('[name=mine] option[value="'+listing+'"]'));
  const select=document.querySelector('[name=mine]');select.value=listing;select.dispatchEvent(new dom.window.Event('change'));await until(()=>document.querySelector('.story-linked').textContent.startsWith('✓'));
  const caption=document.querySelector('[name=caption]');caption.value='<script>alert(1)</script>';caption.dispatchEvent(new dom.window.Event('input'));assert.equal(document.querySelectorAll('.story-preview script').length,0);assert.equal(document.querySelector('.story-preview-copy p').textContent,caption.value);

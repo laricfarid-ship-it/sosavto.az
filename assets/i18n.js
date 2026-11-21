@@ -336,6 +336,7 @@ const STRINGS = {
   "Şifrəmi unutdum": {en:"Forgot password?",ru:"Забыли пароль?"},
   "Yeni istifadəçisiniz?": {en:"New here?",ru:"Впервые здесь?"},
   "Qeydiyyatdan keçin": {en:"Create an account",ru:"Зарегистрироваться"},
+  "Qeydiyyatdan keç": {en:"Create an account",ru:"Зарегистрироваться"},
   "Yeni şifrə": {en:"New password",ru:"Новый пароль"},
   "Şifrənizi iki dəfə daxil edin. Yenilədikdən sonra giriş səhifəsi açılacaq.": {en:"Enter your new password twice. After resetting it, the login page will open.",ru:"Введите новый пароль дважды. После сброса откроется страница входа."},
   "Hesabınızın email ünvanını yazın. Bərpa linki 20 dəqiqə etibarlıdır və bir dəfə istifadə olunur.": {en:"Enter your account email. The recovery link is valid for 20 minutes and can be used once.",ru:"Введите email аккаунта. Ссылка действительна 20 минут и используется один раз."},

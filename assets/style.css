@@ -157,3 +157,24 @@ html:not(.sa-app) .home-intro #search > .body-choices{display:none!important}
 .auth-emblem{display:block;width:84px;height:48px;object-fit:contain;margin:0 auto 6px}.auth-wordmark{text-align:center;font-size:26px;font-weight:800;letter-spacing:-1px;margin:0 0 24px}.auth-wordmark span{color:#329fdf}.premium-login h1{font-size:2rem}.premium-login form>.btn{width:100%}.business-login-card{margin-top:28px;padding-top:24px;border-top:1px solid #258acb40}.business-login-card h2{font-size:1.15rem}.business-login-card .btn{width:100%;border-color:#258acb80}
 .messages-page{min-width:0}.messages-page h1{font-size:2rem}.messenger{display:grid;grid-template-columns:minmax(190px,280px) minmax(0,1fr);gap:16px}.messenger nav,.conversation-panel{border:1px solid #258acb35;border-radius:18px;padding:14px;min-width:0}.messenger nav{max-height:650px;overflow:auto}.conversation-item{display:grid;gap:6px;width:100%;text-align:left;background:transparent;color:inherit;padding:15px;border:0;border-bottom:1px solid #258acb25;cursor:pointer}.conversation-item.active{background:#258acb20;border-radius:12px}.conversation-item span,.conversation-item small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.conversation-panel h2{font-size:1.15rem}.conversation-panel>a{display:block;margin-bottom:12px;color:#319cdb}.conversation-panel>a[hidden]{display:none}#message-history{height:360px;overflow-y:auto;padding:12px 0;display:flex;flex-direction:column;gap:12px}.message-bubble{align-self:flex-start;max-width:88%;padding:12px 16px;border-radius:16px;background:#258acb16;overflow-wrap:anywhere}.message-bubble.mine{align-self:flex-end;background:#177bc42a;border:1px solid #258acb50}.message-bubble p{white-space:pre-wrap;margin:0 0 6px}.message-bubble time{font-size:11px;opacity:.65}#message-compose{border-top:1px solid #258acb25;padding-top:12px}
 @media(max-width:760px){.premium-login{padding:24px 20px;margin:12px auto}.messenger{grid-template-columns:1fr}.messenger nav{max-height:190px}#message-history{height:340px}.messages-page .section-head{gap:10px;flex-wrap:wrap}}
+
+/* Homepage search and listing entry share the first screen. */
+.compact-home .discovery-hero{min-height:0;margin-bottom:12px}
+.compact-home .discovery-copy{padding:18px 24px}
+.compact-home .discovery-hero h1{font-size:clamp(1.45rem,3vw,2.25rem);margin:0 0 9px}
+.compact-home .discovery-visual{min-height:0}
+.compact-home .search-panel{padding:14px;margin-bottom:20px}
+.compact-home #search>.fields{gap:8px;grid-template-columns:repeat(6,minmax(0,1fr))}
+.search-submit-bottom{display:flex;justify-content:flex-end;margin-top:12px}
+.compact-home .search-submit-bottom{margin-top:8px}
+.compact-home #search .advanced:not([open]){margin-top:4px;padding-top:4px}
+.compact-home #home-stories:not(:empty){margin:0 0 10px}
+.account-entry-actions{display:flex;justify-content:center;flex-wrap:wrap;gap:8px}
+@media(max-width:1000px){.compact-home #search>.fields{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:720px){
+ .compact-home .discovery-copy{width:78%;padding:12px 15px}
+ .compact-home .discovery-hero h1{font-size:clamp(1.25rem,5vw,1.7rem);margin-bottom:7px}
+ .compact-home .search-panel{padding:10px}
+ .compact-home #search>.fields .field{font-size:.78rem}
+ .compact-home #search>.fields .field input,.compact-home #search>.fields .field select{padding-block:7px}
+}
