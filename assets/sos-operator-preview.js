@@ -65,6 +65,10 @@ export function mountSosOperatorPreview(main, mapLibrary) {
     li { margin-bottom: 8px; }
     .amount { font-size: 2.2rem; font-weight: 750; margin: 0; }
     .actions { margin-top: 15px; }
+    .checkout { margin-top: 16px; padding: 16px; border: 1px solid var(--line-strong); border-radius: 12px; background: var(--panel2); }
+    .checkout h3 { margin-top: 0; }
+    .checkout button { min-height: 44px; }
+    .checkout label input[type=checkbox] { display: inline; width: auto; margin: 0 6px 0 0; }
     .location-map { height: clamp(230px, 40vw, 320px); margin: 10px 0; border: 1px solid var(--line); border-radius: 12px; background: var(--panel2); }
     .locate { min-height: 44px; }
     .locate svg { width: 1.2em; height: 1.2em; vertical-align: -.2em; margin-right: 5px; }
@@ -185,22 +189,41 @@ export function mountSosOperatorPreview(main, mapLibrary) {
     if (point) show(point);
   }
 
+  const paymentMethods = {apple:'Apple Pay', google:'Google Pay', card:'Visa / Mastercard', saved:'Saxlanmış kart · •••• 4242'};
+  let checkout;
+  let savedDemoCard = false;
+  function paymentPanel(amount) {
+    if (!checkout) return button('openPayment', 'Kartla ödə (sınaq)', true);
+    const options = ['apple','google','card', ...(savedDemoCard ? ['saved'] : [])];
+    const method = checkout.method;
+    return `<section class="checkout"><h3>Ödəniş üsulunu seç · ${money(amount)}</h3>
+      <p class="muted">Sınaq ödənişidir. Real kart məlumatı daxil etmə.</p>
+      ${method ? `<p><strong>${paymentMethods[method]}</strong></p>
+        ${method === 'card' ? '<p>Nümunə kart · •••• 4242</p><label><input name="saveCard" type="checkbox">Nümunə kartı növbəti sınaq üçün yadda saxla</label>' : ''}
+        ${button('confirmPayment','Sınaq ödənişini təsdiqlə',true)}
+        ${button('backPayment','Üsulu dəyiş')}` :
+        `<div class="actions">${options.map(key => button('method-' + key,paymentMethods[key])).join('')}</div>
+          ${savedDemoCard ? button('forgetCard','Nümunə kartı sil') : ''}`}
+      ${button('closePayment','Bağla')}
+    </section>`;
+  }
   const screens = {
     start: () => `<fieldset class="sos-problems"><legend class="sr-only">SOS kateqoriyası</legend>${Object.entries(labels).map(([key, label]) => `<label><input type="radio" name="category" value="${key}" required${key === 'battery' ? ' checked' : ''}><span>${categoryIcon(key)}${label}</span></label>`).join('')}</fieldset><h3>Haradasan?</h3><p class="muted">«Məni tap» düyməsini bas və ya xəritədə olduğun nöqtəyə toxun.</p><button type="button" class="locate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>Məni tap</button>${mapPanel}${field('description','Qısa məlumat','maxlength="180" placeholder="Maşın işə düşmür"')}${button('create','Operator zəngi istə',true)}`,
     call: () => `<p>Məkan · ${order.point.map(value => value.toFixed(5)).join(', ')}</p>${field('note','Zəngin nəticəsi')}${fee('total','SosAvto yekun tarifi (AZN)',30)}${fee('commission','SosAvto komissiyası (AZN)',5)}${fee('callFee','Çatma təsdiqlənərsə saxlanıla bilən gəliş haqqı (AZN)',5)}${button('dispatch','Sorğunu ustaya göndər',true)}`,
     quote: () => order.flags.master >= 2 ? '<p>Ustanın yeni sifarişləri operator yoxlamasına qədər dayandırılıb.</p>' : `<p>Usta ${order.candidate} (sınaq) · ${escape(order.note)}</p><p>Sənin qazancın</p><p class="amount">${money(order.total - order.commission)}</p><p>Xidmətin qiyməti ${money(order.total)} · SosAvto komissiyası ${money(order.commission)}</p>${field('eta','Çatma müddəti (dəqiqə)','type="number" required min="1" max="180" value="20"')}${button('quote','Qəbul et',true)} <button type="submit" value="rejectQuote" formnovalidate>İmtina et</button>`,
     offer: () => split() + `<p>Usta ${order.candidate} qəbul edib · ${order.eta} dəqiqə</p>` + button('offer','Sabit qiyməti müştəriyə göndər',true),
-    pay: () => price() + `<p>Ödəniş üsulu: bank kartı. Ləğv və mübahisələr operator tərəfindən yoxlanır. Çatma təsdiqlənərsə, ${money(order.callFee)} gəliş haqqı saxlanıla bilər. Geri ödəniş ödəniş edilən karta yönləndirilir.</p>` + button('pay','Kartla sınaq ödənişi et',true),
+    pay: () => price() + `<p>Ödəniş üsulu: bank kartı. Ləğv və mübahisələr operator tərəfindən yoxlanır. Çatma təsdiqlənərsə, ${money(order.callFee)} gəliş haqqı saxlanıla bilər. Geri ödəniş ödəniş edilən karta yönləndirilir.</p>` + paymentPanel(order.total),
     travel: () => `${navigation()}${field('code','Müştərinin çatma kodu','required inputmode="numeric" pattern="[0-9]{4}" maxlength="4"')}${button('arrive','Çatma kodunu təsdiqlə',true)}`,
     work: () => `${navigation()}${field('item','Əlavə işin adı','maxlength="180"')}<div class="actions">${button('extra','Əlavə işi operatora göndər')}${button('finish','İş görüldü',true)}${button('unresolved','Yerində həll olunmadı')}</div>`,
     extraPrice: () => `<p>${escape(order.item)}</p>${fee('extraFee','Əlavə xidmətin SosAvto tarifi (AZN)',10)}${fee('extraCommission','Əlavə xidmətin SosAvto komissiyası (AZN)',0)}${button('extraPrice','Qiyməti müştəriyə göndər',true)}`,
-    extra: () => `<p>${escape(order.item)} · ${money(order.extraFee)}</p><div class="actions">${button('extraPay','Əlavə işi kartla ödə (sınaq)',true)}${button('decline','Təklifi rədd et')}</div>`,
+    extra: () => `<p>${escape(order.item)} · ${money(order.extraFee)}</p>${paymentPanel(order.extraFee)}<div class="actions">${button('decline','Təklifi rədd et')}</div>`,
     finish: () => `<div class="actions">${button('complete','İş tamamlandı',true)}${button('dispute','Problem bildir')}</div>`,
     review: () => `<p>${escape(order.reason)}</p><div class="actions">${button('refundAll','Tam geri ödəniş')}${order.arrived ? button('refundWork','İş haqqını qaytar') : ''}${button('fraud','Təsdiqlənmiş aldatma')}${order.cancelRole ? button('unjustified','Əsassız imtinanı qeyd et') : ''}</div>`,
     closed: () => button('reset','Yeni sınaq başlat',true),
   };
 
   function go(step, message) {
+    checkout = null;
     order.step = step;
     order.role = flow[step][0];
     order.log.push(message);
@@ -264,9 +287,29 @@ export function mountSosOperatorPreview(main, mapLibrary) {
         return go('offer', 'Usta sifarişi qəbul etdi.');
       case 'offer':
         return go('pay', 'SosAvto tarifi müştəriyə göndərildi: ' + money(order.total) + '.');
-      case 'pay':
+      case 'openPayment': checkout = {}; return render();
+      case 'closePayment': checkout = null; return render();
+      case 'backPayment': checkout.method = null; return render();
+      case 'forgetCard': savedDemoCard = false; return render();
+      case 'method-apple':
+      case 'method-google':
+      case 'method-card':
+      case 'method-saved':
+        checkout.method = action.slice('method-'.length);
+        return render();
+      case 'confirmPayment': {
+        if (order.role !== 'driver' || !checkout?.method || !['pay','extra'].includes(order.step)) return;
+        const method = paymentMethods[checkout.method];
+        if (checkout.method === 'card' && form.has('saveCard')) savedDemoCard = true;
+        if (order.step === 'extra') {
+          order.paid += order.extraFee;
+          order.paidExtraCommission = (order.paidExtraCommission || 0) + order.extraCommission;
+          return go('work', method + ' ilə əlavə işin sınaq ödənişi təsdiqləndi.');
+        }
         order.arrivalCode = String(1000 + crypto.getRandomValues(new Uint32Array(1))[0] % 9000);
-        order.paid = order.total; return go('travel', 'Kartla sınaq ödənişi təsdiqləndi. Ustaya ünvan açıldı.');
+        order.paid = order.total;
+        return go('travel', method + ' ilə sınaq ödənişi təsdiqləndi. Ustaya ünvan açıldı.');
+      }
       case 'arrive':
         if (form.get('code') !== order.arrivalCode) { root.querySelector('#error').textContent = 'Çatma kodu düzgün deyil.'; return; }
         order.arrivalCode = null;
@@ -285,10 +328,6 @@ export function mountSosOperatorPreview(main, mapLibrary) {
           return;
         }
         return go('extra', 'Əlavə xidmətin tarifi müştəriyə göndərildi: ' + money(order.extraFee) + '.');
-      case 'extraPay':
-        order.paid += order.extraFee;
-        order.paidExtraCommission = (order.paidExtraCommission || 0) + order.extraCommission;
-        return go('work', 'Əlavə işin sınaq ödənişi təsdiqləndi.');
       case 'decline': return go('work', 'Müştəri əlavə təklifi rədd etdi.');
       case 'finish': return go('finish', 'Usta işi tamamladığını bildirdi.');
       case 'complete':
