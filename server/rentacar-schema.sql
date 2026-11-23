@@ -46,3 +46,17 @@ CREATE TABLE IF NOT EXISTS rental_media (
 );
 CREATE INDEX IF NOT EXISTS rental_cars_owner ON rental_cars(owner_id,created_at DESC);
 CREATE INDEX IF NOT EXISTS rental_bookings_renter ON rental_bookings(renter_id,created_at DESC);
+
+CREATE TABLE IF NOT EXISTS rental_finance_settings (
+ id integer PRIMARY KEY CHECK(id=1), commission_bps integer NOT NULL DEFAULT 0 CHECK(commission_bps BETWEEN 0 AND 10000),
+ configured boolean NOT NULL DEFAULT false, updated_at timestamptz NOT NULL DEFAULT now()
+);
+INSERT INTO rental_finance_settings(id) VALUES(1) ON CONFLICT DO NOTHING;
+ALTER TABLE rental_bookings ADD COLUMN IF NOT EXISTS commission_bps integer NOT NULL DEFAULT 0 CHECK(commission_bps BETWEEN 0 AND 10000);
+ALTER TABLE rental_bookings ADD COLUMN IF NOT EXISTS commission_cents integer NOT NULL DEFAULT 0 CHECK(commission_cents>=0);
+ALTER TABLE rental_bookings ADD COLUMN IF NOT EXISTS commission_configured boolean NOT NULL DEFAULT false;
+CREATE TABLE IF NOT EXISTS rental_commission_receipts (
+ id uuid PRIMARY KEY,booking_id uuid NOT NULL UNIQUE REFERENCES rental_bookings(id),
+ amount_cents integer NOT NULL CHECK(amount_cents>0),reference varchar(150) NOT NULL UNIQUE,
+ actor_id uuid NOT NULL REFERENCES users(id),created_at timestamptz NOT NULL DEFAULT now()
+);
