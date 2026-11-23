@@ -385,7 +385,13 @@ async function init(){
  await render({main,me,config,api,esc,toast,task,mapLibrary});
  const notice=document.createElement('p');notice.className='notice';notice.textContent='Təsisçi baxışı — bu bölmə yalnız sizin hesabınıza açıqdır. Digər istifadəçilər təmir ekranını görür.';main.prepend(notice);
  };
- const sosPage=()=>founderPage(roadside);
+ const sosPage=()=>founderPage(async context=>{
+ if(page!=='sos.html'||params.get('evvelki')==='1')return roadside(context);
+ main.innerHTML='<p><a class="btn" href="sos.html?evvelki=1">Mövcud SOS paneli</a></p>';
+ const {mountSosOperatorPreview}=await import('./sos-operator-preview.js');
+ mountSosOperatorPreview(main);
+ });
+
  const washPage=()=>founderPage(carwash);
  const routes={'kredit.html':()=>{main.innerHTML='<p><a href="index.html">← Elanlara qayıt</a></p>'+creditMarkup();mountCredit(main);},'avtoyuma.html':washPage,'avtoyuma-panel.html':washPage,'sos.html':sosPage,'sos-usta.html':sosPage,'index.html':home,'muqayise.html':comparisonPage,'sifre-berpa.html':passwordRecovery,'mesajlar.html':async()=>{if(!requireLogin())return;const {mountMessages}=await import('./messages.js');await mountMessages({main,me,api,esc,sidebar,wireLogout,params});},'giris.html':()=>auth(false),'qeydiyyat.html':()=>auth(true),'kabinet.html':profile,'menim-elanlarim.html':()=>collection('my-listings'),'favoriler.html':()=>collection('favorites'),'elan-ver.html':listingForm,'elan.html':detail,'haqqinda.html':()=>legalRoute(),'elaqe.html':()=>legalRoute(),'qaydalar.html':()=>legalRoute(),'mexfiyyet.html':()=>legalRoute(),'xarita.html':mapPage,'ai.html':assistant,'admin.html':admin,'bildirisler.html':notifications};
  await (routes[page]||(()=>{main.innerHTML=empty('Səhifə tapılmadı','Axtardığınız səhifə mövcud deyil.','<a href="index.html" class="btn primary">Ana səhifəyə qayıt</a>');}))();
