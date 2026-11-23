@@ -1,4 +1,4 @@
-export function mountSosOperatorPreview(main) {
+export function mountSosOperatorPreview(main, mapLibrary) {
   const host = document.createElement("section");
   const root = host.attachShadow({mode:"open"});
   const style = document.createElement("style");
@@ -65,12 +65,19 @@ export function mountSosOperatorPreview(main) {
     li { margin-bottom: 8px; }
     .amount { font-size: 2.2rem; font-weight: 750; margin: 0; }
     .actions { margin-top: 15px; }
+    .location-map { height: clamp(230px, 40vw, 320px); margin: 10px 0; border: 1px solid var(--line); border-radius: 12px; background: var(--panel2); }
+    .locate { min-height: 44px; }
+    .locate svg { width: 1.2em; height: 1.2em; vertical-align: -.2em; margin-right: 5px; }
+    .messages { margin-top: 20px; padding-top: 12px; border-top: 1px solid var(--line); overflow-wrap: anywhere; }
     @media (max-width: 700px) { .grid { grid-template-columns: 1fr; } .card { padding: 16px; } }
     @media (max-width: 430px) { .sos-problems { grid-template-columns: repeat(2,minmax(0,1fr)); } }
   `;
   const content = document.createElement("main");
   content.innerHTML = "\n<header><strong class=\"brand\"><b>SOS</b> YOL YARDIMI</strong><small>Sınaq rejimi · real ödəniş və zəng yoxdur</small></header>\n<h1>Yolda qalmısan?</h1>\n<p class=\"muted\">Problemi seç. SosAvto operatoru zəng edib səni uyğun ustaya yönləndirsin.</p>\n<nav aria-label=\"Sınaq rolları\"></nav>\n<div class=\"grid\"><section class=\"card\" id=\"work\"></section><aside class=\"card\" id=\"summary\" aria-live=\"polite\"></aside></div>\n";
-  root.append(style, content);
+  const mapStyles = document.createElement('link');
+  mapStyles.rel = 'stylesheet';
+  mapStyles.href = '/assets/leaflet.css';
+  root.append(mapStyles, style, content);
   main.append(host);
   const labels = {
     tire: 'Təkər deşilib',
@@ -108,7 +115,7 @@ export function mountSosOperatorPreview(main) {
     review: ['operator', 'Ləğv və ya mübahisə', 'Müştərinin və ustanın məlumatlarını yoxla. Qərar sifariş tarixçəsində qalır.'],
     closed: ['driver', 'Sifariş bağlandı', 'Ödəniş və qərarlar tarixçədə görünür.'],
   };
-  const fresh = () => ({step:'start', role:'driver', paid:0, refund:0, deposit:2500, flags:{driver:0, master:0}, log:[]});
+  const fresh = () => ({step:'start', role:'driver', paid:0, refund:0, deposit:2500, flags:{driver:0, master:0}, log:[], messages:[]});
   let order = fresh();
   const nav = root.querySelector('nav');
   const work = root.querySelector('#work');
@@ -122,14 +129,70 @@ export function mountSosOperatorPreview(main) {
   const total = () => (order.callFee || 0) + (order.labor || 0);
   const price = () => `<p class="amount">${money(total())}</p><p>Gəliş ${money(order.callFee)} · İş ${money(order.labor)} · ${order.eta} dəqiqə</p>`;
   const reason = () => '<label>Səbəb<select name="reason" required><option value="">Seçin</option><option>Usta gəlmədi</option><option>Yerində həll mümkün olmadı</option><option>Saytdan kənar ödəniş istəndi</option><option>Plan dəyişdi</option></select></label>';
+  const baku = [40.4093, 49.8671];
+  let selectedPoint;
+  let map;
+  const mapPanel = '<div class="location-map" aria-label="SOS məkan xəritəsi"></div><p class="muted" data-location-status role="status"></p>';
+  const navigation = () => {
+    const point = order.point.join(',');
+    return mapPanel + `<p><a href="https://www.google.com/maps/dir/?api=1&destination=${point}" target="_blank" rel="noopener noreferrer">Google Maps-də marşrutu aç</a> · <a href="https://waze.com/ul?ll=${point}&navigate=yes" target="_blank" rel="noopener noreferrer">Waze-də aç</a></p>`;
+  };
+
+  async function mountMap() {
+    const container = root.querySelector('.location-map');
+    if (!container || !mapLibrary) return;
+    const status = root.querySelector('[data-location-status]');
+    const locate = root.querySelector('.locate');
+    let pin;
+    let L;
+    const show = (point, zoom = 16) => {
+      if (!map) return;
+      map.setView(point, zoom);
+      if (pin) pin.setLatLng(point);
+      else pin = L.circleMarker(point, {radius:9, color:'#087ca9', fillColor:'#20b5eb', fillOpacity:.88, weight:3}).addTo(map);
+    };
+    if (locate) locate.onclick = () => {
+      if (!navigator.geolocation) { status.textContent = 'GPS əlçatan deyil. Xəritədə nöqtə seç.'; return; }
+      locate.disabled = true;
+      status.textContent = 'Məkan axtarılır…';
+      navigator.geolocation.getCurrentPosition(({coords}) => {
+        if (!container.isConnected) return;
+        locate.disabled = false;
+        selectedPoint = [coords.latitude, coords.longitude];
+        show(selectedPoint);
+        status.textContent = `Məkan seçildi · GPS dəqiqliyi təxminən ${Math.round(coords.accuracy)} m.`;
+      }, () => {
+        if (!container.isConnected) return;
+        locate.disabled = false;
+        status.textContent = 'Məkan alınmadı. GPS icazəsini yoxla və ya xəritədə nöqtə seç.';
+      }, {enableHighAccuracy:true, timeout:10000, maximumAge:0});
+    };
+    try { L = await mapLibrary(); } catch {
+      if (container.isConnected && !status.textContent) status.textContent = locate ? 'Xəritə yüklənmədi. GPS ilə məkan seçə bilərsən.' : 'Xəritə yüklənmədi. Marşrut linkindən istifadə et.';
+      return;
+    }
+    if (!container.isConnected) return;
+    map = L.map(container, {scrollWheelZoom:false}).setView(baku, 12);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom:19, attribution:'© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+    if (locate) map.on('click', ({latlng}) => {
+      selectedPoint = [latlng.lat, latlng.lng];
+      show(selectedPoint, map.getZoom());
+      status.textContent = 'Məkan seçildi. Sorğunu göndərməzdən əvvəl nöqtəni yoxla.';
+    });
+    const point = locate ? selectedPoint : order.point;
+    if (point) show(point);
+  }
+
   const screens = {
-    start: () => `<fieldset class="sos-problems"><legend class="sr-only">SOS kateqoriyası</legend>${Object.entries(labels).map(([key, label]) => `<label><input type="radio" name="category" value="${key}" required${key === 'battery' ? ' checked' : ''}><span>${categoryIcon(key)}${label}</span></label>`).join('')}</fieldset>${field('address','Ünvan','required maxlength="180" value="Nərimanov, Bakı · sınaq ünvanı"')}${field('description','Qısa məlumat','maxlength="180" placeholder="Maşın işə düşmür"')}${button('create','Operator zəngi istə',true)}`,
-    call: () => `<p>Ünvan · ${escape(order.address)}</p>${field('note','Zəngin nəticəsi')}${fee('estimate','Təxmini qiymət (AZN)',20)}${button('dispatch','Sorğunu ustaya göndər',true)}`,
+    start: () => `<fieldset class="sos-problems"><legend class="sr-only">SOS kateqoriyası</legend>${Object.entries(labels).map(([key, label]) => `<label><input type="radio" name="category" value="${key}" required${key === 'battery' ? ' checked' : ''}><span>${categoryIcon(key)}${label}</span></label>`).join('')}</fieldset><h3>Haradasan?</h3><p class="muted">«Məni tap» düyməsini bas və ya xəritədə olduğun nöqtəyə toxun.</p><button type="button" class="locate"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>Məni tap</button>${mapPanel}${field('description','Qısa məlumat','maxlength="180" placeholder="Maşın işə düşmür"')}${button('create','Operator zəngi istə',true)}`,
+    call: () => `<p>Məkan · ${order.point.map(value => value.toFixed(5)).join(', ')}</p>${field('note','Zəngin nəticəsi')}${fee('estimate','Təxmini qiymət (AZN)',20)}${button('dispatch','Sorğunu ustaya göndər',true)}`,
     quote: () => order.flags.master >= 2 ? '<p>Ustanın yeni sifarişləri operator yoxlamasına qədər dayandırılıb.</p>' : `<p>${escape(order.note)} · Təxmini ${money(order.estimate)}</p>${fee('callFee','Gəliş haqqı (AZN)',5)}${fee('labor','İş haqqı (AZN)',15)}${field('eta','Çatma müddəti (dəqiqə)','type="number" required min="1" max="180" value="20"')}${button('quote','Təklifi operatora göndər',true)}`,
     offer: () => `<label>Usta təklifləri<select name="offer"><option value="first">Usta 1 · ${money(total())} · ${order.eta} dəqiqə</option><option value="second">Usta 2 (nümunə) · 24.00 AZN · 12 dəqiqə</option></select></label>` + button('offer','Seçilən təklifi müştəriyə göndər',true),
     pay: () => price() + '<p>Ödəniş üsulu: bank kartı. Ləğv və mübahisələr operator tərəfindən yoxlanır. Çatma təsdiqlənərsə, gəliş haqqı saxlanıla bilər. Geri ödəniş ödəniş edilən karta yönləndirilir.</p>' + button('pay','Kartla sınaq ödənişi et',true),
-    travel: () => `<p>Ünvan · ${escape(order.address)}</p>${field('code','Müştərinin çatma kodu','required inputmode="numeric" pattern="[0-9]{4}" maxlength="4"')}${button('arrive','Çatma kodunu təsdiqlə',true)}`,
-    work: () => `<p>Ünvan · ${escape(order.address)}</p>${field('item','Əlavə işin adı','maxlength="180"')}${fee('extraFee','Əlavə ödəniş (AZN)',10)}<div class="actions">${button('extra','Əlavə təklif göndər')}${button('finish','İş görüldü',true)}${button('unresolved','Yerində həll olunmadı')}</div>`,
+    travel: () => `${navigation()}${field('code','Müştərinin çatma kodu','required inputmode="numeric" pattern="[0-9]{4}" maxlength="4"')}${button('arrive','Çatma kodunu təsdiqlə',true)}`,
+    work: () => `${navigation()}${field('item','Əlavə işin adı','maxlength="180"')}${fee('extraFee','Əlavə ödəniş (AZN)',10)}<div class="actions">${button('extra','Əlavə təklif göndər')}${button('finish','İş görüldü',true)}${button('unresolved','Yerində həll olunmadı')}</div>`,
     extra: () => `<p>${escape(order.item)} · ${money(order.extraFee)}</p><div class="actions">${button('extraPay','Əlavə işi kartla ödə (sınaq)',true)}${button('decline','Təklifi rədd et')}</div>`,
     finish: () => `<div class="actions">${button('complete','İş tamamlandı',true)}${button('dispute','Problem bildir')}</div>`,
     review: () => `<p>${escape(order.reason)}</p><div class="actions">${button('refundAll','Tam geri ödəniş')}${order.arrived ? button('refundWork','İş haqqını qaytar') : ''}${button('fraud','Təsdiqlənmiş aldatma')}${order.cancelRole ? button('unjustified','Əsassız imtinanı qeyd et') : ''}</div>`,
@@ -144,10 +207,16 @@ export function mountSosOperatorPreview(main) {
   }
 
   function render() {
+    map?.remove();
+    map = null;
     const [role, title, help] = flow[order.step];
     nav.innerHTML = Object.entries(roles).map(([key, label]) => `<button type="button" data-role="${key}" aria-pressed="${order.role === key}">${label}</button>`).join('');
     const canCancel = ['pay','travel','work','extra','finish'].includes(order.step) && order.role !== 'operator';
     work.innerHTML = `<h2>${title}</h2><p class="muted">${help}</p>${order.role === role ? `<form id="stage">${screens[order.step]()}</form>` : `<p>Növbəti addımı <strong>${roles[role]}</strong> yerinə yetirir.</p>`}${order.step === 'travel' && order.role === 'driver' ? `<p>Ustaya yalnız ünvana çatanda de: <strong>${order.arrivalCode}</strong></p>` : ''}${canCancel ? `<details><summary>Sifarişi ləğv et</summary><form id="cancel">${reason()}${button('cancel','Səbəbi göndər')}</form></details>` : ''}<p id="error" role="alert"></p>`;
+    if (order.step !== 'start' && (order.role !== 'master' || order.paid)) {
+      work.insertAdjacentHTML('beforeend', `<section class="messages"><h3>Sifariş mesajları</h3><p class="muted">Bu yazışmanı sifarişin müştərisi, ustası və SosAvto operatoru görə bilər.</p><ol>${order.messages.map(message => `<li><strong>${roles[message.role]}</strong> · ${escape(message.text)}</li>`).join('')}</ol>${order.step === 'closed' ? '' : `<form>${field('message','Mesaj','required maxlength="500"')}${button('message','Mesajı göndər')}</form>${order.role === 'operator' && order.step !== 'review' ? '<form><button type="submit" value="hold">Sifarişi yoxlamaya al</button></form>' : ''}`}</section>`);
+    }
+    void mountMap();
     summary.innerHTML = `<h2>Sifariş tarixçəsi</h2>${order.category ? `<p>${labels[order.category]}</p>` : ''}<dl><dt>Kartla ödəniş (sınaq)</dt><dd>${money(order.paid)}</dd><dt>Karta geri ödəniş (sınaq)</dt><dd>${money(order.refund)}</dd><dt>SosAvto payı</dt><dd>${money(order.share || 0)}</dd><dt>Usta qazancı</dt><dd>${money(order.earnings || 0)}</dd>${order.role !== 'driver' ? `<dt>Usta depoziti</dt><dd>${money(order.deposit)}</dd>` : ''}</dl>${order.flags.driver || order.flags.master ? `<p>Əsassız imtina · Müştəri ${order.flags.driver} · Usta ${order.flags.master}</p>` : ''}<ol>${order.log.map(item => `<li>${escape(item)}</li>`).join('')}</ol>`;
   }
 
@@ -163,8 +232,18 @@ export function mountSosOperatorPreview(main) {
     const amount = name => Math.round(Number(form.get(name)) * 100);
     switch (action) {
       case 'create':
-        Object.assign(order, {category:form.get('category'), address:form.get('address')});
+        if (!selectedPoint) { root.querySelector('#error').textContent = 'Əvvəl xəritədə məkan seç və ya «Məni tap» düyməsini bas.'; return; }
+        Object.assign(order, {category:form.get('category'), point:selectedPoint});
         return go('call', 'SOS sorğusu açıldı. ' + form.get('description'));
+      case 'message': {
+        const text = form.get('message').trim();
+        if (!text) return;
+        order.messages.push({role:order.role, text});
+        return render();
+      }
+      case 'hold':
+        order.reason = 'Operator sifarişi yoxlamaya aldı.';
+        return go('review', order.reason);
       case 'dispatch':
         Object.assign(order, {note:form.get('note'), estimate:amount('estimate')});
         return go('quote', 'Operator zəngi qeyd etdi və sorğunu göndərdi.');
@@ -215,6 +294,7 @@ export function mountSosOperatorPreview(main) {
         return go('closed', roles[party] + (count === 1 ? ' xəbərdarlıq aldı.' : party === 'master' ? ' üçün yeni sifarişlər dayandırıldı.' : ' üçün etibarlılıq göstəricisi aşağı düşdü.'));
       }
       case 'reset':
+        selectedPoint = null;
         order = {...fresh(), deposit:order.deposit, flags:order.flags};
         return render();
     }

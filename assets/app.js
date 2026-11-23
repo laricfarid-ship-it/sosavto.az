@@ -389,7 +389,7 @@ async function init(){
  if(page!=='sos.html'||params.get('evvelki')==='1')return roadside(context);
  main.innerHTML='<p><a class="btn" href="sos.html?evvelki=1">Mövcud SOS paneli</a></p>';
  const {mountSosOperatorPreview}=await import('./sos-operator-preview.js');
- mountSosOperatorPreview(main);
+ mountSosOperatorPreview(main, mapLibrary);
  });
 
  const washPage=()=>founderPage(carwash);
